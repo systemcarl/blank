@@ -1,5 +1,6 @@
 import js from '@eslint/js';
 import { includeIgnoreFile } from '@eslint/compat';
+import stylistic from '@stylistic/eslint-plugin';
 import svelte from 'eslint-plugin-svelte';
 import globals from 'globals';
 import { fileURLToPath } from 'node:url';
@@ -13,27 +14,59 @@ export default ts.config(
   js.configs.recommended,
   ...ts.configs.recommended,
   ...svelte.configs.recommended,
+  stylistic.configs.recommended,
   {
-    languageOptions: {
-      globals: { ...globals.browser, ...globals.node }
+    languageOptions : {
+      globals : { ...globals.browser, ...globals.node },
     },
-    rules: { // typescript-eslint strongly recommend that you do not use the no-undef lint rule on TypeScript projects.
-    // see: https://typescript-eslint.io/troubleshooting/faqs/eslint/#i-get-errors-from-the-no-undef-rule-about-global-variables-not-being-defined-even-though-there-are-no-typescript-errors
-    "no-undef": 'off' }
+    rules : {
+      '@stylistic/brace-style' : ['error', '1tbs', { allowSingleLine : true }],
+      '@stylistic/key-spacing' : ['error', {
+        beforeColon : true,
+        afterColon : true,
+        ignoredNodes : [
+          'TSTypeLiteral',
+          'TSInterfaceBody',
+        ],
+      }],
+      '@stylistic/max-len' : ['error', { code : 80 }],
+      '@stylistic/max-statements-per-line' : 'off',
+      '@stylistic/member-delimiter-style' : ['error', {
+        multiline : { delimiter : 'semi' },
+        singleline : { delimiter : 'semi', requireLast : true },
+      }],
+      '@stylistic/operator-linebreak' : ['error', 'before', {
+        overrides : { '=' : 'after' },
+      }],
+      '@stylistic/semi' : ['error', 'always'],
+      '@stylistic/type-annotation-spacing' : ['error', {
+        before : true,
+        after : true,
+      }],
+      '@typescript-eslint/no-unused-vars' : [
+        'error',
+        {
+          argsIgnorePattern : '^_',
+          varsIgnorePattern : '^_',
+          caughtErrorsIgnorePattern : '^_',
+        },
+      ],
+      'no-undef' : 'off',
+    },
   },
   {
-    files: [
+    files : [
       '**/*.svelte',
       '**/*.svelte.ts',
-      '**/*.svelte.js'
+      '**/*.svelte.js',
     ],
-    languageOptions: {
-      parserOptions: {
-        projectService: true,
-        extraFileExtensions: ['.svelte'],
-        parser: ts.parser,
-        svelteConfig
-      }
-    }
-  }
+    languageOptions : {
+      parserOptions : {
+        projectService : true,
+        extraFileExtensions : ['.svelte'],
+        parser : ts.parser,
+        svelteConfig,
+      },
+    },
+  },
 );
