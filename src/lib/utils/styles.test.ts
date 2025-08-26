@@ -4,6 +4,8 @@ import type { Font, Section } from './theme';
 import { defaultTheme } from './theme';
 import { compileFonts, compileStyles } from './styles';
 
+let baseUrl : string | undefined = vi.hoisted(() => '/');
+
 const testFonts = {
   test : { family : 'testFont' },
   custom : { family : 'customFont' },
@@ -76,17 +78,25 @@ const getAllSectionsMock = vi.hoisted(
   () => vi.fn(() => ({ test : testSection } as Record<string, Section>)),
 );
 
+vi.mock('$env/dynamic/public', () => ({
+  get env() { return { PUBLIC_BASE_URL : baseUrl }; },
+}));
 vi.mock('./theme', () => ({
   getFonts : getFontsMock,
   getAllSections : getAllSectionsMock,
   defaultTheme : { key : 'default' },
 }));
 
-beforeEach(() => { vi.clearAllMocks(); });
+beforeEach(() => {
+  vi.clearAllMocks();
+  baseUrl = '/';
+});
+
 afterAll(() => { vi.restoreAllMocks(); });
 
 describe('compileFonts', () => {
-  it('returns font-face definitions', () => {
+  it('returns local font-face definitions', () => {
+    baseUrl = '/';
     const fonts = [
       { ...testFonts.test, fontFace : 'test.ttf' },
       { ...testFonts.custom, fontFace : 'custom.ttf' },
@@ -95,15 +105,78 @@ describe('compileFonts', () => {
     const blocks = css.match(/@font-face\s*{[^}]*}/gs);
     expect(blocks).toHaveLength(2);
     expect(blocks?.[0]).contains(`font-family: ${fonts[0]?.family};`);
-    expect(blocks?.[0]).contains(`src: url('${fonts[0]?.fontFace}');`);
+    expect(blocks?.[0]).contains(`src: url('/${fonts[0]?.fontFace}');`);
     expect(blocks?.[1]).contains(`font-family: ${fonts[1]?.family};`);
-    expect(blocks?.[1]).contains(`src: url('${fonts[1]?.fontFace}');`);
+    expect(blocks?.[1]).contains(`src: url('/${fonts[1]?.fontFace}');`);
   });
 
-  it('returns font import statements', () => {
+  it('returns relative font-face definitions', () => {
+    baseUrl = 'http://example.com/';
+    const fonts = [
+      { ...testFonts.test, fontFace : 'test.ttf' },
+      { ...testFonts.custom, fontFace : 'custom.ttf' },
+    ];
+    const css = compileFonts(fonts);
+    const blocks = css.match(/@font-face\s*{[^}]*}/gs);
+    expect(blocks).toHaveLength(2);
+    expect(blocks?.[0]).contains(`font-family: ${fonts[0]?.family};`);
+    expect(blocks?.[0])
+      .contains(`src: url('http://example.com/${fonts[0]?.fontFace}');`);
+    expect(blocks?.[1]).contains(`font-family: ${fonts[1]?.family};`);
+    expect(blocks?.[1])
+      .contains(`src: url('http://example.com/${fonts[1]?.fontFace}');`);
+  });
+
+  it('returns absolute font-face definitions', () => {
+    baseUrl = 'http://example.com/';
+    const fonts = [
+      { ...testFonts.test, fontFace : 'http://example.org/test.ttf' },
+      { ...testFonts.custom, fontFace : 'http://example.org/custom.ttf' },
+    ];
+    const css = compileFonts(fonts);
+    const blocks = css.match(/@font-face\s*{[^}]*}/gs);
+    expect(blocks).toHaveLength(2);
+    expect(blocks?.[0]).contains(`font-family: ${fonts[0]?.family};`);
+    expect(blocks?.[0])
+      .contains(`src: url('${fonts[0]?.fontFace}');`);
+    expect(blocks?.[1]).contains(`font-family: ${fonts[1]?.family};`);
+    expect(blocks?.[1])
+      .contains(`src: url('${fonts[1]?.fontFace}');`);
+  });
+
+  it('returns local font import statements', () => {
+    baseUrl = '/';
     const fonts = [
       { ...testFonts.test, import : 'test.css' },
       { ...testFonts.custom, import : 'custom.css' },
+    ];
+    const css = compileFonts(fonts);
+    const imports = css.match(/@import\s*url\(['"][^'"]+['"]\);/g);
+    expect(imports).toHaveLength(2);
+    expect(imports?.[0]).toBe(`@import url('/${fonts[0]?.import}');`);
+    expect(imports?.[1]).toBe(`@import url('/${fonts[1]?.import}');`);
+  });
+
+  it('returns relative font import statements', () => {
+    baseUrl = 'http://example.com/';
+    const fonts = [
+      { ...testFonts.test, import : 'test.css' },
+      { ...testFonts.custom, import : 'custom.css' },
+    ];
+    const css = compileFonts(fonts);
+    const imports = css.match(/@import\s*url\(['"][^'"]+['"]\);/g);
+    expect(imports).toHaveLength(2);
+    expect(imports?.[0])
+      .toBe(`@import url('http://example.com/${fonts[0]?.import}');`);
+    expect(imports?.[1])
+      .toBe(`@import url('http://example.com/${fonts[1]?.import}');`);
+  });
+
+  it('returns absolute font import statements', () => {
+    baseUrl = 'http://example.com/';
+    const fonts = [
+      { ...testFonts.test, import : 'http://example.org/test.css' },
+      { ...testFonts.custom, import : 'http://example.org/custom.css' },
     ];
     const css = compileFonts(fonts);
     const imports = css.match(/@import\s*url\(['"][^'"]+['"]\);/g);
@@ -222,12 +295,46 @@ describe('compileStyles', () => {
     expect(block?.[0]).contains(`--bg-colour: transparent;`);
   });
 
-  it('returns compiled background image', () => {
+  it('returns compiled local background image', () => {
+    baseUrl = '/';
+
     const styles = compileStyles(testThemes);
 
     const block = matchBlock(styles, { section : 'test' });
     expect(block?.[0])
-      .contains(`--bg-img: url('${testSection.background.img.src}');`);
+      .contains(`--bg-img: url('/${testSection.background.img.src}');`);
+  });
+
+  it('returns compiled relative background image', () => {
+    baseUrl = 'http://example.com';
+
+    const styles = compileStyles(testThemes);
+
+    const block = matchBlock(styles, { section : 'test' });
+    expect(block?.[0])
+      .contains('--bg-img: '
+        + `url('http://example.com/${testSection.background.img.src}');`);
+  });
+
+  it('returns compiled absolute background image', () => {
+    baseUrl = 'http://example.com';
+    const section = {
+      ...testSection,
+      background : {
+        ...testSection.background,
+        img : {
+          ...testSection.background.img,
+          src : 'http://example.org/testImage.jpg',
+        },
+      },
+    };
+    getAllSectionsMock.mockReturnValue({ test : section });
+
+    const styles = compileStyles(testThemes);
+
+    const block = matchBlock(styles, { section : 'test' });
+    expect(block?.[0])
+      .contains(`--bg-img: url('http://example.org/testImage.jpg');`);
   });
 
   it('returns without background image', () => {
@@ -656,7 +763,7 @@ describe('compileStyles', () => {
     }
   });
 
-  it('returns compiled graphic src', () => {
+  it('returns compiled local graphic src', () => {
     const section = {
       ...testSection,
       graphics : {
@@ -669,7 +776,46 @@ describe('compileStyles', () => {
     const styles = compileStyles(testThemes);
 
     const block = matchBlock(styles, { section : 'test', graphic : 'graphic' });
-    expect(block?.[0]).contains(`--img-src: url('graphic.jpg');`);
+    expect(block?.[0]).contains(`--img-src: url('/graphic.jpg');`);
+  });
+
+  it('returns compiled relative graphic src', () => {
+    baseUrl = 'http://example.com';
+    const section = {
+      ...testSection,
+      graphics : {
+        ...testSection.graphics,
+        graphic : { ...testSection.graphics.graphic, src : 'graphic.jpg' },
+      },
+    };
+    getAllSectionsMock.mockReturnValue({ test : section });
+
+    const styles = compileStyles(testThemes);
+
+    const block = matchBlock(styles, { section : 'test', graphic : 'graphic' });
+    expect(block?.[0])
+      .contains(`--img-src: url('http://example.com/graphic.jpg');`);
+  });
+
+  it('returns compiled absolute graphic src', () => {
+    baseUrl = 'http://example.com';
+    const section = {
+      ...testSection,
+      graphics : {
+        ...testSection.graphics,
+        graphic : {
+          ...testSection.graphics.graphic,
+          src : 'http://example.org/graphic.jpg',
+        },
+      },
+    };
+    getAllSectionsMock.mockReturnValue({ test : section });
+
+    const styles = compileStyles(testThemes);
+
+    const block = matchBlock(styles, { section : 'test', graphic : 'graphic' });
+    expect(block?.[0])
+      .contains(`--img-src: url('http://example.org/graphic.jpg');`);
   });
 
   it('returns compiled graphic alt text', () => {
