@@ -1,5 +1,6 @@
 import type { Section, Font, Background, Typography, Graphic } from './theme';
 import { isObject } from './typing';
+import { resolveUrl } from './http';
 import { defaultTheme, getFonts, getAllSections } from './theme';
 
 function compileClasses(classes : string[]) {
@@ -15,13 +16,13 @@ function compileProps(props : Record<string, string | number>) {
 function compileFontFace(fonts : Font) {
   const props = {
     'font-family' : fonts.family,
-    'src' : fonts.fontFace ? `url('${fonts.fontFace}')` : '',
+    'src' : fonts.fontFace ? `url('${resolveUrl(fonts.fontFace)}')` : '',
   };
   return `@font-face {\n  ${compileProps(props)}\n}`;
 }
 
 function compileFontImport(fonts : Font) {
-  return `@import url('${fonts.import}');`;
+  return `@import url('${resolveUrl(fonts.import ?? '')}');`;
 }
 
 export function compileFonts(fonts : Font[]) {
@@ -41,7 +42,7 @@ function compileSection(classes : string[], section : Section) {
     '--layout-spacing' : section.scale.spacing,
     '--bg-colour' : section.background.fill ?? 'transparent',
     '--bg-img' : section.background.img?.src
-      ? `url('${section.background.img.src}')`
+      ? `url('${resolveUrl(section.background.img.src)}')`
       : 'none',
     '--bg-repeat' : (section.background.img?.mode === 'tile')
       ? 'repeat'
@@ -80,7 +81,7 @@ function compileTypography(classes : string[], typography : Typography) {
 
 function compileGraphic(classes : string[], graphic : Graphic) {
   const props = {
-    '--img-src' : `url('${graphic.src}')`,
+    '--img-src' : `url('${resolveUrl(graphic.src)}')`,
     '--img-alt' : graphic.alt ?? '',
   };
   return `${compileClasses(classes)} {\n  ${compileProps(props)}\n}\n`
@@ -112,7 +113,7 @@ function compileThemeStyles(classes : string[], theme : unknown) {
 }
 
 export function compileStyles(themes : unknown) {
-  if (!isObject(themes))
+  if (!isObject(themes) || !Object.keys(themes).length)
     return compileThemeStyles(['theme-default'], defaultTheme);
 
   const fonts : Font[] = [];

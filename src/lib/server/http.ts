@@ -1,14 +1,20 @@
+import { resolveUrl as resolvePublicUrl } from '$lib/utils/http';
 import { log } from './logs';
+import { env } from '$env/dynamic/private';
+
+function resolveUrl(path : string) {
+  return resolvePublicUrl(path, env.BASE_URL ?? '/');
+}
 
 async function requestResource(url : string, { fetch } : {
   fetch : typeof window.fetch;
 }) : Promise<Response | null> {
   try {
-    const response = await fetch(url);
+    const response = await fetch(resolveUrl(url));
     if (!response.ok) {
       log({
         message : `Failed to fetch resource`,
-        resource : url,
+        resource : resolveUrl(url),
         response : { status : response.status },
       }, { level : 'warn' });
       return null;
@@ -17,7 +23,7 @@ async function requestResource(url : string, { fetch } : {
   } catch (error) {
     log({
       message : `Error fetching resource`,
-      resource : url,
+      resource : resolveUrl(url),
       error,
     }, { level : 'warn' });
     return null;
@@ -35,7 +41,7 @@ export async function fetchResource(url : string, { fetch } : {
   } catch (error) {
     log({
       message : `Error reading response`,
-      resource : url,
+      resource : resolveUrl(url),
       response : { status : response.status },
       error,
     }, { level : 'warn' });
@@ -54,7 +60,7 @@ export async function fetchJsonResource<T>(url : string, { fetch } : {
   } catch (error) {
     log({
       message : `Error reading JSON response`,
-      resource : url,
+      resource : resolveUrl(url),
       response : { status : response.status },
       error,
     }, { level : 'warn' });
