@@ -7,9 +7,15 @@ import Page from '$lib/materials/page.svelte';
 
 import Layout from './+layout.svelte';
 
+let favicon = vi.hoisted(() => '/test.svg');
+
 const setLocaleMock = vi.hoisted(() => vi.fn());
 const setThemesMock = vi.hoisted(() => vi.fn());
 const setGraphicsMock = vi.hoisted(() => vi.fn());
+
+vi.mock('$env/dynamic/public', () => ({
+  env : { get PUBLIC_FAVICON() { return favicon; } },
+}));
 
 vi.mock('$lib/hooks/useLocale', async (original) => {
   const originalDefault =
@@ -98,5 +104,24 @@ describe('/+layout.svelte render', () => {
     expect(page).toBeInTheDocument();
     expect(within(page).queryByTestId('content')).toBeInTheDocument();
     expect(Page).toHaveBeenCalledOnce();
+  });
+
+  it('adds favicon link to head', async () => {
+    favicon = '/test.svg';
+    render(Layout, { data, children : ((() => {}) as Snippet<[]>) });
+
+    const link = document.head
+      .querySelector('link[rel="icon"]') as HTMLLinkElement;
+    expect(link).not.toBeNull();
+    expect(link.href).toBe(`${window.location.origin}/test.svg`);
+  });
+
+  it('does not add favicon link to head if not set', async () => {
+    favicon = '';
+    render(Layout, { data, children : ((() => {}) as Snippet<[]>) });
+
+    const link = document.head
+      .querySelector('link[rel="icon"]') as HTMLLinkElement;
+    expect(link).toBeNull();
   });
 });

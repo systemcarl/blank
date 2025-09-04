@@ -49,6 +49,11 @@ npm install
 Optional environment variables can be defined in a `.env` file at the root of
 the project. A sample `.env` file is provided as [`.env.example`](.env.example).
 
+#### Application
+By default, the application will not set a head favicon link. To add a
+favicon, set the `PUBLIC_FAVICON` environment variable to the desired favicon
+href link.
+
 #### Logging
 Server side events are automatically logged and formatted using
 [*Pino*](https://getpino.io/). Events are sent to the application's standard
