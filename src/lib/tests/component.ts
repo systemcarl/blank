@@ -14,7 +14,7 @@ export function makeComponent({
   noStyle = false,
   component = TestComponent,
 } : {
-  testId ?: string;
+  testId ?: string | ((...args : unknown[]) => string);
   style ?: Record<string, string>;
   noStyle ?: boolean;
   component ?: Component;
@@ -28,10 +28,12 @@ export function makeComponent({
         ...style,
       }
     : { display : 'contents' };
-  const id = testId ? `data-testid="${testId}"` : '';
   const css =
     Object.entries(styles).map(([key, value]) => `${key}: ${value};`).join(' ');
   return vi.fn((...params) => createRawSnippet((props) => {
+    let id = testId;
+    if (typeof testId === 'function') id = testId({ ...props });
+    id = id ? `data-testid="${id}"` : '';
     return {
       render : () => `<div ${id} style="${css}"></div>`,
       setup : (node) => {
@@ -48,7 +50,7 @@ export function makeComponent({
 export async function wrapOriginal(
   component : () => Promise<unknown>,
   options : {
-    testId ?: string;
+    testId ?: string | ((...args : unknown[]) => string);
     wrapSnippets ?: Record<string, string>;
   },
 ) {
