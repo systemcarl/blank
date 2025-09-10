@@ -55,7 +55,7 @@ describe('Text', () => {
   });
 
   it('does not centre text on mobile viewport', async () => {
-    await page.viewport(768, 1024);
+    await page.viewport(767, 1024);
     const { container } = render(Text, {
       centred : true,
       children : makeHtml('<span>Test Text</span>'),
@@ -67,7 +67,7 @@ describe('Text', () => {
   });
 
   it('collapses flex text', async () => {
-    await page.viewport(768, 1024);
+    await page.viewport(767, 1024);
     const { container } = render(Text, {
       flex : true,
       children : makeHtml('<span>Test Text</span>'),
@@ -81,7 +81,7 @@ describe('Text', () => {
   });
 
   it('does not collapse flex text on table viewport', async () => {
-    await page.viewport(769, 1024);
+    await page.viewport(768, 1024);
     const { container } = render(Text, {
       flex : true,
       children : makeHtml('<span>Test Text</span>'),

@@ -61,7 +61,7 @@ svg {
   width: var(--text-flex-width, fit-content);
 }
 
-@media (max-width: 768px) {
+@media (width < 768px) {
   :root {
     --text-centred: left;
     --text-flex-width: min-content;
