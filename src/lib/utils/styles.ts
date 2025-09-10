@@ -3,8 +3,17 @@ import { isObject } from './typing';
 import { resolveUrl } from './http';
 import { defaultTheme, getFonts, getAllSections } from './theme';
 
+export function kebabCase(str : string) {
+  return str
+    .replace(/([a-z0-9])([A-Z])/g, '$1-$2')
+    .replace(/([A-Z])([A-Z][a-z])/g, '$1-$2')
+    .replace(/([a-zA-Z])([0-9])/g, '$1-$2')
+    .replace(/([0-9])([a-zA-Z])/g, '$1-$2')
+    .toLowerCase();
+}
+
 function compileClasses(classes : string[]) {
-  return classes.map(c => `.${c}`).join(' ');
+  return classes.map(c => `.${kebabCase(c)}`).join(' ');
 }
 
 function compileProps(props : Record<string, string | number>) {
@@ -35,9 +44,9 @@ export function compileFonts(fonts : Font[]) {
 function compileSection(classes : string[], section : Section) {
   const props = {
     ...Object.fromEntries(Object.entries(section.scale)
-      .map(([key, value]) => [`--scale-${key}`, value])),
+      .map(([key, value]) => [`--scale-${kebabCase(key)}`, value])),
     ...Object.fromEntries(Object.entries(section.palette)
-      .map(([key, value]) => [`--colour-${key}`, value])),
+      .map(([key, value]) => [`--colour-${kebabCase(key)}`, value])),
     '--padding-inset' : section.scale.inset,
     '--layout-spacing' : section.scale.spacing,
     '--bg-colour' : section.background.fill ?? 'transparent',

@@ -2,6 +2,7 @@ import { browser } from '$app/environment';
 import { get, writable } from 'svelte/store';
 
 import type { Section, Typography, Graphic } from '$lib/utils/theme';
+import { kebabCase } from '$lib/utils/styles';
 import * as themeStore from '$lib/stores/theme';
 
 const handleStorageEvent = (event : StorageEvent) => {
@@ -106,9 +107,9 @@ function useThemes() {
     }
 
     const classes : string[] = [];
-    if (sectionKey) classes.push(`section-${sectionKey}`);
-    if (typographyKey) classes.push(`typography-${typographyKey}`);
-    if (graphicKey) classes.push(`graphic-${graphicKey}`);
+    if (sectionKey) classes.push(`section-${kebabCase(sectionKey)}`);
+    if (typographyKey) classes.push(`typography-${kebabCase(typographyKey)}`);
+    if (graphicKey) classes.push(`graphic-${kebabCase(graphicKey)}`);
 
     return {
       provider : { class : classes.join(' ') },

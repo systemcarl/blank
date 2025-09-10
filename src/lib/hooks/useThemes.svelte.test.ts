@@ -84,6 +84,16 @@ describe('useThemes', () => {
     expect(className).toBe('section-test');
   });
 
+  it('makes section provider with kebab case', () => {
+    let className;
+    render(Test, { props : { makeProvider : {
+      keys : { sectionKey : 'testSection' },
+      className : (name) => { className = name; },
+    } } });
+
+    expect(className).toBe('section-test-section');
+  });
+
   it('makes typography provider', () => {
     let className;
     render(Test, { props : { makeProvider : {
@@ -94,6 +104,16 @@ describe('useThemes', () => {
     expect(className).toBe('typography-test');
   });
 
+  it('makes typography provider with kebab case', () => {
+    let className;
+    render(Test, { props : { makeProvider : {
+      keys : { typographyKey : 'testTypography' },
+      className : (name) => { className = name; },
+    } } });
+
+    expect(className).toBe('typography-test-typography');
+  });
+
   it('makes graphic provider', () => {
     let className;
     render(Test, { props : { makeProvider : {
@@ -102,6 +122,16 @@ describe('useThemes', () => {
     } } });
 
     expect(className).toBe('graphic-test');
+  });
+
+  it('makes graphic provider with kebab case', () => {
+    let className;
+    render(Test, { props : { makeProvider : {
+      keys : { graphicKey : 'testGraphic' },
+      className : (name) => { className = name; },
+    } } });
+
+    expect(className).toBe('graphic-test-graphic');
   });
 
   it('combines provides', () => {
