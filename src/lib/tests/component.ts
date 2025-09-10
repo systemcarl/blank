@@ -8,6 +8,14 @@ export function makeHtml(content : string) : Snippet {
   return createRawSnippet(() => ({ render : () => content }));
 }
 
+export function addChildComponent(
+  node : Element,
+  child : Component | Snippet<[]>,
+) {
+  const m = mount(child as Snippet<[]>, { target : node });
+  return () => unmount(m);
+}
+
 export function makeComponent({
   testId = '',
   style = {},
