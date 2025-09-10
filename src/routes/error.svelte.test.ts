@@ -3,50 +3,31 @@ import { render, within } from '@testing-library/svelte';
 
 import { wrapOriginal } from '$lib/tests/component';
 import Content from '$lib/materials/content.svelte';
-import TitleCard from '$lib/materials/titleCard.svelte';
+import HttpError from '$lib/components/httpError.svelte';
 
 import ErrorPage from './+error.svelte';
 
 let status = vi.hoisted(() => 500);
-const error = vi.hoisted(() => ({ message : 'Test error' }));
-const errorLocale = vi.hoisted(() => ({
-  errors : {
-    default : 'Default Message',
-    invalid : 'Invalid Message',
-    not_authenticated : 'Not Authenticated Message',
-    forbidden : 'Forbidden Message',
-    not_found : 'Not Found Message',
-    unexpected : 'Unexpected Message',
-  } as Record<string, string>,
-}));
+let message = vi.hoisted(() => 'Test error');
 
 vi.mock('$app/state', async () => ({
   page : {
     get status() { return status; },
-    get error() { return error; },
+    get error() { return { message }; },
   },
 }));
-vi.mock('$lib/hooks/useLocale', async (original) => {
-  const originalDefault =
-    ((await original()) as { default : () => object; }).default;
-  return {
-    default : () => ({
-      ...originalDefault(),
-      getLocale : vi.fn(() => errorLocale),
-    }),
-  };
-});
 
 vi.mock('$lib/materials/content.svelte', async (original) => {
   return { default : await wrapOriginal(original, { testId : 'content' }) };
 });
-vi.mock('$lib/materials/titleCard.svelte', async (original) => {
-  return { default : await wrapOriginal(original, { testId : 'titleCard' }) };
+vi.mock('$lib/components/httpError.svelte', async (original) => {
+  return { default : await wrapOriginal(original, { testId : 'httpError' }) };
 });
 
 beforeEach(() => {
   vi.clearAllMocks();
   status = 500;
+  message = 'Test error';
 });
 
 afterAll(() => { vi.restoreAllMocks(); });
@@ -57,9 +38,9 @@ describe('/+error.svelte', () => {
 
     const content = within(container).queryByTestId('content') as HTMLElement;
     expect(content).toBeInTheDocument();
-    const titleCard =
-      within(content).queryByTestId('titleCard') as HTMLElement;
-    expect(titleCard).toBeInTheDocument();
+    const httpError =
+      within(content).queryByTestId('httpError') as HTMLElement;
+    expect(httpError).toBeInTheDocument();
 
     expect(Content).toHaveBeenCalledWith(
       expect.anything(),
@@ -72,9 +53,9 @@ describe('/+error.svelte', () => {
 
     const content = within(container).queryByTestId('content') as HTMLElement;
     expect(content).toBeInTheDocument();
-    const titleCard =
-      within(container).queryByTestId('titleCard') as HTMLElement;
-    expect(titleCard).toBeInTheDocument();
+    const httpError =
+      within(content).queryByTestId('httpError') as HTMLElement;
+    expect(httpError).toBeInTheDocument();
 
     expect(Content).toHaveBeenCalledWith(
       expect.anything(),
@@ -82,20 +63,14 @@ describe('/+error.svelte', () => {
     );
   });
 
-  it.each([
-    ['invalid', 400],
-    ['not_authenticated', 401],
-    ['forbidden', 403],
-    ['not_found', 404],
-    ['default', 418],
-    ['unexpected', 500],
-  ])('displays %s error message in title card', (key, statusCode) => {
-    status = statusCode;
+  it('displays error message in title card', () => {
+    status = 418;
+    message = `I'm a teapot`;
     render(ErrorPage);
-    expect(TitleCard).toHaveBeenCalledOnce();
-    expect(TitleCard).toHaveBeenCalledWithProps(expect.objectContaining({
-      title : expect.stringContaining(`${statusCode} ${error.message}`),
-      subtitle : errorLocale.errors[key],
+    expect(HttpError).toHaveBeenCalledOnce();
+    expect(HttpError).toHaveBeenCalledWithProps(expect.objectContaining({
+      status,
+      message,
     }));
   });
 });

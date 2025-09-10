@@ -3,12 +3,18 @@
 
   --z-background: -10;
   --z-graphic: -1;
+  --z-graphic-overlay: 1;
 }
 
 :root {
+  overflow: auto;
+
   --title-graphic-top: 4rem;
   --title-graphic-right: -2rem;
   --title-graphic-size: 10rem;
+  --frame-size: 16rem;
+  --transition-fast: 0.1s;
+  --transition-ease: ease-in-out;
 }
 
 body {
@@ -25,6 +31,68 @@ h1, h2, h3, h4, h5, h6, p {
   margin: 0;
 }
 
+.split-stack {
+  --split-stack-direction: row;
+
+  display: flex;
+  flex-direction: var(--split-stack-direction);
+  justify-content: center;
+  align-items: center;
+  gap: var(--layout-spacing, 0);
+  min-width: fit-content;
+}
+
+.split-stack.reversed {
+  --split-stack-reversed: column-reverse;
+}
+
+.split-stack.divided {
+  gap: 0;
+}
+
+.split-stack.divided > * {
+  flex-grow: 0;
+  flex-shrink: 0;
+  border:
+    var(--border-width, 0)
+    none
+    var(--border-colour, transparent);
+}
+
+.split-stack.divided > * {
+  --split-stack-h-divider: none;
+  --split-stack-v-divider: solid;
+  --split-stack-h-padding: 1;
+  --split-stack-v-padding: 0;
+}
+
+.split-stack.divided > *:not(:last-child) {
+  padding-right: calc(var(--layout-spacing) * var(--split-stack-h-padding, 0));
+  border-right-style: var(--split-stack-v-divider, none);
+}
+
+.split-stack.divided > *:not(:first-child) {
+  padding-left: calc(var(--layout-spacing) * var(--split-stack-h-padding, 0));
+}
+
+.split-stack.divided:not(.reversed) > *:not(:last-child) {
+  padding-bottom: calc(var(--layout-spacing) * var(--split-stack-v-padding, 0));
+  border-bottom-style: var(--split-stack-h-divider, solid);
+}
+
+.split-stack.divided:not(.reversed) > *:not(:first-child) {
+  padding-top: calc(var(--layout-spacing) * var(--split-stack-v-padding, 0));
+}
+
+.split-stack.reversed.divided > *:not(:first-child) {
+  padding-bottom: calc(var(--layout-spacing) * var(--split-stack-v-padding, 0));
+  border-bottom-style: var(--split-stack-h-divider, solid);
+}
+
+.split-stack.reversed.divided > *:not(:last-child) {
+  padding-top: calc(var(--layout-spacing) * var(--split-stack-v-padding, 0));
+}
+
 .graphic {
   position: relative;
   z-index: var(--z-graphic);
@@ -32,9 +100,65 @@ h1, h2, h3, h4, h5, h6, p {
   height: 100%;
 }
 
+.frame {
+  --frame-factor: calc(abs(sin(var(--frame-rotation, 0deg)))
+    + abs(cos(var(--frame-rotation, 0deg))));
+
+  position: relative;
+  flex-shrink: 0;
+  width: calc(var(--frame-size) * var(--frame-factor));
+  height: calc(var(--frame-size) * var(--frame-factor));
+  padding: calc(var(--frame-size) * (1 - var(--frame-factor)) / 2);
+  transform: rotate(var(--frame-rotation, 0deg));
+  transition-property: width, height, top, right;
+  transition-duration: var(--transition-fast);
+  transition-timing-function: var(--transition-ease);
+}
+
+.overlay {
+  position: absolute;
+  left: calc(50% * (1 - 1 / var(--frame-factor)));
+  top: calc(50% * (1 - 1 / var(--frame-factor)));
+  width: var(--frame-size);
+  height: var(--frame-size);
+  z-index: var(--z-graphic-overlay);
+  transition-property: width, height, top, right;
+  transition-duration: var(--transition-fast);
+  transition-timing-function: var(--transition-ease);
+}
+
+.frame-content {
+  overflow: hidden;
+  position: relative;
+  top: calc(50% * (1 - 1 / var(--frame-factor)));
+  left: calc(50% * (1 - 1 / var(--frame-factor)));
+  width: var(--frame-size);
+  height: var(--frame-size);
+  border: var(--border-width, 0) solid var(--border-colour, transparent);
+  border-radius: var(--border-radius, 0);
+  z-index: var(--z-graphic);
+  transition-property: width, height, top, right;
+  transition-duration: var(--transition-fast);
+  transition-timing-function: var(--transition-ease);
+}
+
+.frame-content > * {
+  position: absolute;
+  left: calc(50% * (1 - var(--frame-factor)));
+  top: calc(50% * (1 - var(--frame-factor)));
+  width: calc(100% * var(--frame-factor));
+  height: calc(100% * var(--frame-factor));
+  z-index: var(--z-graphic);
+  transform: rotate(calc(-1 * var(--frame-rotation, 0deg)));
+  transition-property: width, height, top, right;
+  transition-duration: var(--transition-fast);
+  transition-timing-function: var(--transition-ease);
+}
+
 svg {
   width: 100%;
   height: 100%;
+  overflow: visible;
 }
 
 .text {
@@ -66,11 +190,63 @@ svg {
 
 @media (width < 768px) {
   :root {
+    --layout-scale: 0.5;
     --text-centred: left;
     --text-flex-width: min-content;
     --title-graphic-top: 4rem;
     --title-graphic-right: -2rem;
     --title-graphic-size: 6rem;
     --title-graphic-shift: 1;
+    --frame-size: 12rem;
+  }
+
+  .split-stack.stack-mobile {
+    --split-stack-direction: var(--split-stack-reversed, column);
+  }
+
+  .split-stack.stack-mobile > * {
+    --split-stack-h-divider: solid;
+    --split-stack-v-divider: none;
+    --split-stack-h-padding: 0;
+    --split-stack-v-padding: 1;
+  }
+}
+
+@media (768px <= width < 1024px) {
+  .split-stack.stack-tablet {
+    --split-stack-direction: var(--split-stack-reversed, column);
+  }
+
+  .split-stack.stack-tablet > * {
+    --split-stack-h-divider: solid;
+    --split-stack-v-divider: none;
+    --split-stack-h-padding: 0;
+    --split-stack-v-padding: 1;
+  }
+}
+
+@media (1024px <= width < 1440px) {
+  .split-stack.stack-desktop {
+    --split-stack-direction: var(--split-stack-reversed, column);
+  }
+
+  .split-stack.stack-desktop > * {
+    --split-stack-h-divider: solid;
+    --split-stack-v-divider: none;
+    --split-stack-h-padding: 0;
+    --split-stack-v-padding: 1;
+  }
+}
+
+@media (1440px <= width) {
+  .split-stack.stack-wide {
+    --split-stack-direction: var(--split-stack-reversed, column);
+  }
+
+  .split-stack.stack-wide > * {
+    --split-stack-h-divider: solid;
+    --split-stack-v-divider: none;
+    --split-stack-h-padding: 0;
+    --split-stack-v-padding: 1;
   }
 }

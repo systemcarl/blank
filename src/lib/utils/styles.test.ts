@@ -14,11 +14,16 @@ const testFonts = {
 const testThemes = { test : {} };
 
 const testSection = vi.hoisted(() => ({
-  palette : { test : '#111111' },
+  palette : {
+    test : '#111111',
+    border : '#222222',
+  },
   scale : {
     inset : 'testInset',
     spacing : 'testSpacing',
     fontSize : 'testFontSize',
+    borderWidth : 'testBorderWidth',
+    borderRadius : 'testBorderRadius',
     test : 'testSize',
   },
   background : {
@@ -344,6 +349,38 @@ describe('compileStyles', () => {
     const block = matchBlock(styles);
     expect(block?.[0])
       .contains(`--layout-spacing: ${testSection.scale.spacing};`);
+  });
+
+  it('returns compiled border colour', () => {
+    const styles = compileStyles(testThemes);
+
+    const block = matchBlock(styles);
+    expect(block?.[0])
+      .contains(`--border-colour: ${testSection.palette.border};`);
+  });
+
+  it('returns transparent border colour', () => {
+    const section = { ...testSection, palette : {} };
+    getAllSectionsMock.mockReturnValue({ test : section });
+
+    const styles = compileStyles(testThemes);
+
+    const block = matchBlock(styles, { section : 'test' });
+    expect(block?.[0]).contains(`--border-colour: transparent;`);
+  });
+
+  it('returns compiled border width', () => {
+    const styles = compileStyles(testThemes);
+    const block = matchBlock(styles);
+    expect(block?.[0])
+      .contains(`--border-width: ${testSection.scale.borderWidth};`);
+  });
+
+  it('returns compiled border radius', () => {
+    const styles = compileStyles(testThemes);
+    const block = matchBlock(styles);
+    expect(block?.[0])
+      .contains(`--border-radius: ${testSection.scale.borderRadius};`);
   });
 
   it('returns compiled background colour', () => {

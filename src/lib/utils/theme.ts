@@ -17,6 +17,8 @@ export type Scale = {
   inset : string;
   spacing : string;
   fontSize : string;
+  borderWidth : string;
+  borderRadius : string;
   [key : string] : string;
 };
 
@@ -75,6 +77,8 @@ export const defaultTheme = {
       inset : '2rem',
       spacing : '4rem',
       fontSize : '1rem',
+      borderWidth : '1px',
+      borderRadius : '0',
     },
   },
   fonts : {
@@ -205,6 +209,10 @@ function makeScale(scale : unknown) : Scale {
     scl.spacing = defaultTheme.scales.default.spacing;
   if (scl.fontSize === undefined)
     scl.fontSize = defaultTheme.scales.default.fontSize;
+  if (scl.borderWidth === undefined)
+    scl.borderWidth = defaultTheme.scales.default.borderWidth;
+  if (scl.borderRadius === undefined)
+    scl.borderRadius = defaultTheme.scales.default.borderRadius;
   return scl;
 }
 

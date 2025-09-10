@@ -10,7 +10,7 @@
 </script>
 
 <div class="card">
-  <Title as="h1" centred flex>{ title }</Title>
+  <Title as="h1" flex>{ title }</Title>
   <div class="subtitle">
     <Subtitle as="h2" flex>{ subtitle }</Subtitle>
     <div class="filler">
@@ -35,7 +35,7 @@
     width: 100%;
     flex-grow: 1;
     flex-direction: row;
-    align-items: end;
+    align-items: start;
   }
 
   .filler {
@@ -50,6 +50,8 @@
     right: var(--title-graphic-right);
     width: var(--title-graphic-size);
     height: var(--title-graphic-size);
-    transition: all 0.1s ease;
+    transition-property: width, height, top, right;
+    transition-duration: var(--transition-fast);
+    transition-timing-function: var(--transition-ease);
   }
 </style>

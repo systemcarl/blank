@@ -1076,6 +1076,42 @@ describe('getSection scale', () => {
     expect(section.scale)
       .toEqual(expect.objectContaining(expectedSection));
   });
+
+  it('returns default border width if border width unset', () => {
+    const theme = {
+      ...testTheme,
+      scales : {
+        ...testTheme.scales,
+        [testTheme.sections.default.scale] : {
+          ...testTheme.scales[testTheme.sections.default.scale],
+          borderWidth : undefined,
+        },
+      },
+    };
+    const expectedSection =
+      { borderWidth : defaultThemes.default.scales.default.borderWidth };
+    const section = getSection(theme);
+    expect(section.scale)
+      .toEqual(expect.objectContaining(expectedSection));
+  });
+
+  it('returns default theme border radius if border radius unset', () => {
+    const theme = {
+      ...testTheme,
+      scales : {
+        ...testTheme.scales,
+        [testTheme.sections.default.scale] : {
+          ...testTheme.scales[testTheme.sections.default.scale],
+          borderRadius : undefined,
+        },
+      },
+    };
+    const expectedSection =
+      { borderRadius : defaultThemes.default.scales.default.borderRadius };
+    const section = getSection(theme);
+    expect(section.scale)
+      .toEqual(expect.objectContaining(expectedSection));
+  });
 });
 
 describe('getSection background', () => {

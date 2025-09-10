@@ -49,6 +49,9 @@ function compileSection(classes : string[], section : Section) {
       .map(([key, value]) => [`--colour-${kebabCase(key)}`, value])),
     '--padding-inset' : section.scale.inset,
     '--layout-spacing' : section.scale.spacing,
+    '--border-colour' : section.palette.border ?? 'transparent',
+    '--border-width' : section.scale.borderWidth,
+    '--border-radius' : section.scale.borderRadius,
     '--bg-colour' : section.background.fill ?? 'transparent',
     '--bg-img' : section.background.img?.src
       ? `url('${resolveUrl(section.background.img.src)}')`
