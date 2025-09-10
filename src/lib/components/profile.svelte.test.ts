@@ -5,6 +5,7 @@ import { wrapOriginal } from '$lib/tests/component';
 import { tryGet } from '$lib/utils/typing';
 import SplitStack from '$lib/materials/splitStack.svelte';
 import TitleCard from '$lib/materials/titleCard.svelte';
+import Tagline from '$lib/materials/tagline.svelte';
 import Frame from '$lib/materials/frame.svelte';
 import Graphic from '$lib/materials/graphic.svelte';
 
@@ -13,6 +14,7 @@ import Profile from './profile.svelte';
 const locale = vi.hoisted(() => ({
   title : 'Test Title',
   subtitle : 'Test Subtitle',
+  tagline : 'Test Tagline',
 }));
 
 vi.mock('$lib/hooks/useLocale', async (original) => {
@@ -31,6 +33,9 @@ vi.mock('$lib/materials/splitStack.svelte', async (original) => {
 });
 vi.mock('$lib/materials/titleCard.svelte', async (original) => {
   return { default : await wrapOriginal(original, { testId : 'titleCard' }) };
+});
+vi.mock('$lib/materials/tagline.svelte', async (original) => {
+  return { default : await wrapOriginal(original, { testId : 'tagline' }) };
 });
 vi.mock('$lib/materials/frame.svelte', async (original) => {
   return { default : await wrapOriginal(original, { testId : 'frame' }) };
@@ -104,5 +109,16 @@ describe('Profile', () => {
       expect.anything(),
       expect.objectContaining({ divide : true }),
     );
+  });
+
+  it('displays locale tagline', () => {
+    const { container } = render(Profile);
+
+    const tagline = within(container)
+      .queryByTestId('tagline') as HTMLElement;
+    expect(tagline).toBeInTheDocument();
+    expect(tagline).toHaveTextContent(locale.tagline);
+
+    expect(Tagline).toHaveBeenCalledOnce();
   });
 });

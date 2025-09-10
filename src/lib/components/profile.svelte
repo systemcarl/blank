@@ -2,6 +2,7 @@
   import useLocale from '$lib/hooks/useLocale';
   import SplitStack from '$lib/materials/splitStack.svelte';
   import TitleCard from '$lib/materials/titleCard.svelte';
+  import Tagline from '$lib/materials/tagline.svelte';
   import Graphic from '$lib/materials/graphic.svelte';
   import Frame from '$lib/materials/frame.svelte';
 
@@ -16,3 +17,4 @@
   </Frame>
   <TitleCard title={locale.title} subtitle={locale.subtitle} />
 </SplitStack>
+<Tagline>{ locale.tagline }</Tagline>

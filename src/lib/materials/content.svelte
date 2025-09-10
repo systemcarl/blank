@@ -41,6 +41,8 @@
     justify-content: center;
     align-items: var(--vertical-alignment);
     gap: var(--layout-spacing);
-    padding: var(--layout-spacing);
+    padding:
+      var(--layout-spacing, 0)
+      calc(var(--layout-spacing, 0) * var(--layout-scale, 1));
   }
 </style>

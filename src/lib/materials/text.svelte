@@ -6,7 +6,7 @@
     centred ?: boolean;
     flex ?: boolean;
     inset ?: boolean;
-    typography ?: 'body' | 'title' | 'subtitle';
+    typography ?: 'body' | 'title' | 'subtitle' | 'tagline';
     as ?: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'p' | 'span';
     children : Snippet<[]>;
   } = $props();
