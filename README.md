@@ -54,6 +54,13 @@ By default, the application will not set a head favicon link. To add a
 favicon, set the `PUBLIC_FAVICON` environment variable to the desired favicon
 href link.
 
+By default, all local resources are served from the root path (`/`). The base
+path used by the client can be set using the `PUBLIC_BASE_URL` environment
+variable. To provide a base path for the server data loading, set the private
+`BASE_URL` environment variable. This can be useful for including static
+resources or customization files after building the application which bundles
+the `/static` folder.
+
 #### Logging
 Server side events are automatically logged and formatted using
 [*Pino*](https://getpino.io/). Events are sent to the application's standard
