@@ -25,7 +25,7 @@
   .card {
     display: flex;
     flex-direction: column;
-    align-items: left;
+    align-items: flex-start;
     width: fit-content;
     min-width: 200px;
   }
