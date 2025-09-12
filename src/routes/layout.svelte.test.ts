@@ -9,6 +9,7 @@ import Layout from './+layout.svelte';
 
 let favicon = vi.hoisted(() => '/test.svg');
 
+const setConfigMock = vi.hoisted(() => vi.fn());
 const setLocaleMock = vi.hoisted(() => vi.fn());
 const setThemesMock = vi.hoisted(() => vi.fn());
 const setGraphicsMock = vi.hoisted(() => vi.fn());
@@ -17,6 +18,16 @@ vi.mock('$env/dynamic/public', () => ({
   env : { get PUBLIC_FAVICON() { return favicon; } },
 }));
 
+vi.mock('$lib/hooks/useConfig', async (original) => {
+  const originalDefault =
+    ((await original()) as { default : () => object; }).default;
+  return {
+    default : () => ({
+      ...originalDefault(),
+      setConfig : setConfigMock,
+    }),
+  };
+});
 vi.mock('$lib/hooks/useLocale', async (original) => {
   const originalDefault =
     ((await original()) as { default : () => object; }).default;
@@ -53,6 +64,7 @@ vi.mock('$lib/materials/page.svelte', async original => ({
 }));
 
 const data = {
+  config : {},
   locale : {},
   themes : {},
   graphics : { graphic : '<svg></svg>' },
@@ -66,6 +78,15 @@ afterAll(() => { vi.restoreAllMocks(); });
 describe('/+layout.svelte', () => {
   it('renders', () => {
     render(Layout, { data, children : ((() => {}) as Snippet<[]>) });
+  });
+
+  it('stores loaded config', () => {
+    const expected = { likes : [{ icon : 'icon', text : 'test' }] };
+    render(Layout, {
+      data : { ...data, config : expected },
+      children : ((() => {}) as Snippet<[]>),
+    });
+    expect(setConfigMock).toHaveBeenCalledWith(expected);
   });
 
   it('stores loaded locale', () => {

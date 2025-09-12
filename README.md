@@ -3,16 +3,22 @@
 the [*SvelteKit*](https://kit.svelte.dev/docs/kit) framework.
 
 ## Customization
-Aside from the necessary [deployment configuration](#configuration), the
-application requires no additional customization; all customization is optional
-and primarily cosmetic.
+Aside from [deployment configuration](#configuration), the application is
+customized via static configuration, locale, and theming files. These files
+are expected to be served from the root of the internal `BASE_URL` path.
 
-### Locale
+### Config File
+To customize application settings, add a `config.json` file to the `/static`
+folder. The [default configuration](src/lib/utils/config.ts) defines the
+expected configuration object structure and default values. Values not defined
+in the `config.json` file will fall back to the default configuration values.
+
+### Locale File
 A locale can be set in `locale.json`, located in the `/static` folder. Values
 found in the `locale.json` file will be used to populate application text. The
 [default locale](src/lib/utils/locale.ts) defines all expected values.
 
-### Theming
+### Theming File
 Adding a custom `theme.json` file to the `/static` folder will populate the
 application with the provided theme settings. The theme shown in the client is
 determined by the `theme` local storage key. If no theme is set, the default
