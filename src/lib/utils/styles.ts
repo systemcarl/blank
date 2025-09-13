@@ -73,8 +73,8 @@ function compileBackground(classes : string[], background : Background) {
 
 function compileTypography(classes : string[], typography : Typography) {
   const props = {
-    '--font-family' : typography.font,
-    '--font-size' : typography.size,
+    '--font-family' : typography.font ?? 'inherit',
+    '--font-size' : typography.size ?? 'inherit',
     '--font-weight' : typography.weight ?? 'inherit',
     '--font-style' : typography.style ?? 'inherit',
     '--line-height' : typography.lineHeight ?? 'inherit',

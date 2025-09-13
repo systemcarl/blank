@@ -597,6 +597,22 @@ describe('compileStyles', () => {
     expect(block?.[0]).contains(`--font-family: custom;`);
   });
 
+  it('returns default typography font family', () => {
+    const section = {
+      ...testSection,
+      typography : {
+        ...testSection.typography,
+        body : { ...testSection.typography.body, font : undefined },
+      },
+    };
+    getAllSectionsMock.mockReturnValue({ test : section });
+
+    const styles = compileStyles(testThemes);
+
+    const block = matchBlock(styles, { section : 'test', typography : 'body' });
+    expect(block?.[0]).contains(`--font-family: inherit;`);
+  });
+
   it('returns compiled typography font size', () => {
     const section = {
       ...testSection,
@@ -611,6 +627,22 @@ describe('compileStyles', () => {
     const styles = compileStyles(testThemes);
     const block = matchBlock(styles, { section : 'test', typography : 'body' });
     expect(block?.[0]).contains(`--font-size: 16px;`);
+  });
+
+  it('returns default typography font size', () => {
+    const section = {
+      ...testSection,
+      typography : {
+        ...testSection.typography,
+        body : { ...testSection.typography.body, size : undefined },
+      },
+    };
+    getAllSectionsMock.mockReturnValue({ test : section });
+
+    const styles = compileStyles(testThemes);
+
+    const block = matchBlock(styles, { section : 'test', typography : 'body' });
+    expect(block?.[0]).contains(`--font-size: inherit;`);
   });
 
   it('returns compiled typography font weight', () => {

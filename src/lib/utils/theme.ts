@@ -37,8 +37,8 @@ export interface Background {
 }
 
 export interface Typography {
-  font : string;
-  size : string;
+  font ?: string;
+  size ?: string;
   lineHeight ?: string;
   letterSpacing ?: string;
   weight ?: string;
@@ -317,10 +317,6 @@ function makeTypography(typography : unknown, { palette, scale, fonts } : {
     if (typ[key] === undefined) continue;
     const t = typ[key] = { ...typ[key] };
 
-    if (typeof t.font !== 'string')
-      t.font = defaultTheme.typography.default.body.font;
-    if (typeof t.size !== 'string')
-      t.size = defaultTheme.typography.default.body.size;
     if ((t.lineHeight !== undefined) && (typeof t.lineHeight !== 'string'))
       delete t.lineHeight;
     if (
@@ -340,21 +336,13 @@ function makeTypography(typography : unknown, { palette, scale, fonts } : {
     if ((t.shadowColour !== undefined) && (typeof t.shadowColour !== 'string'))
       delete t.shadowColour;
 
-    const fontFamily = fonts?.[t.font]?.family;
+    const fontFamily = t.font ? fonts?.[t.font]?.family : undefined;
     if (fontFamily) t.font = fontFamily;
-    else {
-      const defaultFontFamily = fonts?.default?.family;
-      if (defaultFontFamily) t.font = defaultFontFamily;
-      else t.font = defaultTheme.fonts.default.family;
-    }
+    else delete t.font;
 
-    const fontSize = scale?.[t.size];
+    const fontSize = t.size ? scale?.[t.size] : undefined;
     if (fontSize) t.size = fontSize;
-    else {
-      const defaultFontSize = scale?.fontSize;
-      if (defaultFontSize) t.size = defaultFontSize;
-      else t.size = defaultTheme.scales.default.fontSize;
-    }
+    else delete t.size;
 
     if (t.colour) {
       const paletteColour = palette?.[t.colour];
