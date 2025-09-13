@@ -35,7 +35,10 @@ describe('Content', () => {
   it('renders content layout', async () => {
     const expectedSpacing = 64;
 
-    const { container } = render(Content, { children : TestContent });
+    const { container } = render(Content, {
+      section : 'profile',
+      children : TestContent,
+    });
 
     container.style.setProperty('display', 'flex');
     container.style.setProperty('--layout-spacing', `${expectedSpacing}px`);
@@ -50,6 +53,8 @@ describe('Content', () => {
 
     const layout = content.element().parentElement as HTMLElement;
     await expect.element(layout).toBeInTheDocument();
+
+    expect(section.className).toMatch(/section-profile/);
 
     const layoutStyle = getComputedStyle(layout);
     expect(layoutStyle.display).toBe('flex');

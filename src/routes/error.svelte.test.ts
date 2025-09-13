@@ -52,6 +52,21 @@ beforeEach(() => {
 afterAll(() => { vi.restoreAllMocks(); });
 
 describe('/+error.svelte', () => {
+  it('set error theme section', () => {
+    const { container } = render(ErrorPage);
+
+    const content = within(container).queryByTestId('content') as HTMLElement;
+    expect(content).toBeInTheDocument();
+    const titleCard =
+      within(content).queryByTestId('titleCard') as HTMLElement;
+    expect(titleCard).toBeInTheDocument();
+
+    expect(Content).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ section : 'error' }),
+    );
+  });
+
   it('vertically centres content', () => {
     const { container } = render(ErrorPage);
 

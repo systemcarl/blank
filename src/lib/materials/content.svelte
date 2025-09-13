@@ -1,16 +1,20 @@
 <script lang="ts">
   import type { Snippet } from 'svelte';
+  import useThemes from '$lib/hooks/useThemes';
   import Background from './background.svelte';
 
-  const { verticalAlignment = 'top', children } : {
+  const { section = 'default', verticalAlignment = 'top', children } : {
+    section ?: 'default' | 'profile' | 'contact' | 'error';
     verticalAlignment ?: 'top' | 'centre';
     children : Snippet<[]>;
   } = $props();
 
+  const { provider } = useThemes().makeProvider({ sectionKey : section });
+
   const vAlign = verticalAlignment === 'centre' ? 'center' : 'flex-start';
 </script>
 
-<section>
+<section class={provider.class}>
   <Background>
     <div class="layout" style="--vertical-alignment: {vAlign};">
       {@render children()}

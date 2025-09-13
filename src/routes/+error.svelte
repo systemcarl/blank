@@ -15,7 +15,7 @@
   if (page.status === 500) detail = errorLocale.unexpected;
 </script>
 
-<Content verticalAlignment='centre'>
+<Content section="error" verticalAlignment='centre'>
   <TitleCard
     title={ `${page.status} ${page.error?.message}` }
     subtitle={ detail }
