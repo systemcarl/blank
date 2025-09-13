@@ -29,7 +29,11 @@ afterAll(() => { vi.restoreAllMocks(); });
 
 describe('Page', () => {
   it('renders content in page layout', async () => {
+    await page.viewport(768, 1024);
+
     const { container } = render(Page, { children : TestContent });
+
+    container.style.setProperty('width', '100%');
 
     const main = page.elementLocator(container).getByRole('main');
     const content = page.elementLocator(container).getByTestId('content');
@@ -47,5 +51,17 @@ describe('Page', () => {
     expect(contentBounds.top).toEqual(mainBounds.top);
     expect(contentBounds.right).toEqual(mainBounds.right);
     expect(contentBounds.bottom).toEqual(mainBounds.bottom);
+  });
+
+  it('limits min width to 340px', async () => {
+    await page.viewport(300, 600);
+
+    const { container } = render(Page, { children : TestContent });
+
+    const main = page.elementLocator(container).getByRole('main');
+    const mainBounds = main.element().getBoundingClientRect();
+
+    expect(mainBounds.left).toEqual(mainBounds.right - 340);
+    expect(mainBounds.width).toEqual(340);
   });
 });
