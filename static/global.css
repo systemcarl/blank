@@ -2,7 +2,6 @@
   box-sizing: border-box;
 
   --z-background: -10;
-  --z-background-image: -5;
   --z-graphic: -1;
 }
 
@@ -23,25 +22,11 @@ h1, h2, h3, h4, h5, h6, p {
   margin: 0;
 }
 
-.background {
-  z-index: var(--z-background);
-  flex-grow: 1;
-  overflow: hidden;
-  background-color: var(--bg-colour);
-  background-image: var(--bg-img);
-  background-size: var(--bg-size);
-  background-repeat: var(--bg-repeat);
-}
-
 .graphic {
   position: relative;
   z-index: var(--z-graphic);
   width: 100%;
   height: 100%;
-}
-
-.background .graphic {
-  z-index: var(--z-background-image);
 }
 
 svg {
