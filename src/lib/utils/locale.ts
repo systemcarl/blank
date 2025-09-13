@@ -9,6 +9,10 @@ export const defaultLocale = {
     most : 'Most',
     least : 'Least',
   },
+  contact : {
+    header : 'Contact',
+    infoHeader : 'Contact Info:',
+  },
   errors : {
     default : 'Oops.',
     invalid : 'Oops.',

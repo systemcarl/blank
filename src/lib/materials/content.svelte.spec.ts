@@ -11,7 +11,11 @@ import { page } from '@vitest/browser/context';
 import { render } from '@testing-library/svelte';
 
 import { loadStyles } from '$lib/tests/browser';
-import { makeComponent, wrapOriginal } from '$lib/tests/component';
+import {
+  makeComponent,
+  addChildComponent,
+  wrapOriginal,
+} from '$lib/tests/component';
 import Content from './content.svelte';
 
 vi.mock('./background.svelte', async original => ({
@@ -157,5 +161,28 @@ describe('Content', () => {
       .toBeLessThan(containerBounds.bottom - expectedSpacing);
     expect(contentBounds.top - containerBounds.top)
       .toEqual(containerBounds.bottom - contentBounds.bottom);
+  });
+
+  it('stretches last content to fill layout', async () => {
+    const expectedHeight = 100;
+
+    const { container } = render(Content);
+    addChildComponent(container, Content);
+
+    container.style.setProperty('display', 'flex');
+    container.style.setProperty('flex-direction', 'column');
+    container.style.setProperty('height', `${3 * expectedHeight}px`);
+    container.style.setProperty('--layout-spacing', `${expectedHeight / 2}px`);
+
+    const first = container.children[0] as HTMLElement;
+    const second = container.children[1] as HTMLElement;
+    await expect.element(first).toBeInTheDocument();
+    await expect.element(second).toBeInTheDocument();
+
+    const firstBounds = first.getBoundingClientRect();
+    const secondBounds = second.getBoundingClientRect();
+
+    expect(firstBounds.height).toEqual(2 * expectedHeight);
+    expect(secondBounds.height).toEqual(expectedHeight);
   });
 });

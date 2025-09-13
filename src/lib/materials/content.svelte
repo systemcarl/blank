@@ -6,7 +6,7 @@
   const { section = 'default', verticalAlignment = 'top', children } : {
     section ?: 'default' | 'profile' | 'contact' | 'error';
     verticalAlignment ?: 'top' | 'centre';
-    children : Snippet<[]>;
+    children ?: Snippet<[]>;
   } = $props();
 
   const { provider } = useThemes().makeProvider({ sectionKey : section });
@@ -17,7 +17,7 @@
 <section class={provider.class}>
   <Background>
     <div class="layout" style="--vertical-alignment: {vAlign};">
-      {@render children()}
+      {@render children?.()}
     </div>
   </Background>
 </section>
@@ -29,7 +29,7 @@
     width: 100%;
   }
 
-  section:last-child {
+  section:first-child {
     flex-grow: 1;
   }
 

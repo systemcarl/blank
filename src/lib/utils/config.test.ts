@@ -93,3 +93,73 @@ describe('config dislikes', () => {
     }));
   });
 });
+
+describe('config contact', () => {
+  it('returns config with valid contact', () => {
+    const config = buildConfig({
+      ...testConfig,
+      contact : [
+        {
+          icon : 'icon1',
+          link : 'Link 1',
+          href : 'https://example1.com',
+        },
+        {
+          icon : 'icon2',
+          text : 'Text 2',
+          link : 'Link 2',
+          href : 'https://example2.com',
+        },
+      ],
+    });
+    expect(config).toEqual(expect.objectContaining({
+      contact : [
+        {
+          icon : 'icon1',
+          link : 'Link 1',
+          href : 'https://example1.com',
+        },
+        {
+          icon : 'icon2',
+          text : 'Text 2',
+          link : 'Link 2',
+          href : 'https://example2.com',
+        },
+      ],
+    }));
+  });
+
+  it('filters out invalid contact', () => {
+    const config = buildConfig({
+      ...testConfig,
+      contact : [
+        {
+          icon : 'icon1',
+          link : 'Link 1',
+          href : 'https://example1.com',
+        },
+        { icon : 123, link : 'Link 2', href : 'https://example2.com' },
+        { link : 'Link 3', href : 'https://example3.com' },
+        { icon : 'icon4', link : 456, href : 'https://example4.com' },
+        { icon : 'icon4', href : 'https://example5.com' },
+        { icon : 'icon5', link : 'Link 5', href : 789 },
+        { icon : 'icon5', link : 'Link 5' },
+      ],
+    });
+    expect(config).toEqual(expect.objectContaining({
+      contact : [
+        { icon : 'icon1', link : 'Link 1', href : 'https://example1.com' },
+      ],
+    }));
+  });
+
+  it('drops invalid contact property', () => {
+    const config = buildConfig({
+      ...testConfig,
+      contact : 'invalid',
+    });
+    expect(config).toEqual(expect.objectContaining({
+      contact : null,
+    }));
+  });
+});

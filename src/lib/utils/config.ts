@@ -1,11 +1,18 @@
 export interface Config {
   likes : { icon : string; text : string; }[] | null;
   dislikes : { icon : string; text : string; }[] | null;
+  contact : {
+    icon : string;
+    text ?: string;
+    link : string;
+    href : string;
+  }[] | null;
 }
 
 export const defaultConfig : Config = {
   likes : null,
   dislikes : null,
+  contact : null,
 };
 
 export function buildConfig(config : unknown) : Config {
@@ -33,5 +40,17 @@ export function buildConfig(config : unknown) : Config {
     });
   }
 
+  if (!('contact' in conf) || !Array.isArray((conf.contact))) {
+    conf.contact = defaultConfig.contact;
+  } else {
+    conf.contact = conf.contact.filter((item) => {
+      if (typeof item !== 'object' || item === null) return false;
+      if (!('icon' in item) || typeof item.icon !== 'string') return false;
+      if ('text' in item && typeof item.text !== 'string') return false;
+      if (!('link' in item) || typeof item.link !== 'string') return false;
+      if (!('href' in item) || typeof item.href !== 'string') return false;
+      return true;
+    });
+  }
   return conf;
 }
