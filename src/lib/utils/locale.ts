@@ -4,6 +4,11 @@ export const defaultLocale = {
   title : 'Welcome!',
   subtitle : '',
   tagline : '',
+  favourites : {
+    header : 'Favourite',
+    most : 'Most',
+    least : 'Least',
+  },
   errors : {
     default : 'Oops.',
     invalid : 'Oops.',

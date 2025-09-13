@@ -13,6 +13,11 @@ folder. The [default configuration](src/lib/utils/config.ts) defines the
 expected configuration object structure and default values. Values not defined
 in the `config.json` file will fall back to the default configuration values.
 
+#### Favourites Lists
+A "personal favourites" list can be added to the home page by defining a list
+of items in the `config.likes` array, specifying a theme graphic and a text
+label for each item. A similar `config.dislikes` array can also be defined.
+
 ### Locale File
 A locale can be set in `locale.json`, located in the `/static` folder. Values
 found in the `locale.json` file will be used to populate application text. The

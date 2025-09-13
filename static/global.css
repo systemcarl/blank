@@ -9,6 +9,7 @@
 :root {
   overflow: auto;
 
+  --icon-size: 2rem;
   --title-graphic-top: 4rem;
   --title-graphic-right: -2rem;
   --title-graphic-size: 10rem;
@@ -40,6 +41,18 @@ h1, h2, h3, h4, h5, h6, p {
   align-items: center;
   gap: var(--layout-spacing, 0);
   min-width: fit-content;
+}
+
+.split-stack.align-start {
+  align-items: flex-start;
+}
+
+.split-stack.align-centre {
+  align-items: center;
+}
+
+.split-stack.align-end {
+  align-items: flex-end;
 }
 
 .split-stack.reversed {
@@ -93,11 +106,28 @@ h1, h2, h3, h4, h5, h6, p {
   padding-top: calc(var(--layout-spacing) * var(--split-stack-v-padding, 0));
 }
 
+.list-item {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: center;
+  gap: calc(var(--padding-inset) / 2);
+  width: fit-content;
+  padding-top: calc(var(--padding-inset) / 4);
+  padding-bottom: calc(var(--padding-inset) / 4);
+  padding-left: var(--padding-inset);
+}
+
 .graphic {
   position: relative;
   z-index: var(--z-graphic);
   width: 100%;
   height: 100%;
+}
+
+.icon {
+  width: var(--icon-size, 2rem);
+  height: var(--icon-size, 2rem);
 }
 
 .frame {
@@ -238,6 +268,10 @@ svg {
 }
 
 @media (1440px <= width) {
+  :root {
+    --is-wide: 1;
+  }
+
   .split-stack.stack-wide {
     --split-stack-direction: var(--split-stack-reversed, column);
   }

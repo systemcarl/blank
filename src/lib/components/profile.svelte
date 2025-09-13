@@ -6,15 +6,25 @@
   import Graphic from '$lib/materials/graphic.svelte';
   import Frame from '$lib/materials/frame.svelte';
 
+  import FavouriteList from './favouriteList.svelte';
+
   const { getLocale } = useLocale();
 
   const locale = getLocale();
 </script>
 
-<SplitStack stackOrder="reverse" stack={['mobile', 'tablet']}>
-  <Frame rotation={45}>
-    <Graphic graphic="avatar" />
-  </Frame>
-  <TitleCard title={locale.title} subtitle={locale.subtitle} />
+<SplitStack divide stack={['mobile', 'tablet', 'desktop']}>
+  <SplitStack stack={['mobile', 'tablet', 'desktop', 'wide']}>
+    <SplitStack stackOrder="reverse" stack={['mobile', 'tablet']}>
+      <Frame rotation={45}>
+        <Graphic graphic="avatar" />
+      </Frame>
+      <TitleCard title={locale.title} subtitle={locale.subtitle} />
+    </SplitStack>
+    <Tagline>{ locale.tagline }</Tagline>
+  </SplitStack>
+  <SplitStack alignment="start" stack={['mobile', 'wide']}>
+    <FavouriteList rank="most" headingElement="h2" />
+    <FavouriteList rank="least" headingElement="h2" />
+  </SplitStack>
 </SplitStack>
-<Tagline>{ locale.tagline }</Tagline>

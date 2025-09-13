@@ -52,10 +52,106 @@ describe('SplitStack', () => {
       const firstBounds = first.element().getBoundingClientRect();
       const secondBounds = second.element().getBoundingClientRect();
 
-      expect(firstBounds.top).toBe(secondBounds.top);
       expect(firstBounds.right).toEqual(secondBounds.left - 16);
     },
   );
+
+  it('renders unstacked content with top alignment', async () => {
+    await page.viewport(1024, 1024);
+
+    const { container } = render(SplitStack, { alignment : 'start' });
+
+    container.style.setProperty('--layout-spacing', '16px');
+
+    container.style.setProperty('--layout-spacing', '16px');
+
+    const splitStack = container.children[0] as HTMLElement;
+    await expect.element(splitStack).toBeInTheDocument();
+    addChildComponent(splitStack, makeComponent({
+      testId : 'content-0',
+      style : { height : '200px' },
+    }));
+    addChildComponent(splitStack, makeComponent({
+      testId : 'content-1',
+      style : { height : '100px' },
+    }));
+
+    const first = page.elementLocator(splitStack).getByTestId('content-0');
+    const second = page.elementLocator(splitStack).getByTestId('content-1');
+    await expect.element(first).toBeInTheDocument();
+    await expect.element(second).toBeInTheDocument();
+
+    const firstBounds = first.element().getBoundingClientRect();
+    const secondBounds = second.element().getBoundingClientRect();
+
+    expect(firstBounds.top).toEqual(secondBounds.top);
+    expect(firstBounds.right).toEqual(secondBounds.left - 16);
+  });
+
+  it('renders unstacked content with centre alignment', async () => {
+    await page.viewport(1024, 1024);
+
+    const { container } = render(SplitStack, { alignment : 'centre' });
+
+    container.style.setProperty('--layout-spacing', '16px');
+
+    container.style.setProperty('--layout-spacing', '16px');
+
+    const splitStack = container.children[0] as HTMLElement;
+    await expect.element(splitStack).toBeInTheDocument();
+    addChildComponent(splitStack, makeComponent({
+      testId : 'content-0',
+      style : { height : '200px' },
+    }));
+    addChildComponent(splitStack, makeComponent({
+      testId : 'content-1',
+      style : { height : '100px' },
+    }));
+
+    const first = page.elementLocator(splitStack).getByTestId('content-0');
+    const second = page.elementLocator(splitStack).getByTestId('content-1');
+    await expect.element(first).toBeInTheDocument();
+    await expect.element(second).toBeInTheDocument();
+
+    const firstBounds = first.element().getBoundingClientRect();
+    const secondBounds = second.element().getBoundingClientRect();
+
+    expect((firstBounds.top + firstBounds.bottom) / 2)
+      .toEqual(secondBounds.top + (secondBounds.bottom - secondBounds.top) / 2);
+    expect(firstBounds.right).toEqual(secondBounds.left - 16);
+  });
+
+  it('renders unstacked content with bottom alignment', async () => {
+    await page.viewport(1024, 1024);
+
+    const { container } = render(SplitStack, { alignment : 'end' });
+
+    container.style.setProperty('--layout-spacing', '16px');
+
+    container.style.setProperty('--layout-spacing', '16px');
+
+    const splitStack = container.children[0] as HTMLElement;
+    await expect.element(splitStack).toBeInTheDocument();
+    addChildComponent(splitStack, makeComponent({
+      testId : 'content-0',
+      style : { height : '200px' },
+    }));
+    addChildComponent(splitStack, makeComponent({
+      testId : 'content-1',
+      style : { height : '100px' },
+    }));
+
+    const first = page.elementLocator(splitStack).getByTestId('content-0');
+    const second = page.elementLocator(splitStack).getByTestId('content-1');
+    await expect.element(first).toBeInTheDocument();
+    await expect.element(second).toBeInTheDocument();
+
+    const firstBounds = first.element().getBoundingClientRect();
+    const secondBounds = second.element().getBoundingClientRect();
+
+    expect(firstBounds.bottom).toEqual(secondBounds.bottom);
+    expect(firstBounds.right).toEqual(secondBounds.left - 16);
+  });
 
   it('renders unstacked divided content', async () => {
     await page.viewport(1024, 1024);
@@ -128,9 +224,108 @@ describe('SplitStack', () => {
       const secondBounds = second.element().getBoundingClientRect();
 
       expect(firstBounds.bottom).toEqual(secondBounds.top - 16);
-      expect(firstBounds.left).toEqual(secondBounds.left);
     },
   );
+
+  it('renders stacked content with left alignment', async () => {
+    await page.viewport(767, 1024);
+
+    const { container } = render(SplitStack, {
+      stack : ['mobile', 'tablet', 'desktop', 'wide'],
+      alignment : 'start',
+    });
+
+    container.style.setProperty('--layout-spacing', '16px');
+
+    const splitStack = container.children[0] as HTMLElement;
+    await expect.element(splitStack).toBeInTheDocument();
+    addChildComponent(splitStack, makeComponent({
+      testId : 'content-0',
+      style : { width : '200px' },
+    }));
+    addChildComponent(splitStack, makeComponent({
+      testId : 'content-1',
+      style : { width : '100px' },
+    }));
+
+    const first = page.elementLocator(splitStack).getByTestId('content-0');
+    const second = page.elementLocator(splitStack).getByTestId('content-1');
+    await expect.element(first).toBeInTheDocument();
+    await expect.element(second).toBeInTheDocument();
+
+    const firstBounds = first.element().getBoundingClientRect();
+    const secondBounds = second.element().getBoundingClientRect();
+
+    expect(firstBounds.left).toEqual(secondBounds.left);
+    expect(firstBounds.bottom).toEqual(secondBounds.top - 16);
+  });
+
+  it('renders stacked content with centre alignment', async () => {
+    await page.viewport(767, 1024);
+
+    const { container } = render(SplitStack, {
+      stack : ['mobile', 'tablet', 'desktop', 'wide'],
+      alignment : 'centre',
+    });
+
+    container.style.setProperty('--layout-spacing', '16px');
+
+    const splitStack = container.children[0] as HTMLElement;
+    await expect.element(splitStack).toBeInTheDocument();
+    addChildComponent(splitStack, makeComponent({
+      testId : 'content-0',
+      style : { width : '200px' },
+    }));
+    addChildComponent(splitStack, makeComponent({
+      testId : 'content-1',
+      style : { width : '100px' },
+    }));
+
+    const first = page.elementLocator(splitStack).getByTestId('content-0');
+    const second = page.elementLocator(splitStack).getByTestId('content-1');
+    await expect.element(first).toBeInTheDocument();
+    await expect.element(second).toBeInTheDocument();
+
+    const firstBounds = first.element().getBoundingClientRect();
+    const secondBounds = second.element().getBoundingClientRect();
+
+    expect((firstBounds.left + firstBounds.right) / 2)
+      .toEqual((secondBounds.left + secondBounds.right) / 2);
+    expect(firstBounds.bottom).toEqual(secondBounds.top - 16);
+  });
+
+  it('renders stacked content with right alignment', async () => {
+    await page.viewport(767, 1024);
+
+    const { container } = render(SplitStack, {
+      stack : ['mobile', 'tablet', 'desktop', 'wide'],
+      alignment : 'end',
+    });
+
+    container.style.setProperty('--layout-spacing', '16px');
+
+    const splitStack = container.children[0] as HTMLElement;
+    await expect.element(splitStack).toBeInTheDocument();
+    addChildComponent(splitStack, makeComponent({
+      testId : 'content-0',
+      style : { width : '200px' },
+    }));
+    addChildComponent(splitStack, makeComponent({
+      testId : 'content-1',
+      style : { width : '100px' },
+    }));
+
+    const first = page.elementLocator(splitStack).getByTestId('content-0');
+    const second = page.elementLocator(splitStack).getByTestId('content-1');
+    await expect.element(first).toBeInTheDocument();
+    await expect.element(second).toBeInTheDocument();
+
+    const firstBounds = first.element().getBoundingClientRect();
+    const secondBounds = second.element().getBoundingClientRect();
+
+    expect((firstBounds.right)).toEqual(secondBounds.right);
+    expect(firstBounds.bottom).toEqual(secondBounds.top - 16);
+  });
 
   it('renders stacked divided content', async () => {
     await page.viewport(767, 1024);

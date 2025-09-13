@@ -8,6 +8,7 @@ import TitleCard from '$lib/materials/titleCard.svelte';
 import Tagline from '$lib/materials/tagline.svelte';
 import Frame from '$lib/materials/frame.svelte';
 import Graphic from '$lib/materials/graphic.svelte';
+import FavouriteList from '$lib/components/favouriteList.svelte';
 
 import Profile from './profile.svelte';
 
@@ -29,7 +30,20 @@ vi.mock('$lib/hooks/useLocale', async (original) => {
 });
 
 vi.mock('$lib/materials/splitStack.svelte', async (original) => {
-  return { default : await wrapOriginal(original, { testId : 'splitStack' }) };
+  return {
+    default : await wrapOriginal(original, {
+      testId : (props) => {
+        let id = 'splitStack';
+        const order = tryGet(props, 'stackOrder', s => typeof s === 'string');
+        const align = tryGet(props, 'alignment', s => typeof s === 'string');
+        const divide = tryGet(props, 'divide', s => typeof s === 'boolean');
+        if (order) { id += `-${order}`; }
+        if (align) { id += `-${align}`; }
+        if (divide) { id += `-divide`; }
+        return id;
+      },
+    }),
+  };
 });
 vi.mock('$lib/materials/titleCard.svelte', async (original) => {
   return { default : await wrapOriginal(original, { testId : 'titleCard' }) };
@@ -45,6 +59,14 @@ vi.mock('$lib/materials/graphic.svelte', async (original) => {
     default : await wrapOriginal(original, {
       testId : p =>
         `graphic-${tryGet(p, 'graphic', s => typeof s === 'string') ?? 'none'}`,
+    }),
+  };
+});
+vi.mock('$lib/components/favouriteList.svelte', async (original) => {
+  return {
+    default : await wrapOriginal(original, {
+      testId : p =>
+        `favourites-${tryGet(p, 'rank', s => typeof s === 'string') ?? 'none'}`,
     }),
   };
 });
@@ -90,7 +112,7 @@ describe('Profile', () => {
     const { container } = render(Profile);
 
     const splitStack = within(container)
-      .queryByTestId('splitStack') as HTMLElement;
+      .queryByTestId('splitStack-reverse') as HTMLElement;
     expect(splitStack).toBeInTheDocument();
     const titleCard = within(splitStack)
       .queryByTestId('titleCard') as HTMLElement;
@@ -102,12 +124,8 @@ describe('Profile', () => {
       expect.anything(),
       expect.objectContaining({
         stackOrder : 'reverse',
-        breakpoint : 'desktop',
+        stack : expect.arrayContaining(['mobile', 'tablet']),
       }),
-    );
-    expect(TitleCard).not.toHaveBeenCalledWith(
-      expect.anything(),
-      expect.objectContaining({ divide : true }),
     );
   });
 
@@ -120,5 +138,95 @@ describe('Profile', () => {
     expect(tagline).toHaveTextContent(locale.tagline);
 
     expect(Tagline).toHaveBeenCalledOnce();
+  });
+
+  it('renders title layout and tagline in split stack', () => {
+    const { container } = render(Profile);
+
+    const splitStack = within(container)
+      .queryByTestId('splitStack') as HTMLElement;
+    expect(splitStack).toBeInTheDocument();
+    const titleLayout = within(splitStack)
+      .queryByTestId('splitStack-reverse') as HTMLElement;
+    expect(titleLayout).toBeInTheDocument();
+    const tagline = within(splitStack)
+      .queryByTestId('tagline') as HTMLElement;
+    expect(tagline).toBeInTheDocument();
+
+    expect(SplitStack).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        stack : expect.arrayContaining(['mobile', 'tablet', 'desktop', 'wide']),
+      }),
+    );
+  });
+
+  it ('renders likes list', () => {
+    const { container } = render(Profile);
+
+    const likesList = within(container)
+      .queryByTestId('favourites-most') as HTMLElement;
+    expect(likesList).toBeInTheDocument();
+
+    expect(FavouriteList).toHaveBeenCalledWithProps(expect.objectContaining({
+      rank : 'most',
+      headingElement : 'h2',
+    }));
+  });
+
+  it ('renders dislikes list', () => {
+    const { container } = render(Profile);
+
+    const dislikesList = within(container)
+      .queryByTestId('favourites-least') as HTMLElement;
+    expect(dislikesList).toBeInTheDocument();
+
+    expect(FavouriteList).toHaveBeenCalledWithProps(expect.objectContaining({
+      rank : 'least',
+      headingElement : 'h2',
+    }));
+  });
+
+  it('renders likes, dislikes lists in split stack', () => {
+    const { container } = render(Profile);
+
+    const splitStack = within(container)
+      .queryByTestId('splitStack-start') as HTMLElement;
+    expect(splitStack).toBeInTheDocument();
+    const likesList = within(splitStack)
+      .queryByTestId('favourites-most') as HTMLElement;
+    expect(likesList).toBeInTheDocument();
+    const dislikesList = within(splitStack)
+      .queryByTestId('favourites-least') as HTMLElement;
+    expect(dislikesList).toBeInTheDocument();
+
+    expect(SplitStack).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        alignment : 'start',
+        stack : expect.arrayContaining(['mobile', 'wide']),
+      }),
+    );
+  });
+
+  it('renders favourites layout in divided split stack', () => {
+    const { container } = render(Profile);
+
+    const splitStack = within(container)
+      .queryByTestId('splitStack-divide') as HTMLElement;
+    expect(splitStack).toBeInTheDocument();
+    const first = within(splitStack).queryByTestId('splitStack') as HTMLElement;
+    expect(first).toBeInTheDocument();
+    const second = within(splitStack)
+      .queryByTestId('splitStack-start') as HTMLElement;
+    expect(second).toBeInTheDocument();
+
+    expect(SplitStack).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        divide : true,
+        stack : expect.arrayContaining(['mobile', 'tablet', 'desktop']),
+      }),
+    );
   });
 });

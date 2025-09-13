@@ -28,6 +28,7 @@
     align-items: flex-start;
     width: fit-content;
     min-width: 200px;
+    padding-right: calc(var(--layout-spacing) * var(--is-wide, 0));
   }
 
   .subtitle {
