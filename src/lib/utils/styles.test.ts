@@ -2,7 +2,7 @@ import { beforeEach, afterAll, describe, it, expect, vi } from 'vitest';
 
 import type { Font, Section } from './theme';
 import { defaultTheme } from './theme';
-import { compileFonts, compileStyles } from './styles';
+import { compileFonts, compileStyles, kebabCase } from './styles';
 
 let baseUrl : string | undefined = vi.hoisted(() => '/');
 
@@ -14,11 +14,16 @@ const testFonts = {
 const testThemes = { test : {} };
 
 const testSection = vi.hoisted(() => ({
-  palette : { test : '#111111' },
+  palette : {
+    test : '#111111',
+    border : '#222222',
+  },
   scale : {
     inset : 'testInset',
     spacing : 'testSpacing',
     fontSize : 'testFontSize',
+    borderWidth : 'testBorderWidth',
+    borderRadius : 'testBorderRadius',
     test : 'testSize',
   },
   background : {
@@ -93,6 +98,21 @@ beforeEach(() => {
 });
 
 afterAll(() => { vi.restoreAllMocks(); });
+
+describe('kebabCase', () => {
+  it('converts camelCase to kebab-case', () => {
+    expect(kebabCase('camelCaseTest')).toBe('camel-case-test');
+  });
+
+  it('converts camelCase with acronyms to kebab-case', () => {
+    expect(kebabCase('camelCaseACRONYMTest')).toBe('camel-case-acronym-test');
+  });
+
+  it('converts camelCase with numbers to kebab-case', () => {
+    expect(kebabCase('camelCaseWith123Numbers'))
+      .toBe('camel-case-with-123-numbers');
+  });
+});
 
 describe('compileFonts', () => {
   it('returns local font-face definitions', () => {
@@ -234,8 +254,8 @@ describe('compileStyles', () => {
     expect(getAllSectionsMock).toHaveBeenCalledTimes(2);
     expect(getAllSectionsMock).toHaveBeenNthCalledWith(1, { key : 1 });
     expect(getAllSectionsMock).toHaveBeenNthCalledWith(2, { key : 2 });
-    const block1 = matchBlock(styles, { theme : 'theme1' });
-    const block2 = matchBlock(styles, { theme : 'theme2' });
+    const block1 = matchBlock(styles, { theme : 'theme-1' });
+    const block2 = matchBlock(styles, { theme : 'theme-2' });
     expect(block1).toHaveLength(1);
     expect(block2).toHaveLength(1);
   });
@@ -257,10 +277,63 @@ describe('compileStyles', () => {
 
     const styles = compileStyles(testThemes);
 
-    const block1 = matchBlock(styles, { section : 'section1' });
-    const block2 = matchBlock(styles, { section : 'section2' });
+    const block1 = matchBlock(styles, { section : 'section-1' });
+    const block2 = matchBlock(styles, { section : 'section-2' });
     expect(block1).toHaveLength(1);
     expect(block2).toHaveLength(1);
+  });
+
+  it('returns compiled sections styles with kebab case', () => {
+    const section1 = { ...testSection };
+    const section2 = { ...section1, background : { fill : 'transparent' } };
+    const sections = { sectionOne : section1, sectionTwo : section2 };
+    getAllSectionsMock.mockReturnValue(sections);
+
+    const styles = compileStyles(testThemes);
+
+    const block1 = matchBlock(styles, { section : 'section-one' });
+    const block2 = matchBlock(styles, { section : 'section-two' });
+    expect(block1).toHaveLength(1);
+    expect(block2).toHaveLength(1);
+  });
+
+  it('returns compiled palette colours', () => {
+    const styles = compileStyles(testThemes);
+
+    const block = matchBlock(styles);
+    const colour = testSection.palette.test;
+    expect(block?.[0]).contains(`--colour-test: ${colour};`);
+  });
+
+  it('returns compiled pattern colours as train-case', () => {
+    const section = { ...testSection, palette : { testColour : '#123456' } };
+    getAllSectionsMock.mockReturnValue({ test : section });
+
+    const styles = compileStyles(testThemes);
+
+    const block = matchBlock(styles);
+    expect(block?.[0]).contains(`--colour-test-colour: #123456;`);
+  });
+
+  it('returns compiled scale values', () => {
+    const styles = compileStyles(testThemes);
+
+    const block = matchBlock(styles);
+    const size = testSection.scale.test;
+    expect(block?.[0]).contains(`--scale-test: ${size};`);
+  });
+
+  it('returns compiled scale values as train-case', () => {
+    const section = {
+      ...testSection,
+      scale : { ...testSection.scale, testSize : '123px' },
+    };
+    getAllSectionsMock.mockReturnValue({ test : section });
+
+    const styles = compileStyles(testThemes);
+
+    const block = matchBlock(styles);
+    expect(block?.[0]).contains(`--scale-test-size: 123px;`);
   });
 
   it('returns compiled padding inset', () => {
@@ -276,6 +349,38 @@ describe('compileStyles', () => {
     const block = matchBlock(styles);
     expect(block?.[0])
       .contains(`--layout-spacing: ${testSection.scale.spacing};`);
+  });
+
+  it('returns compiled border colour', () => {
+    const styles = compileStyles(testThemes);
+
+    const block = matchBlock(styles);
+    expect(block?.[0])
+      .contains(`--border-colour: ${testSection.palette.border};`);
+  });
+
+  it('returns transparent border colour', () => {
+    const section = { ...testSection, palette : {} };
+    getAllSectionsMock.mockReturnValue({ test : section });
+
+    const styles = compileStyles(testThemes);
+
+    const block = matchBlock(styles, { section : 'test' });
+    expect(block?.[0]).contains(`--border-colour: transparent;`);
+  });
+
+  it('returns compiled border width', () => {
+    const styles = compileStyles(testThemes);
+    const block = matchBlock(styles);
+    expect(block?.[0])
+      .contains(`--border-width: ${testSection.scale.borderWidth};`);
+  });
+
+  it('returns compiled border radius', () => {
+    const styles = compileStyles(testThemes);
+    const block = matchBlock(styles);
+    expect(block?.[0])
+      .contains(`--border-radius: ${testSection.scale.borderRadius};`);
   });
 
   it('returns compiled background colour', () => {
@@ -458,11 +563,11 @@ describe('compileStyles', () => {
 
     const block1 = matchBlock(
       styles,
-      { section : 'test', background : 'key1' },
+      { section : 'test', background : 'key-1' },
     );
     const block2 = matchBlock(
       styles,
-      { section : 'test', background : 'key2' },
+      { section : 'test', background : 'key-2' },
     );
     expect(block1).toHaveLength(1);
     expect(block2).toHaveLength(1);
@@ -492,10 +597,25 @@ describe('compileStyles', () => {
     const styles = compileStyles(testThemes);
 
     for (const key of Object.keys(testSection.typography)) {
-      const block = styles
-        .match(new RegExp(`\\.typography-${key}\\s*{[^}]*}`, 'g'));
+      const block = matchBlock(styles, { typography : key });
       expect(block).toHaveLength(1);
     }
+  });
+
+  it('returns compiled typography styles with kebab case', () => {
+    const section = {
+      ...testSection,
+      typography : {
+        ...testSection.typography,
+        bodyTest : testSection.typography.body,
+      },
+    };
+    getAllSectionsMock.mockReturnValue({ test : section });
+
+    const styles = compileStyles(testThemes);
+
+    const block = matchBlock(styles, { typography : 'body-test' });
+    expect(block).toHaveLength(1);
   });
 
   it('returns compiled typography font family', () => {
@@ -514,6 +634,22 @@ describe('compileStyles', () => {
     expect(block?.[0]).contains(`--font-family: custom;`);
   });
 
+  it('returns default typography font family', () => {
+    const section = {
+      ...testSection,
+      typography : {
+        ...testSection.typography,
+        body : { ...testSection.typography.body, font : undefined },
+      },
+    };
+    getAllSectionsMock.mockReturnValue({ test : section });
+
+    const styles = compileStyles(testThemes);
+
+    const block = matchBlock(styles, { section : 'test', typography : 'body' });
+    expect(block?.[0]).contains(`--font-family: inherit;`);
+  });
+
   it('returns compiled typography font size', () => {
     const section = {
       ...testSection,
@@ -528,6 +664,22 @@ describe('compileStyles', () => {
     const styles = compileStyles(testThemes);
     const block = matchBlock(styles, { section : 'test', typography : 'body' });
     expect(block?.[0]).contains(`--font-size: 16px;`);
+  });
+
+  it('returns default typography font size', () => {
+    const section = {
+      ...testSection,
+      typography : {
+        ...testSection.typography,
+        body : { ...testSection.typography.body, size : undefined },
+      },
+    };
+    getAllSectionsMock.mockReturnValue({ test : section });
+
+    const styles = compileStyles(testThemes);
+
+    const block = matchBlock(styles, { section : 'test', typography : 'body' });
+    expect(block?.[0]).contains(`--font-size: inherit;`);
   });
 
   it('returns compiled typography font weight', () => {
@@ -763,6 +915,25 @@ describe('compileStyles', () => {
     }
   });
 
+  it('returns compiled graphics styles with kebab case', () => {
+    const section = {
+      ...testSection,
+      graphics : {
+        ...testSection.graphics,
+        testGraphic : testSection.graphics.graphic,
+      },
+    };
+    getAllSectionsMock.mockReturnValue({ test : section });
+
+    const styles = compileStyles(testThemes);
+
+    const block = matchBlock(
+      styles,
+      { section : 'test', graphic : 'test-graphic' },
+    );
+    expect(block).toHaveLength(1);
+  });
+
   it('returns compiled local graphic src', () => {
     const section = {
       ...testSection,
@@ -850,11 +1021,11 @@ describe('compileStyles', () => {
     const styles = compileStyles(testThemes);
     const block1 = matchBlock(
       styles,
-      { section : 'test', graphic : 'graphic', img : 'key1' },
+      { section : 'test', graphic : 'graphic', img : 'key-1' },
     );
     const block2 = matchBlock(
       styles,
-      { section : 'test', graphic : 'graphic', img : 'key2' },
+      { section : 'test', graphic : 'graphic', img : 'key-2' },
     );
     expect(block1).toHaveLength(1);
     expect(block2).toHaveLength(1);

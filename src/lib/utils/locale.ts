@@ -3,6 +3,16 @@ import { isObject } from './typing';
 export const defaultLocale = {
   title : 'Welcome!',
   subtitle : '',
+  tagline : '',
+  favourites : {
+    header : 'Favourite',
+    most : 'Most',
+    least : 'Least',
+  },
+  contact : {
+    header : 'Contact',
+    infoHeader : 'Contact Info:',
+  },
   errors : {
     default : 'Oops.',
     invalid : 'Oops.',

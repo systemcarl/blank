@@ -22,28 +22,42 @@
   };
 </script>
 
-<div class="background" style={hasGraphic ? 'background-image: none;' : ''}>
+<div class="background">
   {@render children()}
-  {#if hasGraphic}
-    <div class="background-graphic">
-      <Graphic src={section?.background.img?.src} />
-    </div>
-  {/if}
+  <div
+    class="background-underlay"
+    style={hasGraphic ? 'background-image: none;' : ''}
+  >
+    {#if hasGraphic}
+      <div class="background-graphic">
+        <Graphic src={section?.background.img?.src} />
+      </div>
+    {/if}
+  </div>
 </div>
 
 <style>
   .background {
-    position: relative;
     display: flex;
+    position: relative;
+    flex-grow: 1;
+  }
+
+  .background-underlay {
+    position: absolute;
+    inset: 0;
+    z-index: var(--z-background);
+    overflow: hidden;
+    background-color: var(--bg-colour);
+    background-image: var(--bg-img);
+    background-size: var(--bg-size);
+    background-repeat: var(--bg-repeat);
   }
 
   .background-graphic {
     position: absolute;
-    top: -10%;
-    left: -10%;
-    width: 120%;
-    height: 120%;
-    z-index: -9;
+    inset: -10%;
+    z-index: var(--z-graphic-overlay);
     opacity: var(--bg-opacity);
     background-size: var(--bg-size);
     background-repeat: var(--bg-repeat);

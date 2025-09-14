@@ -15,4 +15,7 @@ Object.defineProperty(window, 'matchMedia', {
   })),
 });
 
-// add more mocks here if you need them
+vi.mock('$env/static/public', () => ({}));
+vi.mock('$env/static/private', () => ({}));
+vi.mock('$env/dynamic/public', () => ({ env : {} }));
+vi.mock('$env/dynamic/private', () => ({ env : {} }));

@@ -106,32 +106,36 @@ describe('Background', () => {
 
     const background = container.children[0] as HTMLElement;
     await expect.element(background).toBeInTheDocument();
-    const content = page.elementLocator(background).getByTestId('content');
+    const content = page.elementLocator(background)
+      .getByTestId('content').element().children[0] as HTMLElement;
     await expect.element(content).toBeInTheDocument();
 
+    const underlay = Array.from(background.children)
+      .find(c => getComputedStyle(c).position === 'absolute') as HTMLElement;
+    await expect.element(underlay).toBeInTheDocument();
     const backgroundGraphic =
       page.elementLocator(background).getByTestId('graphic');
     await expect.element(backgroundGraphic).not.toBeInTheDocument();
 
-    const backgroundStyle = getComputedStyle(background);
-    const contentStyle = getComputedStyle(content.element());
+    const underlayStyle = getComputedStyle(underlay);
+
     const containerBounds = container.getBoundingClientRect();
-    const backgroundBounds = background.getBoundingClientRect();
+    const underlayBounds = underlay.getBoundingClientRect();
+    const contentBounds = content.getBoundingClientRect();
 
-    expect(backgroundStyle.backgroundColor).toBe('rgb(220, 220, 220)');
-    expect(backgroundStyle.backgroundImage).toBe('none');
+    expect(underlayStyle.backgroundColor).toBe('rgb(220, 220, 220)');
 
-    const backgroundZIndex = backgroundStyle.getPropertyValue('z-index');
-    const contentZIndex = contentStyle.getPropertyValue('z-index');
-    expect((backgroundZIndex !== 'auto' ? Number(backgroundZIndex) : 0))
-      .toBeLessThan((contentZIndex !== 'auto' ? Number(contentZIndex) : 0));
-
-    expect(backgroundBounds.left).toBeLessThanOrEqual(containerBounds.left);
-    expect(backgroundBounds.top).toBeLessThanOrEqual(containerBounds.top);
-    expect(backgroundBounds.right)
+    expect(underlayBounds.left).toBeLessThanOrEqual(containerBounds.left);
+    expect(underlayBounds.top).toBeLessThanOrEqual(containerBounds.top);
+    expect(underlayBounds.right)
       .toBeGreaterThanOrEqual(containerBounds.right);
-    expect(backgroundBounds.bottom)
+    expect(underlayBounds.bottom)
       .toBeGreaterThanOrEqual(containerBounds.bottom);
+
+    expect(document.elementFromPoint(
+      (contentBounds.left + contentBounds.right) / 2,
+      (contentBounds.top + contentBounds.bottom) / 2,
+    )).toBe(content);
   });
 
   it('renders cover background image', async () => {
@@ -146,16 +150,19 @@ describe('Background', () => {
 
     const background = container.children[0] as HTMLElement;
     await expect.element(background).toBeInTheDocument();
+    const underlay = Array.from(background.children)
+      .find(c => getComputedStyle(c).position === 'absolute') as HTMLElement;
+    await expect.element(underlay).toBeInTheDocument();
 
     const backgroundGraphic =
       page.elementLocator(background).getByTestId('graphic');
     await expect.element(backgroundGraphic).not.toBeInTheDocument();
 
-    const backgroundStyle = getComputedStyle(background);
+    const underlayStyle = getComputedStyle(underlay);
 
-    expect(backgroundStyle.backgroundImage).toContain('/test-background.png');
-    expect(backgroundStyle.backgroundSize).toBe('cover');
-    expect(backgroundStyle.backgroundRepeat).toBe('no-repeat');
+    expect(underlayStyle.backgroundImage).toContain('/test-background.png');
+    expect(underlayStyle.backgroundSize).toBe('cover');
+    expect(underlayStyle.backgroundRepeat).toBe('no-repeat');
   });
 
   it('renders tiled background image', async () => {
@@ -170,16 +177,19 @@ describe('Background', () => {
 
     const background = container.children[0] as HTMLElement;
     await expect.element(background).toBeInTheDocument();
+    const underlay = Array.from(background.children)
+      .find(c => getComputedStyle(c).position === 'absolute') as HTMLElement;
+    await expect.element(underlay).toBeInTheDocument();
 
     const backgroundGraphic =
       page.elementLocator(background).getByTestId('graphic');
     await expect.element(backgroundGraphic).not.toBeInTheDocument();
 
-    const backgroundStyle = getComputedStyle(background);
+    const underlayStyle = getComputedStyle(underlay);
 
-    expect(backgroundStyle.backgroundImage).toContain('/test-background.png');
-    expect(backgroundStyle.backgroundSize).toBe('auto');
-    expect(backgroundStyle.backgroundRepeat).toBe('repeat');
+    expect(underlayStyle.backgroundImage).toContain('/test-background.png');
+    expect(underlayStyle.backgroundSize).toBe('auto');
+    expect(underlayStyle.backgroundRepeat).toBe('repeat');
   });
 
   it('renders SVG background image', async () => {

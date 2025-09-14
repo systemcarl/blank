@@ -2,11 +2,33 @@
   import type { Snippet } from 'svelte';
   import useThemes from '$lib/hooks/useThemes';
 
-  const { centred, flex, inset, typography, as = 'span', children } : {
+  const {
+    id,
+    centred,
+    flex,
+    inset,
+    typography = 'body',
+    as = 'span',
+    children,
+  } : {
+    id ?: string;
     centred ?: boolean;
     flex ?: boolean;
     inset ?: boolean;
-    typography ?: 'body' | 'title' | 'subtitle';
+    typography ?: 'body'
+      | 'title'
+      | 'subtitle'
+      | 'heading-1'
+      | 'heading-2'
+      | 'heading-3'
+      | 'heading-4'
+      | 'heading-5'
+      | 'heading-6'
+      | 'link'
+      | 'nav'
+      | 'tagline'
+      | 'list-header'
+      | 'list-header-emphasis';
     as ?: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'p' | 'span';
     children : Snippet<[]>;
   } = $props();
@@ -23,6 +45,7 @@
 
 <svelte:element
   {...attr}
+  id={id}
   class="{className.join(' ')}"
   this={as}
 >

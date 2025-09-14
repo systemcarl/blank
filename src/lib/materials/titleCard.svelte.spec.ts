@@ -34,10 +34,17 @@ afterAll(() => { vi.restoreAllMocks(); });
 
 describe('TitleCard', () => {
   it('renders title, subtitle, and graphic', async () => {
+    await page.viewport(1024, 1024);
+
     const { container } = render(TitleCard, {
       title : 'Title Text',
       subtitle : 'Subtitle Text',
     });
+
+    container.style.setProperty('--layout-spacing', '64px');
+
+    const card = container.children[0] as HTMLElement;
+    await expect.element(card).toBeInTheDocument();
 
     const title = page.elementLocator(container)
       .getByTestId('title')
@@ -52,10 +59,10 @@ describe('TitleCard', () => {
       .getByTestId('graphic')
       .element()
       .querySelector('img') as HTMLImageElement;
+    await expect.element(graphic).toBeInTheDocument();
 
     expect(Title).toHaveBeenCalledOnce();
     expect(Title).toHaveBeenCalledWithProps(expect.objectContaining({
-      centred : true,
       flex : true,
     }));
     expect(Subtitle).toHaveBeenCalledOnce();
@@ -67,12 +74,36 @@ describe('TitleCard', () => {
       graphic : 'titleAccent',
     }));
 
+    const cardStyle = getComputedStyle(card);
+
+    const cardBounds = card.getBoundingClientRect();
     const titleBounds = title.element().getBoundingClientRect();
     const subtitleBounds = subtitle.element().getBoundingClientRect();
     const graphicBounds = graphic.getBoundingClientRect();
 
+    expect(cardStyle.paddingRight).toBe('0px');
+
+    expect(cardBounds.width).toEqual(200);
     expect(subtitleBounds.top).toBeGreaterThanOrEqual(titleBounds.bottom);
     expect(subtitleBounds.left).toEqual(titleBounds.left);
     expect(graphicBounds.top).toBeGreaterThan(subtitleBounds.top);
+  });
+
+  it('renders with padding in wide view', async () => {
+    await page.viewport(1440, 1024);
+
+    const { container } = render(TitleCard, {
+      title : 'Title Text',
+      subtitle : 'Subtitle Text',
+    });
+
+    container.style.setProperty('--layout-spacing', '64px');
+
+    const card = container.children[0] as HTMLElement;
+    await expect.element(card).toBeInTheDocument();
+
+    const cardStyle = getComputedStyle(card);
+
+    expect(cardStyle.paddingRight).toBe('64px');
   });
 });

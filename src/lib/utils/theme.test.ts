@@ -1076,6 +1076,42 @@ describe('getSection scale', () => {
     expect(section.scale)
       .toEqual(expect.objectContaining(expectedSection));
   });
+
+  it('returns default border width if border width unset', () => {
+    const theme = {
+      ...testTheme,
+      scales : {
+        ...testTheme.scales,
+        [testTheme.sections.default.scale] : {
+          ...testTheme.scales[testTheme.sections.default.scale],
+          borderWidth : undefined,
+        },
+      },
+    };
+    const expectedSection =
+      { borderWidth : defaultThemes.default.scales.default.borderWidth };
+    const section = getSection(theme);
+    expect(section.scale)
+      .toEqual(expect.objectContaining(expectedSection));
+  });
+
+  it('returns default theme border radius if border radius unset', () => {
+    const theme = {
+      ...testTheme,
+      scales : {
+        ...testTheme.scales,
+        [testTheme.sections.default.scale] : {
+          ...testTheme.scales[testTheme.sections.default.scale],
+          borderRadius : undefined,
+        },
+      },
+    };
+    const expectedSection =
+      { borderRadius : defaultThemes.default.scales.default.borderRadius };
+    const section = getSection(theme);
+    expect(section.scale)
+      .toEqual(expect.objectContaining(expectedSection));
+  });
 });
 
 describe('getSection background', () => {
@@ -1503,53 +1539,7 @@ describe('getSection typography', () => {
       .toEqual(expect.objectContaining(expectedTypography));
   });
 
-  it('returns default font family if font not set', () => {
-    const { font : _, ...typography } =
-      testTheme.typography[testTheme.sections.default.typography].body;
-    const theme = {
-      ...testTheme,
-      typography : {
-        ...testTheme.typography,
-        [testTheme.sections.default.typography] : {
-          body : { ...typography },
-        },
-      },
-    };
-    const expectedTypography = makeSection({
-      typography : {
-        ...testTheme.typography[testTheme.sections.default.typography],
-        body : { ...typography },
-      },
-    }).typography;
-    const section = getSection(theme);
-    expect(section.typography)
-      .toEqual(expect.objectContaining(expectedTypography));
-  });
-
-  it('returns default font family if font invalid', () => {
-    const { font : _, ...typography } =
-      testTheme.typography[testTheme.sections.default.typography].body;
-    const theme = {
-      ...testTheme,
-      typography : {
-        ...testTheme.typography,
-        [testTheme.sections.default.typography] : {
-          body : { ...typography, font : 1 },
-        },
-      },
-    };
-    const expectedTypography = makeSection({
-      typography : {
-        ...testTheme.typography[testTheme.sections.default.typography],
-        body : { ...typography },
-      },
-    }).typography;
-    const section = getSection(theme);
-    expect(section.typography)
-      .toEqual(expect.objectContaining(expectedTypography));
-  });
-
-  it('returns default font family if font not found', () => {
+  it('drops invalid font', () => {
     const { font : _, ...typography } =
       testTheme.typography[testTheme.sections.default.typography].body;
     const theme = {
@@ -1561,90 +1551,13 @@ describe('getSection typography', () => {
         },
       },
     };
-    const expectedTypography = makeSection({
-      typography : {
-        ...testTheme.typography[testTheme.sections.default.typography],
-        body : { ...typography },
-      },
-    }).typography;
+    const unexpectedTypography = { font : expect.anything() };
     const section = getSection(theme);
-    expect(section.typography)
-      .toEqual(expect.objectContaining(expectedTypography));
+    expect(section.typography.body)
+      .not.toEqual(expect.objectContaining(unexpectedTypography));
   });
 
-  it('returns default theme font family if default font not found', () => {
-    const { default : _f, ...fonts } = testTheme.fonts;
-    const { font : _t, ...typography } =
-      testTheme.typography[testTheme.sections.default.typography].body;
-    const theme = {
-      ...testTheme,
-      fonts,
-      typography : {
-        ...testTheme.typography,
-        [testTheme.sections.default.typography] : {
-          body : { ...typography, font : 'bad' },
-        },
-      },
-    };
-    const expectedTypography = makeSection({
-      fonts : defaultThemes.default.fonts,
-      typography : {
-        ...testTheme.typography[testTheme.sections.default.typography],
-        body : { ...typography },
-      },
-    }).typography;
-    const section = getSection(theme);
-    expect(section.typography)
-      .toEqual(expect.objectContaining(expectedTypography));
-  });
-
-  it('returns default theme font size if size not set', () => {
-    const { size : _, ...typography } =
-      testTheme.typography[testTheme.sections.default.typography].body;
-    const theme = {
-      ...testTheme,
-      typography : {
-        ...testTheme.typography,
-        [testTheme.sections.default.typography] : {
-          body : { ...typography },
-        },
-      },
-    };
-    const expectedTypography = makeSection({
-      typography : {
-        ...testTheme.typography[testTheme.sections.default.typography],
-        body : { ...typography },
-      },
-    }).typography;
-    const section = getSection(theme);
-    expect(section.typography)
-      .toEqual(expect.objectContaining(expectedTypography));
-  });
-
-  it('returns default font size if size invalid', () => {
-    const { size : _, ...typography } =
-      testTheme.typography[testTheme.sections.default.typography].body;
-    const theme = {
-      ...testTheme,
-      typography : {
-        ...testTheme.typography,
-        [testTheme.sections.default.typography] : {
-          body : { ...typography, size : 1 },
-        },
-      },
-    };
-    const expectedTypography = makeSection({
-      typography : {
-        ...testTheme.typography[testTheme.sections.default.typography],
-        body : { ...typography },
-      },
-    }).typography;
-    const section = getSection(theme);
-    expect(section.typography)
-      .toEqual(expect.objectContaining(expectedTypography));
-  });
-
-  it('returns default font size if size not found', () => {
+  it('drops invalid font size', () => {
     const { size : _, ...typography } =
       testTheme.typography[testTheme.sections.default.typography].body;
     const theme = {
@@ -1656,41 +1569,10 @@ describe('getSection typography', () => {
         },
       },
     };
-    const expectedTypography = makeSection({
-      typography : {
-        ...testTheme.typography[testTheme.sections.default.typography],
-        body : { ...typography },
-      },
-    }).typography;
+    const unexpectedTypography = { size : expect.anything() };
     const section = getSection(theme);
-    expect(section.typography)
-      .toEqual(expect.objectContaining(expectedTypography));
-  });
-
-  it('returns default theme font size if default size not found', () => {
-    const { fontSize : _f, ...defaultScale } = testTheme.scales.default;
-    const { size : _t, ...typography } =
-      testTheme.typography[testTheme.sections.default.typography].body;
-    const theme = {
-      ...testTheme,
-      scales : { ...testTheme.scales, default : defaultScale },
-      typography : {
-        ...testTheme.typography,
-        [testTheme.sections.default.typography] : {
-          body : { ...typography, size : 'bad' },
-        },
-      },
-    };
-    const expectedTypography = makeSection({
-      scale : { ...testTheme.scales, default : defaultScale },
-      typography : {
-        ...testTheme.typography[testTheme.sections.default.typography],
-        body : { ...typography },
-      },
-    }).typography;
-    const section = getSection(theme);
-    expect(section.typography)
-      .toEqual(expect.objectContaining(expectedTypography));
+    expect(section.typography.body)
+      .not.toEqual(expect.objectContaining(unexpectedTypography));
   });
 
   it('drops invalid line height', () => {
