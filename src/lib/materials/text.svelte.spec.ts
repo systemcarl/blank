@@ -31,6 +31,17 @@ describe('Text', () => {
     expect(content).toHaveTextContent('Test Text');
   });
 
+  it('renders text with id', async () => {
+    const { container } = render(Text, {
+      id : 'test-id',
+      children : makeHtml('<span>Test Text</span>'),
+    });
+
+    const content = container.querySelector('#test-id');
+    expect(content).toBeInTheDocument();
+    expect(content).toHaveTextContent('Test Text');
+  });
+
   it('applies typography', async () => {
     const { container } = render(Text, {
       typography : 'body',

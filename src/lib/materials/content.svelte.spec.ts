@@ -79,6 +79,35 @@ describe('Content', () => {
       .toBeLessThanOrEqual(containerBounds.bottom - expectedSpacing);
   });
 
+  it('renders top navigation content layout', async () => {
+    await page.viewport(768, 1024);
+    const expectedSpacing = 64;
+
+    const { container } = render(Content, {
+      hasNav : true,
+      children : TestContent,
+    });
+
+    container.style.setProperty('display', 'flex');
+    container.style.setProperty('--layout-spacing', `${expectedSpacing}px`);
+
+    const background = page.elementLocator(container).getByTestId('background');
+    const content = background.getByTestId('content');
+    await expect.element(background).toBeInTheDocument();
+    await expect.element(content).toBeInTheDocument();
+
+    const containerBounds = container.getBoundingClientRect();
+    const contentBounds = content.element().getBoundingClientRect();
+    expect(contentBounds.left)
+      .toEqual(containerBounds.left + expectedSpacing);
+    expect(contentBounds.right)
+      .toEqual(containerBounds.right - expectedSpacing);
+    expect(contentBounds.top)
+      .toEqual(containerBounds.top + expectedSpacing / 2);
+    expect(contentBounds.bottom)
+      .toBeLessThanOrEqual(containerBounds.bottom - expectedSpacing);
+  });
+
   it('renders mobile content layout', async () => {
     await page.viewport(767, 1024);
     const expectedVerticalSpacing = 64;
@@ -115,6 +144,37 @@ describe('Content', () => {
       .toEqual(containerBounds.right - expectedHorizontalSpacing);
     expect(contentBounds.top)
       .toEqual(containerBounds.top + expectedVerticalSpacing);
+    expect(contentBounds.bottom)
+      .toBeLessThanOrEqual(containerBounds.bottom - expectedVerticalSpacing);
+  });
+
+  it('renders top navigation mobile content layout', async () => {
+    await page.viewport(767, 1024);
+    const expectedVerticalSpacing = 64;
+    const expectedHorizontalSpacing = expectedVerticalSpacing / 2;
+
+    const { container } = render(Content, {
+      hasNav : true,
+      children : TestContent,
+    });
+
+    container.style.setProperty('display', 'flex');
+    container.style
+      .setProperty('--layout-spacing', `${expectedVerticalSpacing}px`);
+
+    const background = page.elementLocator(container).getByTestId('background');
+    const content = background.getByTestId('content');
+    await expect.element(background).toBeInTheDocument();
+    await expect.element(content).toBeInTheDocument();
+
+    const containerBounds = container.getBoundingClientRect();
+    const contentBounds = content.element().getBoundingClientRect();
+    expect(contentBounds.left)
+      .toEqual(containerBounds.left + expectedHorizontalSpacing);
+    expect(contentBounds.right)
+      .toEqual(containerBounds.right - expectedHorizontalSpacing);
+    expect(contentBounds.top)
+      .toEqual(containerBounds.top + expectedVerticalSpacing / 4);
     expect(contentBounds.bottom)
       .toBeLessThanOrEqual(containerBounds.bottom - expectedVerticalSpacing);
   });

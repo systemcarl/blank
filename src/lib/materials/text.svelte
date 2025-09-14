@@ -2,7 +2,16 @@
   import type { Snippet } from 'svelte';
   import useThemes from '$lib/hooks/useThemes';
 
-  const { centred, flex, inset, typography = 'body', as = 'span', children } : {
+  const {
+    id,
+    centred,
+    flex,
+    inset,
+    typography = 'body',
+    as = 'span',
+    children,
+  } : {
+    id ?: string;
     centred ?: boolean;
     flex ?: boolean;
     inset ?: boolean;
@@ -16,6 +25,7 @@
       | 'heading-5'
       | 'heading-6'
       | 'link'
+      | 'nav'
       | 'tagline'
       | 'list-header'
       | 'list-header-emphasis';
@@ -35,6 +45,7 @@
 
 <svelte:element
   {...attr}
+  id={id}
   class="{className.join(' ')}"
   this={as}
 >

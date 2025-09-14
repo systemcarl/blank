@@ -1,6 +1,7 @@
 export interface Config {
   likes : { icon : string; text : string; }[] | null;
   dislikes : { icon : string; text : string; }[] | null;
+  profileLinks : { text : string; href : string; }[] | null;
   contact : {
     icon : string;
     text ?: string;
@@ -13,6 +14,7 @@ export const defaultConfig : Config = {
   likes : null,
   dislikes : null,
   contact : null,
+  profileLinks : null,
 };
 
 export function buildConfig(config : unknown) : Config {
@@ -52,5 +54,17 @@ export function buildConfig(config : unknown) : Config {
       return true;
     });
   }
+
+  if (!('profileLinks' in conf) || !Array.isArray((conf.profileLinks))) {
+    conf.profileLinks = defaultConfig.profileLinks;
+  } else {
+    conf.profileLinks = conf.profileLinks.filter((item) => {
+      if (typeof item !== 'object' || item === null) return false;
+      if (!('text' in item) || typeof item.text !== 'string') return false;
+      if (!('href' in item) || typeof item.href !== 'string') return false;
+      return true;
+    });
+  }
+
   return conf;
 }

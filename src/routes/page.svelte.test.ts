@@ -4,6 +4,7 @@ import { render, within } from '@testing-library/svelte';
 import { tryGet } from '$lib/utils/typing';
 import { wrapOriginal } from '$lib/tests/component';
 import Content from '$lib/materials/content.svelte';
+import NavLinks from '$lib/materials/navLinks.svelte';
 import Profile from '$lib/components/profile.svelte';
 import Contact from '$lib/components/contact.svelte';
 
@@ -16,6 +17,9 @@ vi.mock('$lib/materials/content.svelte', async (original) => {
         `content-${tryGet(p, 'section', s => typeof s === 'string') ?? 'none'}`,
     }),
   };
+});
+vi.mock('$lib/materials/navLinks.svelte', async (original) => {
+  return { default : await wrapOriginal(original, { testId : 'navLinks' }) };
 });
 vi.mock('$lib/components/profile.svelte', async (original) => {
   return { default : await wrapOriginal(original, { testId : 'profile' }) };
@@ -67,6 +71,22 @@ describe('+page.svelte', () => {
     );
   });
 
+  it('renders profile nav links', () => {
+    const { container } = render(HomePage);
+
+    const content = within(container)
+      .queryByTestId('content-profile') as HTMLElement;
+    expect(content).toBeInTheDocument();
+    const navLinks = within(content).queryByTestId('navLinks') as HTMLElement;
+    expect(navLinks).toBeInTheDocument();
+
+    expect(NavLinks).toHaveBeenCalledOnce();
+    expect(NavLinks).toHaveBeenCalledWithProps(expect.objectContaining({
+      links : [{ text : '#Contact', href : '#contact' }],
+      justify : 'end',
+    }));
+  });
+
   it('renders contact', () => {
     const { container } = render(HomePage);
 
@@ -74,6 +94,9 @@ describe('+page.svelte', () => {
     expect(contact).toBeInTheDocument();
 
     expect(Contact).toHaveBeenCalledOnce();
+    expect(Contact).toHaveBeenCalledWithProps(expect.objectContaining({
+      id : 'contact',
+    }));
   });
 
   it('set contact theme section', () => {

@@ -3,20 +3,29 @@
   import useThemes from '$lib/hooks/useThemes';
   import Background from './background.svelte';
 
-  const { section = 'default', verticalAlignment = 'top', children } : {
+  const {
+    section = 'default',
+    hasNav = false,
+    verticalAlignment = 'top',
+    children,
+  } : {
     section ?: 'default' | 'profile' | 'contact' | 'error';
+    hasNav ?: boolean;
     verticalAlignment ?: 'top' | 'centre';
     children ?: Snippet<[]>;
   } = $props();
 
   const { provider } = useThemes().makeProvider({ sectionKey : section });
 
+  const classes = ['layout'];
+  if (hasNav) classes.push('top-nav');
+
   const vAlign = verticalAlignment === 'centre' ? 'center' : 'flex-start';
 </script>
 
 <section class={provider.class}>
   <Background>
-    <div class="layout" style="--vertical-alignment: {vAlign};">
+    <div class={classes.join(' ')} style="--vertical-alignment: {vAlign};">
       {@render children?.()}
     </div>
   </Background>
@@ -44,5 +53,9 @@
     padding:
       var(--layout-spacing, 0)
       calc(var(--layout-spacing, 0) * var(--layout-scale, 1));
+  }
+
+  .top-nav {
+    padding-top: calc((var(--layout-spacing, 0) / 2 ) * var(--layout-scale, 1));
   }
 </style>

@@ -6,17 +6,31 @@ import { tryGet } from '$lib/utils/typing';
 import SplitStack from '$lib/materials/splitStack.svelte';
 import TitleCard from '$lib/materials/titleCard.svelte';
 import Tagline from '$lib/materials/tagline.svelte';
+import NavLinks from '$lib/materials/navLinks.svelte';
 import Frame from '$lib/materials/frame.svelte';
 import Graphic from '$lib/materials/graphic.svelte';
 import FavouriteList from '$lib/components/favouriteList.svelte';
 
 import Profile from './profile.svelte';
 
+let config : { profileLinks : { href : string; text : string; }[]; } =
+  vi.hoisted(() => ({ profileLinks : [] }));
 const locale = vi.hoisted(() => ({
   title : 'Test Title',
   subtitle : 'Test Subtitle',
   tagline : 'Test Tagline',
 }));
+
+vi.mock('$lib/hooks/useConfig', async (original) => {
+  const originalDefault =
+    ((await original()) as { default : () => object; }).default;
+  return {
+    default : () => ({
+      ...originalDefault(),
+      getConfig : vi.fn(() => config),
+    }),
+  };
+});
 
 vi.mock('$lib/hooks/useLocale', async (original) => {
   const originalDefault =
@@ -51,6 +65,9 @@ vi.mock('$lib/materials/titleCard.svelte', async (original) => {
 vi.mock('$lib/materials/tagline.svelte', async (original) => {
   return { default : await wrapOriginal(original, { testId : 'tagline' }) };
 });
+vi.mock('$lib/materials/navLinks.svelte', async (original) => {
+  return { default : await wrapOriginal(original, { testId : 'navLinks' }) };
+});
 vi.mock('$lib/materials/frame.svelte', async (original) => {
   return { default : await wrapOriginal(original, { testId : 'frame' }) };
 });
@@ -71,7 +88,10 @@ vi.mock('$lib/components/favouriteList.svelte', async (original) => {
   };
 });
 
-beforeEach(() => { vi.clearAllMocks(); });
+beforeEach(() => {
+  config = { profileLinks : [] };
+  vi.clearAllMocks();
+});
 afterAll(() => { vi.restoreAllMocks(); });
 
 describe('Profile', () => {
@@ -228,5 +248,32 @@ describe('Profile', () => {
         stack : expect.arrayContaining(['mobile', 'tablet', 'desktop']),
       }),
     );
+  });
+
+  it('does not render nav links if not configured', () => {
+    config = { ...config, profileLinks : [] };
+
+    const { container } = render(Profile);
+
+    const nav = within(container).queryByTestId('navLinks') as HTMLElement;
+    expect(nav).not.toBeInTheDocument();
+    expect(NavLinks).not.toHaveBeenCalled();
+  });
+
+  it('renders configured nav links', () => {
+    config = { ...config, profileLinks : [
+      { href : '/test1', text : 'Test Link 1' },
+      { href : '/test2', text : 'Test Link 2' },
+    ] };
+    const { container } = render(Profile);
+
+    const nav = within(container).queryByTestId('navLinks') as HTMLElement;
+    expect(nav).toBeInTheDocument();
+
+    expect(NavLinks).toHaveBeenCalledOnce();
+    expect(NavLinks).toHaveBeenCalledWithProps(expect.objectContaining({
+      links : config.profileLinks,
+      justify : 'start',
+    }));
   });
 });

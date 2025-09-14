@@ -47,4 +47,17 @@ describe('Heading', () => {
       typography : `heading-${level}`,
     }));
   });
+
+  it('renders heading with id', async () => {
+    render(Heading, {
+      id : 'test-id',
+      level : 1,
+      children : makeHtml('<span>Heading Text</span>'),
+    });
+
+    expect(Text).toHaveBeenCalledOnce();
+    expect(Text).toHaveBeenCalledWithProps(expect.objectContaining({
+      id : 'test-id',
+    }));
+  });
 });

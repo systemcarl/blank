@@ -31,7 +31,7 @@ afterAll(() => { vi.restoreAllMocks(); });
 
 describe('Contact', () => {
   it('renders contact heading', () => {
-    const { container } = render(Contact);
+    const { container } = render(Contact, { id : 'test-id' });
 
     const heading = within(container).queryByTestId('heading');
     expect(heading).toBeInTheDocument();
@@ -39,6 +39,7 @@ describe('Contact', () => {
 
     expect(Heading).toHaveBeenCalledTimes(1);
     expect(Heading).toHaveBeenCalledWithProps(expect.objectContaining({
+      id : 'test-id',
       level : 2,
     }));
   });

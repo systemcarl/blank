@@ -163,3 +163,49 @@ describe('config contact', () => {
     }));
   });
 });
+
+describe('config profile links', () => {
+  it('returns config with valid profile links', () => {
+    const config = buildConfig({
+      ...testConfig,
+      profileLinks : [
+        { text : 'Link 1', href : 'https://example1.com' },
+        { text : 'Link 2', href : 'https://example2.com' },
+      ],
+    });
+    expect(config).toEqual(expect.objectContaining({
+      profileLinks : [
+        { text : 'Link 1', href : 'https://example1.com' },
+        { text : 'Link 2', href : 'https://example2.com' },
+      ],
+    }));
+  });
+
+  it('filters out invalid profile links', () => {
+    const config = buildConfig({
+      ...testConfig,
+      profileLinks : [
+        { text : 'Link 1', href : 'https://example1.com' },
+        { text : 123, href : 'https://example2.com' },
+        { href : 'https://example3.com' },
+        { text : 'Link 4', href : 456 },
+        { text : 'Link 5' },
+      ],
+    });
+    expect(config).toEqual(expect.objectContaining({
+      profileLinks : [
+        { text : 'Link 1', href : 'https://example1.com' },
+      ],
+    }));
+  });
+
+  it('drops invalid profile links property', () => {
+    const config = buildConfig({
+      ...testConfig,
+      profileLinks : 'invalid',
+    });
+    expect(config).toEqual(expect.objectContaining({
+      profileLinks : null,
+    }));
+  });
+});
