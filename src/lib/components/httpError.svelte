@@ -12,9 +12,9 @@
 
   let detail : string = $state(errorLocale.default);
   if (status === 400) detail = errorLocale.invalid;
-  if (status === 401) detail = errorLocale.not_authenticated;
+  if (status === 401) detail = errorLocale.notAuthenticated;
   if (status === 403) detail = errorLocale.forbidden;
-  if (status === 404) detail = errorLocale.not_found;
+  if (status === 404) detail = errorLocale.notFound;
   if (status === 500) detail = errorLocale.unexpected;
 </script>
 

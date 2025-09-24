@@ -16,9 +16,9 @@ export const defaultLocale = {
   errors : {
     default : 'Oops.',
     invalid : 'Oops.',
-    not_authenticated : 'Oops.',
+    notAuthenticated : 'Oops.',
     forbidden : 'Oops.',
-    not_found : 'Oops.',
+    notFound : 'Oops.',
     unexpected : 'Oops!',
   },
 } as const;
