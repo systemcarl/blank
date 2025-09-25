@@ -54,7 +54,7 @@ vi.mock('$lib/server/logs', () => ({
 function stubError() { return new Error('Test error'); }
 function stubEvent() {
   return {
-    url : new URL('https://example.com/test'),
+    url : new URL('https://example.com/test?key=value'),
     request : { method : 'GET' } as Request,
   } as RequestEvent;
 }
@@ -106,6 +106,7 @@ describe('request handler', () => {
       event : {
         message : 'Request response',
         url : event.url.pathname,
+        searchParams : Object.fromEntries(event.url.searchParams.entries()),
         method : event.request.method,
         duration : expectedDuration,
         status : 200,
