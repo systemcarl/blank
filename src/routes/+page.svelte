@@ -1,12 +1,12 @@
 <script lang="ts">
   import Content from '$lib/materials/content.svelte';
-  import NavLinks from '$lib/materials/navLinks.svelte';
+  import Nav from '$lib/components/nav.svelte';
   import Profile from '$lib/components/profile.svelte';
   import Contact from '$lib/components/contact.svelte';
 </script>
 
 <Content section="profile" hasNav verticalAlignment="centre">
-  <NavLinks links={[{ text : '#Contact', href : '#contact' }]} justify="end" />
+  <Nav contact/>
   <Profile />
 </Content>
 <Content section="contact">

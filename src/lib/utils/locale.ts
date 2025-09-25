@@ -13,6 +13,9 @@ export const defaultLocale = {
     header : 'Contact',
     infoHeader : 'Contact Info:',
   },
+  nav : {
+    contact : 'Contact',
+  },
   errors : {
     default : 'Oops.',
     invalid : 'Oops.',
