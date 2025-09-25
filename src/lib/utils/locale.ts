@@ -16,6 +16,10 @@ export const defaultLocale = {
   nav : {
     contact : 'Contact',
   },
+  meta : {
+    title : '',
+    description : '',
+  },
   errors : {
     default : 'Oops.',
     invalid : 'Oops.',
@@ -24,7 +28,7 @@ export const defaultLocale = {
     notFound : 'Oops.',
     unexpected : 'Oops!',
   },
-} as const;
+};
 
 function proxy<T extends Record<string, unknown>>(
   locale : unknown,
