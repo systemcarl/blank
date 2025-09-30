@@ -8,6 +8,9 @@ export interface Config {
     link : string;
     href : string;
   }[] | null;
+  weblog : {
+    url ?: string;
+  };
 }
 
 export const defaultConfig : Config = {
@@ -15,13 +18,14 @@ export const defaultConfig : Config = {
   dislikes : null,
   contact : null,
   profileLinks : null,
+  weblog : {},
 };
 
 export function buildConfig(config : unknown) : Config {
   if (typeof config !== 'object' || config === null) return defaultConfig;
   const conf = { ...config } as Config;
 
-  if (!('likes' in conf) || !Array.isArray((conf.likes))) {
+  if (!Array.isArray((conf.likes))) {
     conf.likes = defaultConfig.likes;
   } else {
     conf.likes = conf.likes.filter((item) => {
@@ -31,7 +35,7 @@ export function buildConfig(config : unknown) : Config {
       return true;
     });
   }
-  if (!('dislikes' in conf) || !Array.isArray((conf.dislikes))) {
+  if (!Array.isArray((conf.dislikes))) {
     conf.dislikes = defaultConfig.dislikes;
   } else {
     conf.dislikes = conf.dislikes.filter((item) => {
@@ -42,7 +46,7 @@ export function buildConfig(config : unknown) : Config {
     });
   }
 
-  if (!('contact' in conf) || !Array.isArray((conf.contact))) {
+  if (!Array.isArray((conf.contact))) {
     conf.contact = defaultConfig.contact;
   } else {
     conf.contact = conf.contact.filter((item) => {
@@ -55,7 +59,7 @@ export function buildConfig(config : unknown) : Config {
     });
   }
 
-  if (!('profileLinks' in conf) || !Array.isArray((conf.profileLinks))) {
+  if (!Array.isArray((conf.profileLinks))) {
     conf.profileLinks = defaultConfig.profileLinks;
   } else {
     conf.profileLinks = conf.profileLinks.filter((item) => {
@@ -64,6 +68,12 @@ export function buildConfig(config : unknown) : Config {
       if (!('href' in item) || typeof item.href !== 'string') return false;
       return true;
     });
+  }
+
+  if (!conf.weblog || (typeof conf.weblog !== 'object')) {
+    conf.weblog = defaultConfig.weblog;
+  } else if (!('url' in conf.weblog) || typeof conf.weblog.url !== 'string') {
+    delete conf.weblog.url;
   }
 
   return conf;

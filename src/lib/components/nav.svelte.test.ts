@@ -8,6 +8,7 @@ import Nav from './nav.svelte';
 
 const navLocale = vi.hoisted(() => ({
   nav : {
+    home : 'Test Home',
     contact : 'Test Contact',
   } as Record<string, string>,
 }));
@@ -43,6 +44,17 @@ describe('Nav', () => {
       links : [],
     }));
   });
+  it('populates nav links with home locale', () => {
+    const { container } = render(Nav, { home : true });
+
+    const navLinks = within(container).queryByTestId('navLinks') as HTMLElement;
+    expect(navLinks).toBeInTheDocument();
+
+    expect(NavLinks).toHaveBeenCalledOnce();
+    expect(NavLinks).toHaveBeenCalledWithProps(expect.objectContaining({
+      links : [{ text : 'Test Home', href : '/' }],
+    }));
+  });
 
   it('populates nav links with contact locale', () => {
     const { container } = render(Nav, { contact : true });
@@ -52,7 +64,7 @@ describe('Nav', () => {
 
     expect(NavLinks).toHaveBeenCalledOnce();
     expect(NavLinks).toHaveBeenCalledWithProps(expect.objectContaining({
-      links : [{ text : 'Test Contact', href : '#contact' }],
+      links : [{ text : 'Test Contact', href : '/#contact' }],
     }));
   });
 });

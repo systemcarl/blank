@@ -64,7 +64,7 @@ describe('Content', () => {
     const layoutStyle = getComputedStyle(layout);
     expect(layoutStyle.display).toBe('flex');
     expect(layoutStyle.flexDirection).toBe('column');
-    expect(layoutStyle.justifyContent).toBe('center');
+    expect(layoutStyle.justifyContent).toBe('flex-start');
     expect(layoutStyle.alignItems).toBe('flex-start');
 
     const containerBounds = container.getBoundingClientRect();
@@ -133,7 +133,7 @@ describe('Content', () => {
     const layoutStyle = getComputedStyle(layout);
     expect(layoutStyle.display).toBe('flex');
     expect(layoutStyle.flexDirection).toBe('column');
-    expect(layoutStyle.justifyContent).toBe('center');
+    expect(layoutStyle.justifyContent).toBe('flex-start');
     expect(layoutStyle.alignItems).toBe('flex-start');
 
     const containerBounds = container.getBoundingClientRect();
@@ -185,7 +185,7 @@ describe('Content', () => {
 
     const { container } = render(
       Content,
-      { verticalAlignment : 'centre', children : TestContent },
+      { justification : 'centre', children : TestContent },
     );
 
     container.style.setProperty('display', 'flex');
@@ -207,7 +207,7 @@ describe('Content', () => {
     expect(layoutStyle.display).toBe('flex');
     expect(layoutStyle.flexDirection).toBe('column');
     expect(layoutStyle.justifyContent).toBe('center');
-    expect(layoutStyle.alignItems).toBe('center');
+    expect(layoutStyle.alignItems).toBe('flex-start');
 
     const containerBounds = container.getBoundingClientRect();
     const contentBounds = content.element().getBoundingClientRect();
@@ -221,6 +221,48 @@ describe('Content', () => {
       .toBeLessThan(containerBounds.bottom - expectedSpacing);
     expect(contentBounds.top - containerBounds.top)
       .toEqual(containerBounds.bottom - contentBounds.bottom);
+  });
+
+  it('renders content horizontally centered layout', async () => {
+    await page.viewport(768, 1024);
+    const expectedSpacing = 64;
+
+    const { container } = render(
+      Content,
+      { alignment : 'centre', children : TestContent },
+    );
+
+    container.style.setProperty('display', 'flex');
+    container.style.setProperty('height', '500px');
+    container.style.setProperty('--layout-spacing', `${expectedSpacing}px`);
+
+    const section = container.querySelector('section') as HTMLElement;
+    expect(section).toBeInTheDocument();
+
+    const background = page.elementLocator(container).getByTestId('background');
+    const content = background.getByTestId('content');
+    await expect.element(background).toBeInTheDocument();
+    await expect.element(content).toBeInTheDocument();
+
+    const layout = content.element().parentElement as HTMLElement;
+    await expect.element(layout).toBeInTheDocument();
+
+    const layoutStyle = getComputedStyle(layout);
+    expect(layoutStyle.display).toBe('flex');
+    expect(layoutStyle.flexDirection).toBe('column');
+    expect(layoutStyle.justifyContent).toBe('flex-start');
+    expect(layoutStyle.alignItems).toBe('center');
+
+    const containerBounds = container.getBoundingClientRect();
+    const contentBounds = content.element().getBoundingClientRect();
+    expect(contentBounds.left)
+      .toEqual(containerBounds.left + expectedSpacing);
+    expect(contentBounds.right)
+      .toEqual(containerBounds.right - expectedSpacing);
+    expect(contentBounds.top)
+      .toEqual(containerBounds.top + expectedSpacing);
+    expect(contentBounds.bottom)
+      .toBeLessThan(containerBounds.bottom - expectedSpacing);
   });
 
   it('stretches last content to fill layout', async () => {

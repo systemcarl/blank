@@ -209,3 +209,44 @@ describe('config profile links', () => {
     }));
   });
 });
+
+describe('config weblog', () => {
+  it('returns weblog with valid url', () => {
+    const config = buildConfig({
+      ...testConfig,
+      weblog : { url : 'https://example.com/weblog' },
+    });
+    expect(config).toEqual(expect.objectContaining({
+      weblog : { url : 'https://example.com/weblog' },
+    }));
+  });
+
+  it('drops invalid weblog url', () => {
+    const config = buildConfig({
+      ...testConfig,
+      weblog : { url : 123 },
+    });
+    expect(config).toEqual(expect.objectContaining({
+      weblog : {},
+    }));
+  });
+
+  it('returns default weblog config if not provided', () => {
+    const config = buildConfig({
+      ...testConfig,
+    });
+    expect(config).toEqual(expect.objectContaining({
+      weblog : defaultConfig.weblog,
+    }));
+  });
+
+  it('returns default weblog config if invalid', () => {
+    const config = buildConfig({
+      ...testConfig,
+      weblog : 'invalid',
+    });
+    expect(config).toEqual(expect.objectContaining({
+      weblog : defaultConfig.weblog,
+    }));
+  });
+});

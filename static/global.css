@@ -197,6 +197,10 @@ svg {
 }
 
 .text {
+  --text-bg-colour: color-mix(in srgb,
+    var(--bg-colour, transparent) 66%,
+    transparent 33%
+  );
   font-family: var(--font-family);
   font-size: var(--font-size);
   font-weight: var(--font-weight);
@@ -207,6 +211,31 @@ svg {
   white-space: pre-wrap;
   color: var(--text-colour);
   text-shadow: var(--text-shadow);
+}
+
+.article {
+  width: 100%;
+  max-width: calc(1024px - (2 * var(--layout-spacing, 0)));
+  margin: 0 auto;
+  white-space: wrap;
+  background-color: var(--text-bg-colour);
+  box-shadow: 0 0
+    var(--font-size) var(--font-size)
+    var(--text-bg-colour, transparent);
+}
+
+.article h1,
+.article h2,
+.article h3,
+.article h4,
+.article h5,
+.article h6 {
+  margin-top: var(--font-size, 1rem);
+}
+
+.article p {
+  margin-top: var(--font-size, 1rem);
+  margin-bottom: var(--font-size, 1rem);
 }
 
 .text-centred {

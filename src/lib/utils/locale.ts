@@ -14,6 +14,7 @@ export const defaultLocale = {
     infoHeader : 'Contact Info:',
   },
   nav : {
+    home : 'Home',
     contact : 'Contact',
   },
   meta : {
