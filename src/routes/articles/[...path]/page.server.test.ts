@@ -13,6 +13,7 @@ const event = {
   fetch : vi.fn(),
 } as unknown as PageServerLoadEvent;
 
+const loadAbstractMock = vi.hoisted(() => vi.fn());
 const loadArticleMock = vi.hoisted(() => vi.fn());
 
 vi.mock('$lib/stores/config', async original => ({
@@ -21,19 +22,45 @@ vi.mock('$lib/stores/config', async original => ({
 }));
 vi.mock('$lib/server/weblog', async original => ({
   ...(await original()),
+  loadAbstract : loadAbstractMock,
   loadArticle : loadArticleMock,
 }));
 
-beforeEach(() => { vi.clearAllMocks(); });
+beforeEach(() => {
+  vi.clearAllMocks();
+  loadAbstractMock.mockResolvedValue({ title : '', body : '' });
+  loadArticleMock.mockResolvedValue('');
+});
 afterAll(() => { vi.restoreAllMocks(); });
 
 describe('load', () => {
+  it('retrieves article title and abstract', async () => {
+    loadAbstractMock.mockResolvedValue({
+      title : 'Test Article',
+      body : 'This is a test abstract.',
+    });
+
+    const result = await load(event);
+
+    expect(result).toEqual(expect.objectContaining({
+      title : 'Test Article',
+      abstract : 'This is a test abstract.',
+    }));
+    expect(loadAbstractMock).toHaveBeenCalledWith(
+      'test-weblog',
+      'test/path',
+      { fetch : event.fetch },
+    );
+  });
+
   it('retrieves article contents', async () => {
     loadArticleMock.mockResolvedValue('Article Content');
 
     const result = await load(event);
 
-    expect(result).toEqual({ markdown : 'Article Content' });
+    expect(result).toEqual(expect.objectContaining({
+      markdown : 'Article Content',
+    }));
     expect(loadArticleMock).toHaveBeenCalledWith(
       'test-weblog',
       'test/path',

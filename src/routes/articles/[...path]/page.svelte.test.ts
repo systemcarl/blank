@@ -23,6 +23,8 @@ const data = {
   locale : {},
   themes : {},
   graphics : {},
+  title : 'Test Title',
+  abstract : 'Test Abstract',
   markdown : 'Test Content',
 };
 
@@ -68,5 +70,39 @@ describe('+page.svelte', () => {
     expect(Article).toHaveBeenCalledWithProps(expect.objectContaining({
       content : data.markdown,
     }));
+  });
+
+  it('adds article title to head', () => {
+    render(ArticlePage, { data : { ...data, title : 'Test Article' } });
+    const meta = document.head.querySelector('title');
+    expect(meta).not.toBeNull();
+    expect(meta?.textContent).toBe('Test Article');
+  });
+
+  it('adds placeholder title to head if not found', () => {
+    render(ArticlePage, { data : { ...data, title : '' } });
+    const meta = document.head.querySelector('title');
+    expect(meta).not.toBeNull();
+    expect(meta?.textContent).toBe('Article');
+  });
+
+  it('adds article abstract to head', () => {
+    render(ArticlePage, { data : { ...data, abstract : 'Test abstract.' } });
+    const meta = document.head.querySelector('meta[name="description"]');
+    expect(meta).not.toBeNull();
+    expect(meta?.getAttribute('content')).toBe('Test abstract.');
+  });
+
+  it('does not add abstract to head if not found', () => {
+    render(ArticlePage, { data : { ...data, abstract : '' } });
+    const meta = document.head.querySelector('meta[name="description"]');
+    expect(meta).toBeNull();
+  });
+
+  it('compresses abstract whitespace', () => {
+    render(ArticlePage, { data : { ...data, abstract : 'Test\n  abstract.' } });
+    const meta = document.head.querySelector('meta[name="description"]');
+    expect(meta).not.toBeNull();
+    expect(meta?.getAttribute('content')).toBe('Test abstract.');
   });
 });
