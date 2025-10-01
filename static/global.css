@@ -37,6 +37,10 @@ a {
   text-decoration: none;
 }
 
+.optional {
+  display: none;
+}
+
 .split-stack {
   --split-stack-direction: row;
 
@@ -263,6 +267,10 @@ svg {
     --frame-size: 12rem;
   }
 
+  .optional.display-mobile {
+    display: block;
+  }
+
   .split-stack.stack-mobile {
     --split-stack-direction: var(--split-stack-reversed, column);
   }
@@ -276,6 +284,10 @@ svg {
 }
 
 @media (768px <= width < 1024px) {
+  .optional.display-tablet {
+    display: block;
+  }
+
   .split-stack.stack-tablet {
     --split-stack-direction: var(--split-stack-reversed, column);
   }
@@ -289,6 +301,10 @@ svg {
 }
 
 @media (1024px <= width < 1440px) {
+  .optional.display-desktop {
+    display: block;
+  }
+
   .split-stack.stack-desktop {
     --split-stack-direction: var(--split-stack-reversed, column);
   }
@@ -304,6 +320,10 @@ svg {
 @media (1440px <= width) {
   :root {
     --is-wide: 1;
+  }
+
+  .optional.display-wide {
+    display: block;
   }
 
   .split-stack.stack-wide {

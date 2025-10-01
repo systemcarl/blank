@@ -2,7 +2,8 @@
   import Text from './text.svelte';
   import Link from './link.svelte';
 
-  const { links = [], justify = 'start' } : {
+  const { links = [], direction = 'row', justify = 'start' } : {
+    direction ?: 'row' | 'column';
     justify ?: 'start' | 'end';
     links : { text : string; href : string; }[];
   } = $props();
@@ -11,7 +12,7 @@
 </script>
 
 {#if links.length > 0}
-  <nav class={className}>
+  <nav class={className} style="flex-direction: {direction};">
     <ul>
       {#each links as { text, href } (text)}
         <li>
@@ -27,7 +28,6 @@
 <style>
   nav {
     display: flex;
-    flex-direction: row;
     gap : var(--padding-inset);
     width: 100%;
     margin: calc(var(--padding-inset) / 4) 0;

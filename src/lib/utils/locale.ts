@@ -17,6 +17,9 @@ export const defaultLocale = {
     home : 'Home',
     contact : 'Contact',
   },
+  alt : {
+    logo : 'Logo',
+  },
   meta : {
     title : '',
     description : '',

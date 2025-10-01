@@ -10,7 +10,12 @@
     justification = 'top',
     children,
   } : {
-    section ?: 'default' | 'profile' | 'contact' | 'article' | 'error';
+    section ?: 'default'
+      | 'profile'
+      | 'contact'
+      | 'article'
+      | 'footer'
+      | 'error';
     hasNav ?: boolean;
     alignment ?: 'left' | 'centre';
     justification ?: 'top' | 'centre';

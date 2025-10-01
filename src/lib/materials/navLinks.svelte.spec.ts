@@ -152,4 +152,44 @@ describe('NavLinks', () => {
     expect(firstBounds.top).toEqual(secondBounds.top);
     expect(firstBounds.right).toEqual(secondBounds.left - expectedGap);
   });
+
+  it('justifies links to top', async () => {
+    const expectedGap = 32;
+    const expectedMargin = expectedGap / 4;
+
+    const links = [
+      { text : 'Link 1', href : '#link1' },
+      { text : 'Link 2', href : '#link2' },
+    ];
+
+    const { container } = render(navLinks, {
+      links,
+      direction : 'column',
+      justify : 'start',
+    });
+
+    const nav = container.children[0] as HTMLElement;
+    expect(nav).toBeInTheDocument();
+
+    container.style.setProperty('height', '200px');
+    container.style.setProperty('--padding-inset', `${expectedGap}px`);
+
+    const anchors = page.elementLocator(container).getByRole('link').elements();
+    expect(anchors.length).toBe(links.length);
+
+    const first = anchors[0] as HTMLElement;
+    const second = anchors[1] as HTMLElement;
+
+    const containerBounds = container.getBoundingClientRect();
+    const navBounds = nav.getBoundingClientRect();
+    const firstBounds = first.getBoundingClientRect();
+    const secondBounds = second.getBoundingClientRect();
+
+    expect(navBounds.top).toEqual(containerBounds.top + expectedMargin);
+    expect(firstBounds.left).toEqual(containerBounds.left);
+    expect(firstBounds.top).toEqual(containerBounds.top + expectedMargin);
+    expect(firstBounds.left).toEqual(secondBounds.left);
+    console.log({ firstBounds, secondBounds, expectedGap });
+    expect(firstBounds.bottom + 1).toEqual(secondBounds.top - expectedGap);
+  });
 });

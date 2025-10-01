@@ -2,6 +2,7 @@
   import Content from '$lib/materials/content.svelte';
   import Article from '$lib/materials/article.svelte';
   import Nav from '$lib/components/nav.svelte';
+  import Footer from '$lib/components/footer.svelte';
 
   const { data } = $props();
   const description = (data?.abstract ?? '')
@@ -13,6 +14,9 @@
 <Content section="article" hasNav>
   <Nav home contact />
   <Article content={data.markdown} />
+</Content>
+<Content section="footer">
+  <Footer />
 </Content>
 
 <svelte:head>
