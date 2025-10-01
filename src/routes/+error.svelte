@@ -4,6 +4,6 @@
   import HttpError from '$lib/components/httpError.svelte';
 </script>
 
-<Content section="error" verticalAlignment="centre">
+<Content section="error" alignment="centre" justification="centre">
   <HttpError status={page.status} message={page.error?.message} />
 </Content>

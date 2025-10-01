@@ -21,8 +21,9 @@ async function requestHandler({ event, resolve } : {
   log({
     event : {
       message : 'Request response',
-      url : event.url.pathname,
       method : event.request.method,
+      url : event.url.pathname,
+      searchParams : Object.fromEntries(event.url.searchParams.entries()),
       duration : Date.now() - received,
       status : response.status,
     },

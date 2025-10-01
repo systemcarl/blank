@@ -6,12 +6,19 @@
   const {
     section = 'default',
     hasNav = false,
-    verticalAlignment = 'top',
+    alignment = 'left',
+    justification = 'top',
     children,
   } : {
-    section ?: 'default' | 'profile' | 'contact' | 'error';
+    section ?: 'default'
+      | 'profile'
+      | 'contact'
+      | 'article'
+      | 'footer'
+      | 'error';
     hasNav ?: boolean;
-    verticalAlignment ?: 'top' | 'centre';
+    alignment ?: 'left' | 'centre';
+    justification ?: 'top' | 'centre';
     children ?: Snippet<[]>;
   } = $props();
 
@@ -20,12 +27,16 @@
   const classes = ['layout'];
   if (hasNav) classes.push('top-nav');
 
-  const vAlign = verticalAlignment === 'centre' ? 'center' : 'flex-start';
+  const align = alignment === 'centre' ? 'center' : 'flex-start';
+  const justify = justification === 'centre' ? 'center' : 'flex-start';
 </script>
 
 <section class={provider.class}>
   <Background>
-    <div class={classes.join(' ')} style="--vertical-alignment: {vAlign};">
+    <div
+      class={classes.join(' ')}
+      style="--content-align: {align}; --content-justify: {justify};"
+    >
       {@render children?.()}
     </div>
   </Background>
@@ -47,12 +58,10 @@
     flex-grow: 1;
     width: 100%;
     flex-direction: column;
-    justify-content: center;
-    align-items: var(--vertical-alignment);
+    justify-content: var(--content-justify);
+    align-items: var(--content-align);
     gap: var(--layout-spacing);
-    padding:
-      var(--layout-spacing, 0)
-      calc(var(--layout-spacing, 0) * var(--layout-scale, 1));
+    padding: calc(2 *var(--layout-spacing, 0) * var(--layout-scale, 1));
   }
 
   .top-nav {

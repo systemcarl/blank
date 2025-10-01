@@ -10,9 +10,9 @@ const errorLocale = vi.hoisted(() => ({
   errors : {
     default : 'Default Message',
     invalid : 'Invalid Message',
-    not_authenticated : 'Not Authenticated Message',
+    notAuthenticated : 'Not Authenticated Message',
     forbidden : 'Forbidden Message',
-    not_found : 'Not Found Message',
+    notFound : 'Not Found Message',
     unexpected : 'Unexpected Message',
   } as Record<string, string>,
 }));
@@ -38,9 +38,9 @@ afterAll(() => { vi.restoreAllMocks(); });
 describe('HttpError', () => {
   it.each([
     ['invalid', 400],
-    ['not_authenticated', 401],
+    ['notAuthenticated', 401],
     ['forbidden', 403],
-    ['not_found', 404],
+    ['notFound', 404],
     ['default', 418],
     ['unexpected', 500],
   ])('displays %s error message in title card', (key, statusCode) => {

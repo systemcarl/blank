@@ -59,7 +59,10 @@ describe('/+error.svelte', () => {
 
     expect(Content).toHaveBeenCalledWith(
       expect.anything(),
-      expect.objectContaining({ verticalAlignment : 'centre' }),
+      expect.objectContaining({
+        alignment : 'centre',
+        justification : 'centre',
+      }),
     );
   });
 

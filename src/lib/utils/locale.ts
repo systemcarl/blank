@@ -13,15 +13,26 @@ export const defaultLocale = {
     header : 'Contact',
     infoHeader : 'Contact Info:',
   },
+  nav : {
+    home : 'Home',
+    contact : 'Contact',
+  },
+  alt : {
+    logo : 'Logo',
+  },
+  meta : {
+    title : '',
+    description : '',
+  },
   errors : {
     default : 'Oops.',
     invalid : 'Oops.',
-    not_authenticated : 'Oops.',
+    notAuthenticated : 'Oops.',
     forbidden : 'Oops.',
-    not_found : 'Oops.',
+    notFound : 'Oops.',
     unexpected : 'Oops!',
   },
-} as const;
+};
 
 function proxy<T extends Record<string, unknown>>(
   locale : unknown,

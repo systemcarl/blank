@@ -27,6 +27,8 @@
     "@sveltejs/vite-plugin-svelte": "^5.0.0",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/svelte": "^5.2.4",
+    "@types/markdown-it": "^14.1.2",
+    "@types/markdown-it-footnote": "^3.0.4",
     "@vitest/browser": "^3.2.3",
     "eslint": "^9.18.0",
     "eslint-plugin-svelte": "^3.0.0",
@@ -43,6 +45,8 @@
   },
   "dependencies": {
     "@sentry/sveltekit": "^9.43.0",
+    "markdown-it": "^14.1.0",
+    "markdown-it-footnote": "^4.0.0",
     "pino": "^9.7.0"
   }
 }
