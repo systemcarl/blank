@@ -38,7 +38,8 @@ afterAll(() => { vi.restoreAllMocks(); });
 describe('Content', () => {
   it('renders content layout', async () => {
     await page.viewport(768, 1024);
-    const expectedSpacing = 64;
+    const expectedSpacing = 32;
+    const expectedPadding = 2 * expectedSpacing;
 
     const { container } = render(Content, {
       section : 'profile',
@@ -70,18 +71,19 @@ describe('Content', () => {
     const containerBounds = container.getBoundingClientRect();
     const contentBounds = content.element().getBoundingClientRect();
     expect(contentBounds.left)
-      .toEqual(containerBounds.left + expectedSpacing);
+      .toEqual(containerBounds.left + expectedPadding);
     expect(contentBounds.right)
-      .toEqual(containerBounds.right - expectedSpacing);
+      .toEqual(containerBounds.right - expectedPadding);
     expect(contentBounds.top)
-      .toEqual(containerBounds.top + expectedSpacing);
+      .toEqual(containerBounds.top + expectedPadding);
     expect(contentBounds.bottom)
-      .toBeLessThanOrEqual(containerBounds.bottom - expectedSpacing);
+      .toBeLessThanOrEqual(containerBounds.bottom - expectedPadding);
   });
 
   it('renders top navigation content layout', async () => {
     await page.viewport(768, 1024);
-    const expectedSpacing = 64;
+    const expectedSpacing = 32;
+    const expectedPadding = 2 * expectedSpacing;
 
     const { container } = render(Content, {
       hasNav : true,
@@ -99,25 +101,24 @@ describe('Content', () => {
     const containerBounds = container.getBoundingClientRect();
     const contentBounds = content.element().getBoundingClientRect();
     expect(contentBounds.left)
-      .toEqual(containerBounds.left + expectedSpacing);
+      .toEqual(containerBounds.left + expectedPadding);
     expect(contentBounds.right)
-      .toEqual(containerBounds.right - expectedSpacing);
+      .toEqual(containerBounds.right - expectedPadding);
     expect(contentBounds.top)
       .toEqual(containerBounds.top + expectedSpacing / 2);
     expect(contentBounds.bottom)
-      .toBeLessThanOrEqual(containerBounds.bottom - expectedSpacing);
+      .toBeLessThanOrEqual(containerBounds.bottom - expectedPadding);
   });
 
   it('renders mobile content layout', async () => {
     await page.viewport(767, 1024);
-    const expectedVerticalSpacing = 64;
-    const expectedHorizontalSpacing = expectedVerticalSpacing / 2;
+    const expectedSpacing = 32;
+    const expectedPadding = 2 * expectedSpacing;
 
     const { container } = render(Content, { children : TestContent });
 
     container.style.setProperty('display', 'flex');
-    container.style
-      .setProperty('--layout-spacing', `${expectedVerticalSpacing}px`);
+    container.style.setProperty('--layout-spacing', `${2 * expectedSpacing}px`);
 
     const section = container.querySelector('section') as HTMLElement;
     expect(section).toBeInTheDocument();
@@ -139,19 +140,19 @@ describe('Content', () => {
     const containerBounds = container.getBoundingClientRect();
     const contentBounds = content.element().getBoundingClientRect();
     expect(contentBounds.left)
-      .toEqual(containerBounds.left + expectedHorizontalSpacing);
+      .toEqual(containerBounds.left + expectedPadding);
     expect(contentBounds.right)
-      .toEqual(containerBounds.right - expectedHorizontalSpacing);
+      .toEqual(containerBounds.right - expectedPadding);
     expect(contentBounds.top)
-      .toEqual(containerBounds.top + expectedVerticalSpacing);
+      .toEqual(containerBounds.top + expectedPadding);
     expect(contentBounds.bottom)
-      .toBeLessThanOrEqual(containerBounds.bottom - expectedVerticalSpacing);
+      .toBeLessThanOrEqual(containerBounds.bottom - expectedPadding);
   });
 
   it('renders top navigation mobile content layout', async () => {
     await page.viewport(767, 1024);
-    const expectedVerticalSpacing = 64;
-    const expectedHorizontalSpacing = expectedVerticalSpacing / 2;
+    const expectedSpacing = 32;
+    const expectedPadding = 2 * expectedSpacing;
 
     const { container } = render(Content, {
       hasNav : true,
@@ -159,8 +160,7 @@ describe('Content', () => {
     });
 
     container.style.setProperty('display', 'flex');
-    container.style
-      .setProperty('--layout-spacing', `${expectedVerticalSpacing}px`);
+    container.style.setProperty('--layout-spacing', `${2 * expectedSpacing}px`);
 
     const background = page.elementLocator(container).getByTestId('background');
     const content = background.getByTestId('content');
@@ -170,18 +170,19 @@ describe('Content', () => {
     const containerBounds = container.getBoundingClientRect();
     const contentBounds = content.element().getBoundingClientRect();
     expect(contentBounds.left)
-      .toEqual(containerBounds.left + expectedHorizontalSpacing);
+      .toEqual(containerBounds.left + expectedPadding);
     expect(contentBounds.right)
-      .toEqual(containerBounds.right - expectedHorizontalSpacing);
+      .toEqual(containerBounds.right - expectedPadding);
     expect(contentBounds.top)
-      .toEqual(containerBounds.top + expectedVerticalSpacing / 4);
+      .toEqual(containerBounds.top + expectedSpacing / 2);
     expect(contentBounds.bottom)
-      .toBeLessThanOrEqual(containerBounds.bottom - expectedVerticalSpacing);
+      .toBeLessThanOrEqual(containerBounds.bottom - expectedPadding);
   });
 
   it('renders content vertically centered layout', async () => {
     await page.viewport(768, 1024);
-    const expectedSpacing = 64;
+    const expectedSpacing = 32;
+    const expectedPadding = 2 * expectedSpacing;
 
     const { container } = render(
       Content,
@@ -212,20 +213,21 @@ describe('Content', () => {
     const containerBounds = container.getBoundingClientRect();
     const contentBounds = content.element().getBoundingClientRect();
     expect(contentBounds.left)
-      .toEqual(containerBounds.left + expectedSpacing);
+      .toEqual(containerBounds.left + expectedPadding);
     expect(contentBounds.right)
-      .toEqual(containerBounds.right - expectedSpacing);
+      .toEqual(containerBounds.right - expectedPadding);
     expect(contentBounds.top)
-      .toBeGreaterThan(containerBounds.top + expectedSpacing);
+      .toBeGreaterThan(containerBounds.top + expectedPadding);
     expect(contentBounds.bottom)
-      .toBeLessThan(containerBounds.bottom - expectedSpacing);
+      .toBeLessThan(containerBounds.bottom - expectedPadding);
     expect(contentBounds.top - containerBounds.top)
       .toEqual(containerBounds.bottom - contentBounds.bottom);
   });
 
   it('renders content horizontally centered layout', async () => {
     await page.viewport(768, 1024);
-    const expectedSpacing = 64;
+    const expectedSpacing = 32;
+    const expectedPadding = 2 * expectedSpacing;
 
     const { container } = render(
       Content,
@@ -256,16 +258,17 @@ describe('Content', () => {
     const containerBounds = container.getBoundingClientRect();
     const contentBounds = content.element().getBoundingClientRect();
     expect(contentBounds.left)
-      .toEqual(containerBounds.left + expectedSpacing);
+      .toEqual(containerBounds.left + expectedPadding);
     expect(contentBounds.right)
-      .toEqual(containerBounds.right - expectedSpacing);
+      .toEqual(containerBounds.right - expectedPadding);
     expect(contentBounds.top)
-      .toEqual(containerBounds.top + expectedSpacing);
+      .toEqual(containerBounds.top + expectedPadding);
     expect(contentBounds.bottom)
-      .toBeLessThan(containerBounds.bottom - expectedSpacing);
+      .toBeLessThan(containerBounds.bottom - expectedPadding);
   });
 
-  it('stretches last content to fill layout', async () => {
+  it('stretches first content to fill layout', async () => {
+    await page.viewport(768, 1024);
     const expectedHeight = 100;
 
     const { container } = render(Content);
@@ -274,7 +277,7 @@ describe('Content', () => {
     container.style.setProperty('display', 'flex');
     container.style.setProperty('flex-direction', 'column');
     container.style.setProperty('height', `${3 * expectedHeight}px`);
-    container.style.setProperty('--layout-spacing', `${expectedHeight / 2}px`);
+    container.style.setProperty('--layout-spacing', `${expectedHeight / 4}px`);
 
     const first = container.children[0] as HTMLElement;
     const second = container.children[1] as HTMLElement;

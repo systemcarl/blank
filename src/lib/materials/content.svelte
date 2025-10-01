@@ -56,9 +56,7 @@
     justify-content: var(--content-justify);
     align-items: var(--content-align);
     gap: var(--layout-spacing);
-    padding:
-      var(--layout-spacing, 0)
-      calc(var(--layout-spacing, 0) * var(--layout-scale, 1));
+    padding: calc(2 *var(--layout-spacing, 0) * var(--layout-scale, 1));
   }
 
   .top-nav {
