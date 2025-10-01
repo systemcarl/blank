@@ -6,5 +6,8 @@ export async function loadArticle(
   { fetch } : { fetch : typeof window.fetch; },
 ) {
   const url = `${basePath}/articles/${article}.md`;
-  return (await fetchResource(url, { fetch })) ?? '';
+  const content = (await fetchResource(url, { fetch })) ?? '';
+  return content
+    .replace(/(\]\([^)]+)\.md\)/g, '$1)')
+    .replace(/(\]:.*)\.md/g, '$1');
 }
