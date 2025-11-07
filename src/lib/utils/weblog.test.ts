@@ -43,6 +43,15 @@ describe('renderArticle', () => {
     expect(paragraph.tagName).toBe('P');
   });
 
+  it('renders headers with slug IDs', () => {
+    const text = '# My Header Title';
+    document.body.innerHTML = renderArticle(text);
+    const { getByText } = within(document.body);
+    const header = getByText('My Header Title');
+    expect(header.tagName).toBe('H1');
+    expect(header).toHaveAttribute('id', 'my-header-title');
+  });
+
   it('renders implicit links', () => {
     const text = 'This is a [link].\n\n[link]: https://example.com';
     document.body.innerHTML = renderArticle(text);
