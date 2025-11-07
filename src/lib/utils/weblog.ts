@@ -9,6 +9,13 @@ const md = markdown({ html : true }).use(markdownFootnote);
 
 const defaultFootnoteRender = md.renderer.rules.footnote_ref;
 
+function slug(text : string) {
+  return text
+    .toLowerCase()
+    .replace(/[\s]+/g, '-')
+    .replace(/[^\w-]+/g, '');
+}
+
 function heading(
   tokens : Tokens,
   idx : number,
@@ -18,6 +25,7 @@ function heading(
 ) {
   const level = tokens[idx]?.tag.replace('h', '');
   tokens[idx]?.attrPush(['class', `text typography-heading-${level}`]);
+  tokens[idx]?.attrPush(['id', slug(tokens[idx + 1]?.content || '')]);
   return self.renderToken(tokens, idx, options);
 }
 
