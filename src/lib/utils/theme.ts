@@ -47,6 +47,7 @@ export interface Typography {
   style ?: string;
   textDecoration ?: string;
   colour ?: string;
+  bgColour ?: string;
   shadowColour ?: string;
 }
 
@@ -100,6 +101,7 @@ export const defaultTheme = {
         style : 'normal',
         textDecoration : 'none',
         colour : 'textPrimary',
+        bgColour : 'background',
       },
     },
   },
@@ -341,6 +343,8 @@ function makeTypography(typography : unknown, { palette, scale, fonts } : {
     ) delete t.textDecoration;
     if ((t.colour !== undefined) && (typeof t.colour !== 'string'))
       delete t.colour;
+    if ((t.bgColour !== undefined) && (typeof t.bgColour !== 'string'))
+      delete t.bgColour;
     if ((t.shadowColour !== undefined) && (typeof t.shadowColour !== 'string'))
       delete t.shadowColour;
 
@@ -356,6 +360,12 @@ function makeTypography(typography : unknown, { palette, scale, fonts } : {
       const paletteColour = palette?.[t.colour];
       if (paletteColour) t.colour = paletteColour;
       else delete t.colour;
+    }
+
+    if (t.bgColour) {
+      const paletteColour = palette?.[t.bgColour];
+      if (paletteColour) t.bgColour = paletteColour;
+      else delete t.bgColour;
     }
 
     if (t.shadowColour) {

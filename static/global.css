@@ -201,10 +201,6 @@ svg {
 }
 
 .text {
-  --text-bg-colour: color-mix(in srgb,
-    var(--bg-colour, transparent) 66%,
-    transparent 33%
-  );
   font-family: var(--font-family);
   font-size: var(--font-size);
   font-weight: var(--font-weight);
@@ -218,14 +214,18 @@ svg {
 }
 
 .article {
+  --scrim-colour: color-mix(in srgb,
+    var(--bg-colour, transparent) 66%,
+    transparent 33%
+  );
   width: 100%;
   max-width: calc(1024px - (2 * var(--layout-spacing, 0)));
   margin: 0 auto;
   white-space: wrap;
-  background-color: var(--text-bg-colour);
+  background-color: var(--scrim-colour);
   box-shadow: 0 0
     var(--font-size) var(--font-size)
-    var(--text-bg-colour, transparent);
+    var(--scrim-colour, transparent);
 }
 
 .article h1,
@@ -240,6 +240,24 @@ svg {
 .article p {
   margin-top: var(--font-size, 1rem);
   margin-bottom: var(--font-size, 1rem);
+}
+
+.text.code {
+    background-color: var(--text-bg-colour, transparent);
+    border-radius: var(--border-radius, 0);
+}
+
+.text.code-block {
+    display: block;
+    padding: calc(var(--padding-inset, 0) / 2);
+    background-color: var(--text-bg-colour, transparent);
+    border-radius: var(--border-radius, 0);
+    white-space: pre;
+    overflow-x: auto;
+}
+
+.code-block .text {
+    white-space: inherit;
 }
 
 .text-centred {

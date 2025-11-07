@@ -874,6 +874,38 @@ describe('compileStyles', () => {
     expect(block?.[0]).contains(`--text-colour: inherit;`);
   });
 
+  it('returns compiled text background colour', () => {
+    const section = {
+      ...testSection,
+      typography : {
+        ...testSection.typography,
+        body : { ...testSection.typography.body, bgColour : '#123456' },
+      },
+    };
+    getAllSectionsMock.mockReturnValue({ test : section });
+
+    const styles = compileStyles(testThemes);
+
+    const block = matchBlock(styles, { section : 'test', typography : 'body' });
+    expect(block?.[0]).contains(`--text-bg-colour: #123456;`);
+  });
+
+  it('returns default text background colour', () => {
+    const section = {
+      ...testSection,
+      typography : {
+        ...testSection.typography,
+        body : { ...testSection.typography.body, bgColour : undefined },
+      },
+    };
+    getAllSectionsMock.mockReturnValue({ test : section });
+
+    const styles = compileStyles(testThemes);
+
+    const block = matchBlock(styles, { section : 'test', typography : 'body' });
+    expect(block?.[0]).contains(`--text-bg-colour: inherit;`);
+  });
+
   it('returns compiled text shadow colour', () => {
     const section = {
       ...testSection,

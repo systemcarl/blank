@@ -84,6 +84,7 @@ function compileTypography(classes : string[], typography : Typography) {
     '--letter-spacing' : typography.letterSpacing ?? 'inherit',
     '--text-decoration' : typography.textDecoration ?? 'inherit',
     '--text-colour' : typography.colour ?? 'inherit',
+    '--text-bg-colour' : typography.bgColour ?? 'inherit',
     '--text-shadow' : typography.shadowColour
       ? `0.03em 0.06em 0 ${typography.shadowColour}`
       : 'none',
