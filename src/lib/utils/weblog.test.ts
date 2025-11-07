@@ -38,6 +38,7 @@ describe('renderArticle', () => {
     const heading = getByText(`Heading ${level}`);
     const paragraph = getByText('Hello, heading!');
     expect(heading.tagName).toBe(`H${level}`);
+    expect(heading).toHaveClass('text');
     expect(heading).toHaveClass(`typography-heading-${level}`);
     expect(paragraph.tagName).toBe('P');
   });
@@ -48,6 +49,7 @@ describe('renderArticle', () => {
     const { getByText } = within(document.body);
     const link = getByText('link');
     expect(link.tagName).toBe('A');
+    expect(link).toHaveClass('text');
     expect(link).toHaveClass('typography-link');
     expect(link).toHaveAttribute('href', 'https://example.com');
   });
@@ -75,6 +77,7 @@ describe('renderArticle', () => {
     const footnote = getByText('This is the footnote.');
 
     expect(footnoteSup).toHaveClass('footnote-ref');
+    expect(footnoteSup).toHaveClass('text');
     expect(footnoteSup).toHaveClass('typography-link');
     expect(footnoteSup).toHaveClass('typography-ref');
     expect(footnoteRef.tagName).toBe('A');
