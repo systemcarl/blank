@@ -53,7 +53,7 @@ function footnote(
   return rendered.replace(
     'class="footnote-ref"',
     'class="footnote-ref text typography-link typography-ref"',
-  );
+  ).replace(/\[(\d+):\d+\]/g, '[$1]');
 }
 
 md.renderer.rules.heading_open = heading;
