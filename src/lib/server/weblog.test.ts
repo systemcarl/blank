@@ -100,9 +100,48 @@ describe('loadArticle', () => {
     expect(actual).toEqual(expected);
   });
 
+  it('removes .md extensions from inline links with anchors', async () => {
+    const markdown = '[Link](./other-article.md#section)';
+    const expected = '[Link](./other-article#section)';
+    fetchResourceMock.mockResolvedValue(markdown);
+
+    const actual = await loadArticle('/base', 'article', { fetch : vi.fn() });
+
+    expect(actual).toEqual(expected);
+  });
+
+  it('removes .md extensions from inline links with query', async () => {
+    const markdown = '[Link](./other-article.md?param=value)';
+    const expected = '[Link](./other-article?param=value)';
+    fetchResourceMock.mockResolvedValue(markdown);
+
+    const actual = await loadArticle('/base', 'article', { fetch : vi.fn() });
+    expect(actual).toEqual(expected);
+  });
+
   it('removes .md extensions from implied links', async () => {
     const markdown = '[Link]: ./other-article.md';
     const expected = '[Link]: ./other-article';
+    fetchResourceMock.mockResolvedValue(markdown);
+
+    const actual = await loadArticle('/base', 'article', { fetch : vi.fn() });
+
+    expect(actual).toEqual(expected);
+  });
+
+  it('removes .md extensions from implied links with anchors', async () => {
+    const markdown = '[Link]: ./other-article.md#section';
+    const expected = '[Link]: ./other-article#section';
+    fetchResourceMock.mockResolvedValue(markdown);
+
+    const actual = await loadArticle('/base', 'article', { fetch : vi.fn() });
+
+    expect(actual).toEqual(expected);
+  });
+
+  it('removes .md extensions from implied links with query', async () => {
+    const markdown = '[Link]: ./other-article.md?param=value';
+    const expected = '[Link]: ./other-article?param=value';
     fetchResourceMock.mockResolvedValue(markdown);
 
     const actual = await loadArticle('/base', 'article', { fetch : vi.fn() });
