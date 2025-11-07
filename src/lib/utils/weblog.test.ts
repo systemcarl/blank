@@ -94,4 +94,13 @@ describe('renderArticle', () => {
     expect(footnoteId).toBe(href.replace('#', ''));
     expect(footnote.tagName).toBe('P');
   });
+
+  it('renders multiple footnote references without indices', () => {
+    const text =
+      'First footnote.[^1] Second footnote.[^1]\n\n[^1]: Footnote content.';
+    document.body.innerHTML = renderArticle(text);
+    const { getAllByText } = within(document.body);
+    const footnoteRefs = getAllByText('[1]');
+    expect(footnoteRefs).toHaveLength(2);
+  });
 });
