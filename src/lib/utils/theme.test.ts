@@ -138,6 +138,8 @@ function makeSection({
               ?? defaultThemes.default.scales.default.fontSize),
           ...(('colour' in value)
             && { colour : palette[value.colour as string] }),
+          ...(('bgColour' in value)
+            && { bgColour : palette[value.bgColour as string] }),
         },
       };
     }, {} as unknown),
@@ -1705,6 +1707,64 @@ describe('getSection typography', () => {
       },
     };
     const unexpectedTypography = { colour : expect.anything() };
+    const section = getSection(theme);
+    expect(section.typography.body)
+      .not.toEqual(expect.objectContaining(unexpectedTypography));
+  });
+
+  it('returns resolved background colour', () => {
+    const theme = {
+      ...testTheme,
+      palettes : {
+        ...testTheme.palettes,
+        [testTheme.sections.default.palette] : {
+          ...testTheme.palettes[testTheme.sections.default.palette],
+          value : '#123456',
+        },
+      },
+      typography : {
+        ...testTheme.typography,
+        [testTheme.sections.default.typography] : {
+          body : {
+            ...testTheme.typography.custom.body,
+            bgColour : 'value',
+          },
+        },
+      },
+    };
+    const expectedTypography = { bgColour : '#123456' };
+    const section = getSection(theme);
+    expect(section.typography.body)
+      .toEqual(expect.objectContaining(expectedTypography));
+  });
+
+  it('drops invalid background colour', () => {
+    const theme = {
+      ...testTheme,
+      typography : {
+        ...testTheme.typography,
+        [testTheme.sections.default.typography] : {
+          body : { ...testTheme.typography.custom.body, bgColour : 1 },
+        },
+      },
+    };
+    const unexpectedTypography = { bgColour : expect.anything() };
+    const section = getSection(theme);
+    expect(section.typography.body)
+      .not.toEqual(expect.objectContaining(unexpectedTypography));
+  });
+
+  it('drops background colour if not found', () => {
+    const theme = {
+      ...testTheme,
+      typography : {
+        ...testTheme.typography,
+        [testTheme.sections.default.typography] : {
+          body : { ...testTheme.typography.custom.body, bgColour : 'bad' },
+        },
+      },
+    };
+    const unexpectedTypography = { bgColour : expect.anything() };
     const section = getSection(theme);
     expect(section.typography.body)
       .not.toEqual(expect.objectContaining(unexpectedTypography));

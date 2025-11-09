@@ -29,7 +29,7 @@ vi.mock('$lib/server/weblog', async original => ({
 beforeEach(() => {
   vi.clearAllMocks();
   loadAbstractMock.mockResolvedValue({ title : '', body : '' });
-  loadArticleMock.mockResolvedValue('');
+  loadArticleMock.mockResolvedValue('Test Content');
 });
 afterAll(() => { vi.restoreAllMocks(); });
 
@@ -66,5 +66,12 @@ describe('load', () => {
       'test/path',
       { fetch : event.fetch },
     );
+  });
+
+  it('raises 404 error when article not found', async () => {
+    loadArticleMock.mockResolvedValue('');
+
+    await expect(load(event)).rejects
+      .toMatchObject(expect.objectContaining({ status : 404 }));
   });
 });

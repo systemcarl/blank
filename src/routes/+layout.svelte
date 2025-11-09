@@ -20,6 +20,7 @@
   setGraphics(data.graphics);
 
   subscribeLocalTheme();
+  // console.log('Memory usage:', process.memoryUsage().heapUsed / 1024 / 1024 + 'MB');
 </script>
 
 <Page>

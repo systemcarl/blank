@@ -11,7 +11,7 @@
     ?.trim();
 </script>
 
-<Content section="article" hasNav>
+<Content section="article" hasTopNav>
   <Nav home contact />
   <Article content={data.markdown} />
 </Content>

@@ -38,8 +38,18 @@ describe('renderArticle', () => {
     const heading = getByText(`Heading ${level}`);
     const paragraph = getByText('Hello, heading!');
     expect(heading.tagName).toBe(`H${level}`);
+    expect(heading).toHaveClass('text');
     expect(heading).toHaveClass(`typography-heading-${level}`);
     expect(paragraph.tagName).toBe('P');
+  });
+
+  it('renders headers with slug IDs', () => {
+    const text = '# My Header Title';
+    document.body.innerHTML = renderArticle(text);
+    const { getByText } = within(document.body);
+    const header = getByText('My Header Title');
+    expect(header.tagName).toBe('H1');
+    expect(header).toHaveAttribute('id', 'my-header-title');
   });
 
   it('renders implicit links', () => {
@@ -48,6 +58,7 @@ describe('renderArticle', () => {
     const { getByText } = within(document.body);
     const link = getByText('link');
     expect(link.tagName).toBe('A');
+    expect(link).toHaveClass('text');
     expect(link).toHaveClass('typography-link');
     expect(link).toHaveAttribute('href', 'https://example.com');
   });
@@ -63,6 +74,145 @@ describe('renderArticle', () => {
     expect(getByText('Item 3').tagName).toBe('LI');
   });
 
+  it('renders inline code', () => {
+    const text = 'This is `inline code`.';
+    document.body.innerHTML = renderArticle(text);
+    const { getByText } = within(document.body);
+    const code = getByText('inline code');
+    expect(code.tagName).toBe('CODE');
+    expect(code).toHaveClass('text');
+    expect(code).toHaveClass('code');
+    expect(code).toHaveClass('typography-code');
+  });
+
+  it('renders code blocks', () => {
+    const text = 'This is a code block:\n\n\tconst x = 10;\n\tconsole.log(x);';
+    document.body.innerHTML = renderArticle(text);
+    const { getByText } = within(document.body);
+    const code = getByText(
+      'const x = 10; console.log(x);',
+      { collapseWhitespace : true },
+    );
+    expect(code.tagName).toBe('CODE');
+    expect(code.parentElement?.tagName).toBe('PRE');
+    expect(code.parentElement).toHaveClass('text');
+    expect(code.parentElement).toHaveClass('code-block');
+    expect(code.parentElement).toHaveClass('typography-code');
+  });
+
+  it('renders fenced code blocks', () => {
+    const text = '```js\nconst y = 20;\nconsole.log(y);\n```';
+    document.body.innerHTML = renderArticle(text);
+    const { getAllByText } = within(document.body);
+    const container = getAllByText((content, element) => {
+      return !!(element?.textContent.includes('const y = 20;')
+        && element?.textContent.includes('console.log(y);'));
+    });
+    expect(container.some(el => el.tagName === 'PRE')).toBe(true);
+    expect(container.some(el => el.tagName === 'CODE')).toBe(true);
+
+    const code = container.find(el => el.tagName === 'CODE')!;
+    expect(code.tagName).toBe('CODE');
+    expect(code).toHaveClass('text');
+    expect(code).toHaveClass('code-block');
+    expect(code).toHaveClass('typography-code');
+  });
+
+  it('renders fenced code blocks with keyword syntax highlighting', () => {
+    const text = '```js\nconst x = 10;\n```';
+    document.body.innerHTML = renderArticle(text);
+    const { getByText } = within(document.body);
+    const keyword = getByText('const');
+    expect(keyword.tagName).toBe('SPAN');
+    expect(keyword).toHaveClass('text');
+    expect(keyword).toHaveClass('typography-code-keyword');
+  });
+
+  it('renders fenced code blocks with name syntax highlighting', () => {
+    const text = '```html\n<span>Hello</span>\n```';
+    document.body.innerHTML = renderArticle(text);
+    const { getAllByText } = within(document.body);
+    const names = getAllByText('span');
+    expect(names).toHaveLength(2);
+    names.forEach((name) => {
+      expect(name.tagName).toBe('SPAN');
+      expect(name).toHaveClass('text');
+      expect(name).toHaveClass('typography-code-name');
+    });
+  });
+
+  it('renders fenced code blocks with title syntax highlighting', () => {
+    const text = '```js\nfunction myFunction() {}\n```';
+    document.body.innerHTML = renderArticle(text);
+    const { getByText } = within(document.body);
+    const title = getByText('myFunction');
+    expect(title.tagName).toBe('SPAN');
+    expect(title).toHaveClass('text');
+    expect(title).toHaveClass('typography-code-title');
+  });
+
+  it('renders fenced code blocks with tag syntax highlighting', () => {
+    const text = '```html\n<div />\n```';
+    document.body.innerHTML = renderArticle(text);
+    const { getByText } = within(document.body);
+    const opening = getByText((content, element) => {
+      return !!(element?.textContent === '<div />');
+    });
+    expect(opening.tagName).toBe('SPAN');
+    expect(opening).toHaveClass('text');
+    expect(opening).toHaveClass('typography-code-tag');
+  });
+
+  it('renders fenced code blocks with selector syntax highlighting', () => {
+    const text = '```css\n.container { display: flex; }\n```';
+    document.body.innerHTML = renderArticle(text);
+    const { getByText } = within(document.body);
+    const selector = getByText('.container');
+    expect(selector.tagName).toBe('SPAN');
+    expect(selector).toHaveClass('text');
+    expect(selector).toHaveClass('typography-code-selector-class');
+  });
+
+  it('renders fenced code blocks with attribute syntax highlighting', () => {
+    const text = '```html\n<span class="example">Hello</span>\n```';
+    document.body.innerHTML = renderArticle(text);
+    const { getByText } = within(document.body);
+    const attribute = getByText('class');
+    expect(attribute.tagName).toBe('SPAN');
+    expect(attribute).toHaveClass('text');
+    expect(attribute).toHaveClass('typography-code-attr');
+  });
+
+  it('renders fenced code blocks with property syntax highlighting', () => {
+    const text = '```js\nobject.property = "value";\n```';
+    document.body.innerHTML = renderArticle(text);
+    const { getByText } = within(document.body);
+    const property = getByText('property');
+    expect(property.tagName).toBe('SPAN');
+    expect(property).toHaveClass('text');
+    expect(property).toHaveClass('typography-code-property');
+  });
+
+  it('renders fenced code blocks with string syntax highlighting', () => {
+    const text = '```js\nconst message = "Hello, world!";\n```';
+    document.body.innerHTML = renderArticle(text);
+    const { getByText } = within(document.body);
+    const string = getByText('"Hello, world!"');
+    expect(string.tagName).toBe('SPAN');
+    expect(string).toHaveClass('text');
+    expect(string).toHaveClass('typography-code-string');
+  });
+
+  it('renders fenced code blocks with comment syntax highlighting', () => {
+    const text = '```js\n// This is a comment\n```';
+    document.body.innerHTML = renderArticle(text);
+    const { getByText } = within(document.body);
+    const comment = getByText('// This is a comment');
+    expect(comment.tagName).toBe('SPAN');
+    expect(comment).toHaveClass('text');
+    expect(comment).toHaveClass('typography-code-comment');
+  });
+
   it('renders footnotes', () => {
     const text = 'Here is a footnote.[^1]\n\n[^1]: This is the footnote.';
     document.body.innerHTML = renderArticle(text);
@@ -75,11 +225,21 @@ describe('renderArticle', () => {
     const footnote = getByText('This is the footnote.');
 
     expect(footnoteSup).toHaveClass('footnote-ref');
+    expect(footnoteSup).toHaveClass('text');
     expect(footnoteSup).toHaveClass('typography-link');
     expect(footnoteSup).toHaveClass('typography-ref');
     expect(footnoteRef.tagName).toBe('A');
     expect(footnotes?.children).toHaveLength(1);
     expect(footnoteId).toBe(href.replace('#', ''));
     expect(footnote.tagName).toBe('P');
+  });
+
+  it('renders multiple footnote references without indices', () => {
+    const text =
+      'First footnote.[^1] Second footnote.[^1]\n\n[^1]: Footnote content.';
+    document.body.innerHTML = renderArticle(text);
+    const { getAllByText } = within(document.body);
+    const footnoteRefs = getAllByText('[1]');
+    expect(footnoteRefs).toHaveLength(2);
   });
 });

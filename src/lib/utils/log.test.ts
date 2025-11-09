@@ -1,10 +1,13 @@
 import { beforeEach, afterAll, describe, it, expect, vi } from 'vitest';
+import { captureException } from '@sentry/svelte';
 
-import { log } from './log';
+import { log, logError } from './log';
 
 vi.spyOn(console, 'log').mockImplementation(() => {});
 vi.spyOn(console, 'warn').mockImplementation(() => {});
 vi.spyOn(console, 'error').mockImplementation(() => {});
+
+vi.mock('@sentry/svelte', () => ({ captureException : vi.fn() }));
 
 beforeEach(() => { vi.clearAllMocks(); });
 afterAll(() => { vi.restoreAllMocks(); });
@@ -39,5 +42,21 @@ describe('log', () => {
     const messages = ['Info message 1', 'Info message 2'];
     log(messages);
     expect(console.log).toHaveBeenCalledWith(...messages);
+  });
+});
+
+describe('logError', () => {
+  it('logs error', () => {
+    const error = new Error('Test error');
+    logError(error);
+    expect(console.error).toHaveBeenCalledWith(
+      expect.objectContaining({ error }),
+    );
+  });
+
+  it('captures exception with Sentry', () => {
+    const error = new Error('Test error');
+    logError(error);
+    expect(captureException).toHaveBeenCalledWith(error);
   });
 });
