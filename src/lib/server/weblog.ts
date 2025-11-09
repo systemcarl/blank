@@ -24,5 +24,5 @@ export async function loadArticle(
   const content = (await fetchResource(url, { fetch })) ?? '';
   return content
     .replace(/(\]\([^)]+?)\.md(?=[#?)])/g, '$1')
-    .replace(/(\]:\s*[^)\s]+?)\.md(?=[#?]|$)/g, '$1');
+    .replace(/(\]:\s*[^)\s]+?)\.md(?=[#?\s]|$)/g, '$1');
 }
