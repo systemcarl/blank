@@ -5,7 +5,8 @@
 
   const {
     section = 'default',
-    hasNav = false,
+    hasTopNav = false,
+    hasBottomNav = false,
     alignment = 'left',
     justification = 'top',
     children,
@@ -16,7 +17,8 @@
       | 'article'
       | 'footer'
       | 'error';
-    hasNav ?: boolean;
+    hasTopNav ?: boolean;
+    hasBottomNav ?: boolean;
     alignment ?: 'left' | 'centre';
     justification ?: 'top' | 'centre';
     children ?: Snippet<[]>;
@@ -25,10 +27,13 @@
   const { provider } = useThemes().makeProvider({ sectionKey : section });
 
   const classes = ['layout'];
-  if (hasNav) classes.push('top-nav');
+  if (hasTopNav) classes.push('top-nav');
 
   const align = alignment === 'centre' ? 'center' : 'flex-start';
-  const justify = justification === 'centre' ? 'center' : 'flex-start';
+  // shift vertical centred layout to align top nav or bottom links
+  const justify = ((hasTopNav || hasBottomNav) && justification === 'centre')
+    ? 'space-between'
+    : justification === 'centre' ? 'center' : 'flex-start';
 </script>
 
 <section class={provider.class}>
@@ -37,7 +42,14 @@
       class={classes.join(' ')}
       style="--content-align: {align}; --content-justify: {justify};"
     >
+      <!-- add placeholder to align vertically asymmetrical layout -->
+      {#if (!hasTopNav && hasBottomNav) && (justification === 'centre')}
+        <div class="placeholder"></div>
+      {/if}
       {@render children?.()}
+      {#if (hasTopNav && !hasBottomNav) && (justification === 'centre')}
+        <div class="placeholder"></div>
+      {/if}
     </div>
   </Background>
 </section>
@@ -66,5 +78,10 @@
 
   .top-nav {
     padding-top: calc((var(--layout-spacing, 0) / 2 ) * var(--layout-scale, 1));
+  }
+
+  .placeholder {
+    width: 100%;
+    height: 0;
   }
 </style>

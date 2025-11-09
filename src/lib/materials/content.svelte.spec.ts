@@ -47,6 +47,7 @@ describe('Content', () => {
     });
 
     container.style.setProperty('display', 'flex');
+    container.style.setProperty('width', '100%');
     container.style.setProperty('--layout-spacing', `${expectedSpacing}px`);
 
     const section = container.querySelector('section') as HTMLElement;
@@ -86,7 +87,7 @@ describe('Content', () => {
     const expectedPadding = 2 * expectedSpacing;
 
     const { container } = render(Content, {
-      hasNav : true,
+      hasTopNav : true,
       children : TestContent,
     });
 
@@ -155,7 +156,7 @@ describe('Content', () => {
     const expectedPadding = 2 * expectedSpacing;
 
     const { container } = render(Content, {
-      hasNav : true,
+      hasTopNav : true,
       children : TestContent,
     });
 
@@ -224,14 +225,14 @@ describe('Content', () => {
       .toEqual(containerBounds.bottom - contentBounds.bottom);
   });
 
-  it('renders content horizontally centered layout', async () => {
+  it('renders content vertically centered layout', async () => {
     await page.viewport(768, 1024);
     const expectedSpacing = 32;
     const expectedPadding = 2 * expectedSpacing;
 
     const { container } = render(
       Content,
-      { alignment : 'centre', children : TestContent },
+      { justification : 'centre', children : TestContent },
     );
 
     container.style.setProperty('display', 'flex');
@@ -252,8 +253,8 @@ describe('Content', () => {
     const layoutStyle = getComputedStyle(layout);
     expect(layoutStyle.display).toBe('flex');
     expect(layoutStyle.flexDirection).toBe('column');
-    expect(layoutStyle.justifyContent).toBe('flex-start');
-    expect(layoutStyle.alignItems).toBe('center');
+    expect(layoutStyle.justifyContent).toBe('center');
+    expect(layoutStyle.alignItems).toBe('flex-start');
 
     const containerBounds = container.getBoundingClientRect();
     const contentBounds = content.element().getBoundingClientRect();
@@ -262,9 +263,93 @@ describe('Content', () => {
     expect(contentBounds.right)
       .toEqual(containerBounds.right - expectedPadding);
     expect(contentBounds.top)
-      .toEqual(containerBounds.top + expectedPadding);
+      .toBeGreaterThan(containerBounds.top + expectedPadding);
     expect(contentBounds.bottom)
       .toBeLessThan(containerBounds.bottom - expectedPadding);
+    expect(contentBounds.top - containerBounds.top)
+      .toEqual(containerBounds.bottom - contentBounds.bottom);
+  });
+
+  it('renders content vertically centered layout with top nav', async () => {
+    await page.viewport(768, 1024);
+    const expectedPadding = 32;
+
+    const { container } = render(Content, {
+      justification : 'centre',
+      hasTopNav : true,
+      children : TestContent,
+    });
+
+    container.style.setProperty('display', 'flex');
+    container.style.setProperty('height', '500px');
+    container.style.setProperty('--layout-spacing', `${expectedPadding / 2}px`);
+
+    const navContent = page
+      .elementLocator(container).getByTestId('content').element();
+    expect(navContent).toBeInTheDocument();
+
+    const layout = navContent.parentNode as HTMLElement;
+    expect(layout).toBeInTheDocument();
+
+    const placeholder = layout.children[1] as HTMLElement;
+    expect(placeholder).toBeInTheDocument();
+    expect(placeholder).not.toBe(navContent);
+
+    const layoutStyle = getComputedStyle(layout);
+
+    const containerBounds = container.getBoundingClientRect();
+    const navBounds = navContent.getBoundingClientRect();
+    const placeholderBounds = placeholder.getBoundingClientRect();
+
+    expect(navBounds.top)
+      .toBeCloseTo(containerBounds.top + (expectedPadding / 4), 1);
+    expect(placeholderBounds.bottom)
+      .toBeCloseTo(containerBounds.bottom - expectedPadding, 1);
+
+    expect(layoutStyle.display).toBe('flex');
+    expect(layoutStyle.flexDirection).toBe('column');
+    expect(layoutStyle.justifyContent).toBe('space-between');
+  });
+
+  it('renders content vertically centered layout with bottom nav', async () => {
+    await page.viewport(768, 1024);
+    const expectedPadding = 32;
+
+    const { container } = render(Content, {
+      justification : 'centre',
+      hasBottomNav : true,
+      children : TestContent,
+    });
+
+    container.style.setProperty('display', 'flex');
+    container.style.setProperty('height', '500px');
+    container.style.setProperty('--layout-spacing', `${expectedPadding / 2}px`);
+
+    const navContent = page
+      .elementLocator(container).getByTestId('content').element();
+    expect(navContent).toBeInTheDocument();
+
+    const layout = navContent.parentNode as HTMLElement;
+    expect(layout).toBeInTheDocument();
+
+    const placeholder = layout.children[0] as HTMLElement;
+    expect(placeholder).toBeInTheDocument();
+    expect(placeholder).not.toBe(navContent);
+
+    const layoutStyle = getComputedStyle(layout);
+
+    const containerBounds = container.getBoundingClientRect();
+    const navBounds = navContent.getBoundingClientRect();
+    const placeholderBounds = placeholder.getBoundingClientRect();
+
+    expect(placeholderBounds.top)
+      .toBeCloseTo(containerBounds.top + expectedPadding, 1);
+    expect(navBounds.bottom)
+      .toBeCloseTo(containerBounds.bottom - expectedPadding, 1);
+
+    expect(layoutStyle.display).toBe('flex');
+    expect(layoutStyle.flexDirection).toBe('column');
+    expect(layoutStyle.justifyContent).toBe('space-between');
   });
 
   it('stretches first content to fill layout', async () => {
