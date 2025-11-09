@@ -8,7 +8,13 @@
   const locale = useLocale().getLocale();
 </script>
 
-<Content section="profile" hasNav alignment="centre" justification="centre">
+<Content
+  section="profile"
+  hasTopNav
+  hasBottomNav
+  alignment="centre"
+  justification="centre"
+>
   <Nav contact/>
   <Profile />
 </Content>
