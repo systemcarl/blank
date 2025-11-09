@@ -120,8 +120,8 @@ describe('loadArticle', () => {
   });
 
   it('removes .md extensions from implied links', async () => {
-    const markdown = '[Link]: ./other-article.md';
-    const expected = '[Link]: ./other-article';
+    const markdown = '[Link]: ./other-article.md\n';
+    const expected = '[Link]: ./other-article\n';
     fetchResourceMock.mockResolvedValue(markdown);
 
     const actual = await loadArticle('/base', 'article', { fetch : vi.fn() });
