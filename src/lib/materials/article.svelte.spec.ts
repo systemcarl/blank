@@ -13,12 +13,18 @@ import { render } from '@testing-library/svelte';
 import { loadStyles } from '$lib/tests/browser';
 import Article from './article.svelte';
 
+const renderMock = vi.fn();
+
 vi.mock('$lib/utils/weblog', () => ({
-  renderArticle : () => '<p data-testid="article-content">Test Article</p>',
+  renderArticle : () => renderMock(),
 }));
 
 beforeAll(async () => await loadStyles());
-beforeEach(() => { vi.clearAllMocks(); });
+beforeEach(() => {
+  vi.clearAllMocks();
+  renderMock
+    .mockReturnValue('<p data-testid="article-content">Test Article</p>');
+});
 
 afterAll(() => { vi.restoreAllMocks(); });
 
@@ -43,7 +49,6 @@ describe('Article', () => {
     const articleStyle = getComputedStyle(article.element());
     const backgroundAlpha = parseFloat(articleStyle.backgroundColor
       .match(/\/\s*([0-9.]+)/)?.[1] ?? '');
-    console.log({ shadow : articleStyle.boxShadow });
     const boxShadowBlur = articleStyle.boxShadow
       .match(/([0-9]+[a-z]+) [0-9]+[a-z]+$/)?.[1] ?? '';
     const boxShadowSpread = articleStyle.boxShadow
@@ -54,6 +59,60 @@ describe('Article', () => {
     expect(boxShadowAlpha).toBeCloseTo(0.6, 2);
     expect(boxShadowBlur).toBe('16px');
     expect(boxShadowSpread).toBe('16px');
+  });
+
+  it('renders inline code', async () => {
+    renderMock
+      .mockReturnValue('<p>This is '
+        + '<code class="text code">inline_code</code>.</p>');
+    const { container } = render(Article);
+
+    container.style.setProperty('--border-radius', '2px');
+
+    const article = page
+      .elementLocator(container.firstElementChild as HTMLElement);
+    const codeElement =
+      article.getByText('inline_code').element() as HTMLElement;
+
+    codeElement.style.setProperty('--text-bg-colour', 'rgb(111, 111, 111)');
+
+    const codeStyle = getComputedStyle(codeElement);
+
+    expect(codeStyle.backgroundColor).toBe('rgb(111, 111, 111)');
+    expect(codeStyle.borderRadius).toBe('2px');
+  });
+
+  it('renders code blocks', async () => {
+    renderMock
+      .mockReturnValue('<pre><code class="text code-block">'
+        + '<span class="text">const</span> x = 10;</code></pre>');
+    const { container } = render(Article);
+
+    container.style.setProperty('--padding-inset', '24px');
+    container.style.setProperty('--border-radius', '8px');
+
+    const article = page
+      .elementLocator(container.firstElementChild as HTMLElement);
+    const codeElement = article.element().querySelector('code') as HTMLElement;
+
+    const keywordElement = page.elementLocator(codeElement)
+      .getByText('const');
+
+    codeElement.style.setProperty('background-color', 'rgb(111, 111, 111)');
+
+    const codeStyle = getComputedStyle(codeElement);
+    const keywordStyle = getComputedStyle(keywordElement.element());
+
+    const articleBounds = article.element().getBoundingClientRect();
+    const codeBounds = codeElement.getBoundingClientRect();
+
+    expect(codeBounds.width).toEqual(articleBounds.width);
+
+    expect(codeStyle.padding).toBe('12px');
+    expect(codeStyle.borderRadius).toBe('8px');
+    expect(codeStyle.backgroundColor).toBe('rgb(111, 111, 111)');
+    expect(codeStyle.overflowX).toBe('auto');
+    expect(keywordStyle.whiteSpace).toBe('pre');
   });
 
   it('limits max width to desktop size', async () => {

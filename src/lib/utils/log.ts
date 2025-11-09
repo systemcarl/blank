@@ -1,3 +1,5 @@
+import { captureException } from '@sentry/svelte';
+
 export function log(
   entry : unknown,
   options : {
@@ -14,4 +16,9 @@ export function log(
 
   if (Array.isArray(entry)) logger(...entry);
   else logger(entry);
+}
+
+export function logError(error : unknown) {
+  log({ error }, { level : 'error' });
+  captureException(error);
 }

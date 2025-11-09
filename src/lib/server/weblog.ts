@@ -5,7 +5,8 @@ export async function loadAbstract(
   article : string,
   { fetch } : { fetch : typeof window.fetch; },
 ) {
-  const url = `${basePath}/abstracts/${article}.md`;
+  basePath = basePath.endsWith('/') ? basePath : basePath + '/';
+  const url = `${basePath}abstracts/${article}.md`;
   const content = (await fetchResource(url, { fetch })) ?? '';
   const titleMatch = content.match(/^# (.+)$/m)?.[1] ?? '';
   const title = titleMatch.replace(/\\#/g, '').trim();
@@ -18,9 +19,10 @@ export async function loadArticle(
   article : string,
   { fetch } : { fetch : typeof window.fetch; },
 ) {
-  const url = `${basePath}/articles/${article}.md`;
+  if (!basePath.endsWith('/')) basePath += '/';
+  const url = `${basePath}articles/${article}.md`;
   const content = (await fetchResource(url, { fetch })) ?? '';
   return content
-    .replace(/(\]\([^)]+)\.md\)/g, '$1)')
-    .replace(/(\]:.*)\.md/g, '$1');
+    .replace(/(\]\([^)]+?)\.md(?=[#?)])/g, '$1')
+    .replace(/(\]:\s*[^)\s]+?)\.md(?=[#?]|$)/g, '$1');
 }

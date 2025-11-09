@@ -46,7 +46,7 @@ describe('+page.svelte', () => {
     render(ArticlePage, { data });
     expect(Content).toHaveBeenCalledWithProps(expect.objectContaining({
       section : 'article',
-      hasNav : true,
+      hasTopNav : true,
     }));
   });
 
