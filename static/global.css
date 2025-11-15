@@ -242,22 +242,41 @@ svg {
   margin-bottom: var(--font-size, 1rem);
 }
 
+blockquote.text {
+  margin: var(--font-size, 0) 0 0 0;
+  padding: calc(var(--padding-inset, 0) / 2);
+  background-color: var(--text-bg-colour, transparent);
+  border-left: calc(var(--border-width, 0) * 2) solid
+    var(--text-colour, transparent);
+  border-radius: var(--border-radius, 0);
+  white-space: normal;
+}
+
+blockquote.text > p {
+  white-space: normal;
+  margin-bottom: 0;
+}
+
+.text.alert {
+  margin: 0;
+}
+
 .text.code {
-    background-color: var(--text-bg-colour, transparent);
-    border-radius: var(--border-radius, 0);
+  background-color: var(--text-bg-colour, transparent);
+  border-radius: var(--border-radius, 0);
 }
 
 .text.code-block {
-    display: block;
-    padding: calc(var(--padding-inset, 0) / 2);
-    background-color: var(--text-bg-colour, transparent);
-    border-radius: var(--border-radius, 0);
-    white-space: pre;
-    overflow-x: auto;
+  display: block;
+  padding: calc(var(--padding-inset, 0) / 2);
+  background-color: var(--text-bg-colour, transparent);
+  border-radius: var(--border-radius, 0);
+  white-space: pre;
+  overflow-x: auto;
 }
 
 .code-block .text {
-    white-space: inherit;
+  white-space: inherit;
 }
 
 .text-centred {

@@ -74,6 +74,64 @@ describe('renderArticle', () => {
     expect(getByText('Item 3').tagName).toBe('LI');
   });
 
+  it('renders blockquote', () => {
+    const text = '> This is a blockquote.';
+    document.body.innerHTML = renderArticle(text);
+    const { getByText } = within(document.body);
+    const content = getByText('This is a blockquote.');
+    const wrapper = content.parentElement;
+    expect(content.tagName).toBe('P');
+    expect(content).toHaveClass('text');
+    expect(content).toHaveClass('typography-note');
+    expect(wrapper?.tagName).toBe('BLOCKQUOTE');
+    expect(wrapper).toHaveClass('text');
+    expect(wrapper).toHaveClass('typography-note');
+  });
+
+  it.each(['INFO', 'WARNING', 'ERROR', 'TIP']) ('renders %s alert', (alert) => {
+    const text = `> [!${alert}]\nThis is an alert.`;
+    document.body.innerHTML = renderArticle(text);
+    const { getByText } = within(document.body);
+    const content = getByText('This is an alert.');
+    const wrapper = content.parentElement;
+    const label = getByText(alert);
+    expect(content.tagName).toBe('P');
+    expect(content).toHaveClass('text');
+    expect(content).toHaveClass('typography-note');
+    expect(wrapper?.tagName).toBe('BLOCKQUOTE');
+    expect(wrapper).toHaveClass('text');
+    expect(wrapper).toHaveClass('typography-note');
+    expect(wrapper).toHaveClass(`typography-alert-${alert.toLowerCase()}`);
+    expect(label.tagName).toBe('P');
+    expect(label).toHaveClass('text');
+    expect(label).toHaveClass('typography-alert');
+  });
+
+  it('renders multiple alerts', () => {
+    const text = 'This is normal text.\n\n'
+      + '> [!TIP]\nThis is a tip alert.\n\n'
+      + 'More normal text.\n\n'
+      + '> [!WARNING]\nThis is a warning alert.';
+    document.body.innerHTML = renderArticle(text);
+    const { getByText } = within(document.body);
+
+    for (const alert of ['TIP', 'WARNING']) {
+      const content = getByText(`This is a ${alert.toLowerCase()} alert.`);
+      const wrapper = content.parentElement;
+      const label = getByText(alert);
+      expect(content.tagName).toBe('P');
+      expect(content).toHaveClass('text');
+      expect(content).toHaveClass('typography-note');
+      expect(wrapper?.tagName).toBe('BLOCKQUOTE');
+      expect(wrapper).toHaveClass('text');
+      expect(wrapper).toHaveClass('typography-note');
+      expect(wrapper).toHaveClass(`typography-alert-${alert.toLowerCase()}`);
+      expect(label.tagName).toBe('P');
+      expect(label).toHaveClass('text');
+      expect(label).toHaveClass('typography-alert');
+    }
+  });
+
   it('renders inline code', () => {
     const text = 'This is `inline code`.';
     document.body.innerHTML = renderArticle(text);

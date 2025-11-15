@@ -57,6 +57,49 @@ function link(
   return self.renderToken(tokens, idx, options);
 }
 
+function blockquote(
+  tokens : Tokens,
+  idx : number,
+  options : Options,
+  env : unknown,
+  self : Renderer,
+) {
+  const classes = ['text', 'typography-note'];
+  const level = tokens[idx]?.level || 0;
+  for (let i = idx + 1; i < tokens.length; i++) {
+    const t = tokens[i];
+    if (!t) break;
+    if (t.type === 'paragraph_open' && t.level === level + 1) {
+      t.attrPush(['class', 'text typography-note']);
+    }
+    if (t.type === 'blockquote_close' && t.level === level) {
+      break;
+    }
+  }
+  const contentToken = tokens[idx + 2];
+
+  const alertMatch = contentToken?.content.match(/^\s*\[!(.+?)\]\s*/);
+  if (!alertMatch) {
+    tokens[idx]?.attrPush(['class', classes.join(' ')]);
+    return self.renderToken(tokens, idx, options);
+  }
+
+  const alertType = alertMatch[1];
+  const alertToken = contentToken?.children
+    ?.find(t => t.content.startsWith('[!'));
+  if (alertToken) {
+    alertToken.content =
+      alertToken.content.replace(/^\s*\[!(.+?)\]\s*/, '');
+  }
+
+  if (alertType) classes.push(`typography-alert-${alertType.toLowerCase()}`);
+  tokens[idx]?.attrPush(['class', classes.join(' ')]);
+  return self.renderToken(tokens, idx, options)
+    + (alertType
+      ? `<p class="text alert typography-alert">${alertType}</p>`
+      : '');
+}
+
 function codeInline(
   tokens : Tokens,
   idx : number,
@@ -114,6 +157,7 @@ function footnote(
 
 md.renderer.rules.heading_open = heading;
 md.renderer.rules.link_open = link;
+md.renderer.rules.blockquote_open = blockquote;
 md.renderer.rules.code_inline = codeInline;
 md.renderer.rules.code_block = codeBlock;
 md.renderer.rules.fence = codeFenced;
