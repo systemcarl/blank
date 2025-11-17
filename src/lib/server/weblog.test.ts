@@ -1,6 +1,6 @@
 import { beforeEach, afterAll, describe, it, expect, vi } from 'vitest';
 
-import { loadAbstract, loadArticle } from './weblog';
+import { loadIndex, loadAbstract, loadArticle } from './weblog';
 
 const fetchResourceMock = vi.hoisted(() => vi.fn());
 const FetchJsonResourceMock = vi.hoisted(() => vi.fn());
@@ -16,6 +16,44 @@ beforeEach(() => {
 });
 
 afterAll(() => { vi.restoreAllMocks(); });
+
+describe('loadIndex', () => {
+  it('fetches index.json', async () => {
+    const fetch = vi.fn();
+    const basePath = '/base';
+    const expected = {
+      articles : {
+        'article-1' : {
+          slug : 'article-1',
+          title : 'Article 1',
+          abstract : 'This is article 1.',
+        },
+      },
+      tags : {},
+    };
+    FetchJsonResourceMock.mockResolvedValue(expected);
+
+    const actual = await loadIndex(basePath, { fetch });
+
+    expect(actual).toEqual(expected);
+    expect(FetchJsonResourceMock).toHaveBeenCalledTimes(1);
+    expect(FetchJsonResourceMock).toHaveBeenCalledWith(
+      `${basePath}/index.json`,
+      { fetch },
+    );
+  });
+
+  it('resolves base paths with trailing slashes', async () => {
+    const fetch = vi.fn();
+    const basePath = '/base';
+
+    await loadIndex(basePath + '/', { fetch });
+    expect(FetchJsonResourceMock).toHaveBeenCalledWith(
+      `${basePath}/index.json`,
+      { fetch },
+    );
+  });
+});
 
 describe('loadAbstract', () => {
   it('fetches article title and abstract', async () => {

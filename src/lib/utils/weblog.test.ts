@@ -1,10 +1,138 @@
 import { beforeEach, afterAll, describe, it, expect, vi } from 'vitest';
 import { within } from '@testing-library/dom';
 
-import { renderArticle } from './weblog';
+import { resolveWeblogIndex, renderArticle } from './weblog';
 
 beforeEach(() => { vi.clearAllMocks(); });
 afterAll(() => { vi.restoreAllMocks(); });
+
+describe('resolveWeblogIndex', () => {
+  it('resolves undefined data', () => {
+    const index = resolveWeblogIndex(undefined);
+    expect(index).toEqual({ articles : {}, tags : {} });
+  });
+
+  it('resolves null data', () => {
+    const index = resolveWeblogIndex(null);
+    expect(index).toEqual({ articles : {}, tags : {} });
+  });
+
+  it('resolves empty object', () => {
+    const index = resolveWeblogIndex({});
+    expect(index).toEqual({ articles : {}, tags : {} });
+  });
+
+  it('resolves tag articles', () => {
+    const data = {
+      articles : {
+        'article-1' : {
+          title : 'Article 1',
+          abstract : 'This is a test article',
+        },
+        'article-2' : {
+          title : 'Article 2',
+          abstract : 'This is another test article',
+        },
+      },
+      tags : {
+        'tag-1' : {
+          name : 'Tag 1',
+          articles : ['article-1', 'article-2'],
+        },
+        'tag-2' : {
+          name : 'Tag 2',
+          articles : ['article-1'],
+        },
+      },
+    };
+    const expected = {
+      articles : {
+        'article-1' : {
+          slug : 'article-1',
+          title : 'Article 1',
+          abstract : 'This is a test article',
+        },
+        'article-2' : {
+          slug : 'article-2',
+          title : 'Article 2',
+          abstract : 'This is another test article',
+        },
+      },
+      tags : {
+        'tag-1' : {
+          slug : 'tag-1',
+          name : 'Tag 1',
+          articles : [
+            {
+              slug : 'article-1',
+              title : 'Article 1',
+              abstract : 'This is a test article',
+            },
+            {
+              slug : 'article-2',
+              title : 'Article 2',
+              abstract : 'This is another test article',
+            },
+          ],
+        },
+        'tag-2' : {
+          slug : 'tag-2',
+          name : 'Tag 2',
+          articles : [
+            {
+              slug : 'article-1',
+              title : 'Article 1',
+              abstract : 'This is a test article',
+            },
+          ],
+        },
+      },
+    };
+    const actual = resolveWeblogIndex(data);
+    expect(actual).toEqual(expected);
+  });
+
+  it('ignores invalid tag articles', () => {
+    const data = {
+      articles : {
+        'article-1' : {
+          title : 'Article 1',
+          abstract : 'This is a test article',
+        },
+      },
+      tags : {
+        'tag-1' : {
+          name : 'Tag 1',
+          articles : ['article-1', 'article-2'],
+        },
+      },
+    };
+    const expected = {
+      articles : {
+        'article-1' : {
+          slug : 'article-1',
+          title : 'Article 1',
+          abstract : 'This is a test article',
+        },
+      },
+      tags : {
+        'tag-1' : {
+          slug : 'tag-1',
+          name : 'Tag 1',
+          articles : [
+            {
+              slug : 'article-1',
+              title : 'Article 1',
+              abstract : 'This is a test article',
+            },
+          ],
+        },
+      },
+    };
+    const actual = resolveWeblogIndex(data);
+    expect(actual).toEqual(expected);
+  });
+});
 
 describe('renderArticle', () => {
   it('renders plain text', () => {

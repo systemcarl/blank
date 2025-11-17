@@ -4,6 +4,68 @@ import markdown from 'markdown-it';
 import markdownFootnote from 'markdown-it-footnote';
 import { logError } from './log';
 
+interface Article {
+  slug : string;
+  title : string;
+  abstract : string;
+}
+
+interface Tag {
+  slug : string;
+  name : string;
+  articles : Article[];
+}
+
+export interface WeblogIndex {
+  articles : Record<string, Article>;
+  tags : Record<string, Tag>;
+}
+
+export function resolveWeblogIndex(data : unknown) : WeblogIndex {
+  const raw = (((typeof data === 'object') && (data !== null))
+    ? data
+    : {}) as Record<string, unknown>;
+  const articles : Record<string, Article> = {};
+  const tags : Record<string, Tag> = {};
+
+  const rawArticles =
+    ((typeof raw.articles === 'object') && (raw.articles !== null))
+      ? raw.articles
+      : {};
+  for (const [slug, value] of Object.entries(rawArticles)) {
+    const article = ((typeof value === 'object') && (value !== null))
+      ? value
+      : {};
+    articles[slug] = {
+      slug,
+      title : `${article.title || ''}`,
+      abstract : `${article.abstract || ''}`,
+    };
+  }
+
+  const rawTags = ((typeof raw.tags === 'object') && (raw.tags !== null))
+    ? raw.tags
+    : {};
+  for (const [slug, value] of Object.entries(rawTags)) {
+    const tag = ((typeof value === 'object') && (value !== null)) ? value : {};
+    const tagArticles : Article[] = [];
+    if (Array.isArray(tag.articles)) {
+      for (const a of tag.articles) {
+        const articleSlug = `${a}`;
+        const article = articles[articleSlug];
+        if (article) tagArticles.push(article);
+      }
+    }
+    tags[slug] = {
+      slug,
+      name : String(tag.name || ''),
+      articles : tagArticles,
+    };
+  }
+
+  return { articles, tags };
+}
+
 highlight.configure({ classPrefix : 'text typography-code-' });
 
 type Tokens = Parameters<Renderer['renderToken']>[0];
