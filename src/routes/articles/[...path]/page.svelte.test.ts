@@ -6,8 +6,8 @@ import { wrapOriginal } from '$lib/tests/component';
 import { defaultConfig } from '$lib/utils/config';
 import { defaultLocale } from '$lib/utils/locale';
 import Content from '$lib/materials/content.svelte';
-import Article from '$lib/materials/article.svelte';
 import Nav from '$lib/components/nav.svelte';
+import Post from '$lib/components/post.svelte';
 import Footer from '$lib/components/footer.svelte';
 
 import ArticlePage from './+page.svelte';
@@ -20,11 +20,11 @@ vi.mock('$lib/materials/content.svelte', async (original) => {
     }),
   };
 });
-vi.mock('$lib/materials/article.svelte', async (original) => {
-  return { default : await wrapOriginal(original, { testId : 'article' }) };
-});
 vi.mock('$lib/components/nav.svelte', async (original) => {
   return { default : await wrapOriginal(original, { testId : 'nav' }) };
+});
+vi.mock('$lib/components/post.svelte', async (original) => {
+  return { default : await wrapOriginal(original, { testId : 'post' }) };
 });
 vi.mock('$lib/components/footer.svelte', async (original) => {
   return { default : await wrapOriginal(original, { testId : 'footer' }) };
@@ -75,12 +75,12 @@ describe('+page.svelte', () => {
       .queryByTestId('content-article') as HTMLElement;
     expect(content).toBeInTheDocument();
     const nav = within(content).queryByTestId('nav') as HTMLElement;
-    const article = within(content).queryByTestId('article') as HTMLElement;
-    expect(article).toBeInTheDocument();
-    expect(article.compareDocumentPosition(nav))
+    const post = within(content).queryByTestId('post') as HTMLElement;
+    expect(post).toBeInTheDocument();
+    expect(post.compareDocumentPosition(nav))
       .toBe(Node.DOCUMENT_POSITION_PRECEDING);
-    expect(Article).toHaveBeenCalledOnce();
-    expect(Article).toHaveBeenCalledWithProps(expect.objectContaining({
+    expect(Post).toHaveBeenCalledOnce();
+    expect(Post).toHaveBeenCalledWithProps(expect.objectContaining({
       content : data.markdown,
     }));
   });

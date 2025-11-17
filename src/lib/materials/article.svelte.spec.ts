@@ -1,43 +1,26 @@
-import {
-  beforeAll,
-  beforeEach,
-  afterAll,
-  describe,
-  it,
-  expect,
-  vi,
-} from 'vitest';
+import { beforeAll, describe, it, expect } from 'vitest';
 import { page } from '@vitest/browser/context';
 import { render } from '@testing-library/svelte';
 
 import { loadStyles } from '$lib/tests/browser';
 import Article from './article.svelte';
 
-const renderMock = vi.fn();
-
-vi.mock('$lib/utils/weblog', () => ({
-  renderArticle : () => renderMock(),
-}));
-
 beforeAll(async () => await loadStyles());
-beforeEach(() => {
-  vi.clearAllMocks();
-  renderMock
-    .mockReturnValue('<p data-testid="article-content">Test Article</p>');
-});
-
-afterAll(() => { vi.restoreAllMocks(); });
 
 describe('Article', () => {
-  it('renders article content', async () => {
-    const { container } = render(Article);
+  it('renders content', async () => {
+    const { container } = render(Article, {
+      content : '<p data-testid="article-content">Test Article</p>',
+    });
     const content = page.elementLocator(container)
       .getByTestId('article-content');
     await expect.element(content).toBeInTheDocument();
   });
 
   it('renders content scrim', async () => {
-    const { container } = render(Article);
+    const { container } = render(Article, {
+      content : '<p data-testid="article-content">Test Article</p>',
+    });
 
     container.style.setProperty('padding', '32px');
     container.style.setProperty('background-color', '#000');
@@ -62,14 +45,14 @@ describe('Article', () => {
   });
 
   it('renders alerts', async () => {
-    renderMock
-      .mockReturnValue('<p>This is a normal paragraph.</p>'
+    const { container } = render(Article, {
+      content : '<p>This is a normal paragraph.</p>'
         + '<blockquote data-testid="blockquote" '
         + 'class="text typography-note typography-alert-warning">'
         + '<p class="text alert typography-alert">WARNING!</p>'
         + '<p class="text typography-note">This is a warning alert.</p>'
-        + '</blockquote>');
-    const { container } = render(Article);
+        + '</blockquote>',
+    });
 
     container.style.setProperty('--font-size', '16px');
     container.style.setProperty('--padding-inset', '24px');
@@ -118,10 +101,10 @@ describe('Article', () => {
   });
 
   it('renders inline code', async () => {
-    renderMock
-      .mockReturnValue('<p>This is '
-        + '<code class="text code">inline_code</code>.</p>');
-    const { container } = render(Article);
+    const { container } = render(Article, {
+      content : '<p>This is '
+        + '<code class="text code">inline_code</code>.</p>',
+    });
 
     container.style.setProperty('--border-radius', '2px');
 
@@ -139,10 +122,10 @@ describe('Article', () => {
   });
 
   it('renders code blocks', async () => {
-    renderMock
-      .mockReturnValue('<pre><code class="text code-block">'
-        + '<span class="text">const</span> x = 10;</code></pre>');
-    const { container } = render(Article);
+    const { container } = render(Article, {
+      content : '<pre><code class="text code-block">'
+        + '<span class="text">const</span> x = 10;</code></pre>',
+    });
 
     container.style.setProperty('--padding-inset', '24px');
     container.style.setProperty('--border-radius', '8px');
@@ -173,7 +156,9 @@ describe('Article', () => {
 
   it('limits max width to desktop size', async () => {
     await page.viewport(1040, 800);
-    const { container } = render(Article);
+    const { container } = render(Article, {
+      content : '<p data-testid="article-content">Test Article</p>',
+    });
 
     container.style.setProperty('width', '100%');
     container.style.setProperty('padding', '16px');
