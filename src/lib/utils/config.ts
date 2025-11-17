@@ -1,7 +1,14 @@
+export interface Highlight {
+  type : 'tag';
+  key : string;
+  section ?: string;
+}
+
 export interface Config {
   likes : { icon : string; text : string; }[] | null;
   dislikes : { icon : string; text : string; }[] | null;
   profileLinks : { text : string; href : string; }[] | null;
+  highlights : Highlight[] | null;
   contact : {
     icon : string;
     text ?: string;
@@ -16,6 +23,7 @@ export interface Config {
 export const defaultConfig : Config = {
   likes : null,
   dislikes : null,
+  highlights : null,
   contact : null,
   profileLinks : null,
   weblog : {},

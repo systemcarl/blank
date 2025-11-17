@@ -1,4 +1,13 @@
-import { fetchResource } from './http';
+import { fetchResource, fetchJsonResource } from './http';
+
+export async function loadIndex(
+  basePath : string,
+  { fetch } : { fetch : typeof window.fetch; },
+) {
+  basePath = basePath.endsWith('/') ? basePath : basePath + '/';
+  const url = `${basePath}index.json`;
+  return await fetchJsonResource(url, { fetch });
+}
 
 export async function loadAbstract(
   basePath : string,

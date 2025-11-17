@@ -1,8 +1,8 @@
 <script>
   import Content from '$lib/materials/content.svelte';
-  import Article from '$lib/materials/article.svelte';
   import Nav from '$lib/components/nav.svelte';
   import Footer from '$lib/components/footer.svelte';
+  import Piece from '$lib/components/piece.svelte';
 
   const { data } = $props();
   const description = (data?.abstract ?? '')
@@ -13,7 +13,7 @@
 
 <Content section="article" hasTopNav>
   <Nav home contact />
-  <Article content={data.markdown} />
+  <Piece content={data.markdown} />
 </Content>
 <Content section="footer">
   <Footer />
