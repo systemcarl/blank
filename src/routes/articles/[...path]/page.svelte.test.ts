@@ -3,6 +3,8 @@ import { render, within } from '@testing-library/svelte';
 
 import { tryGet } from '$lib/utils/typing';
 import { wrapOriginal } from '$lib/tests/component';
+import { defaultConfig } from '$lib/utils/config';
+import { defaultLocale } from '$lib/utils/locale';
 import Content from '$lib/materials/content.svelte';
 import Article from '$lib/materials/article.svelte';
 import Nav from '$lib/components/nav.svelte';
@@ -29,10 +31,11 @@ vi.mock('$lib/components/footer.svelte', async (original) => {
 });
 
 const data = {
-  config : {},
-  locale : {},
+  config : defaultConfig,
+  locale : defaultLocale,
   themes : {},
   graphics : {},
+  articleIndex : { articles : {}, tags : {} },
   title : 'Test Title',
   abstract : 'Test Abstract',
   markdown : 'Test Content',

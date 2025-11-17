@@ -13,7 +13,7 @@ afterAll(() => { resetLocale(); });
 describe('useLocale', () => {
   it('stores locale', () => {
     const { getLocale } = useLocale();
-    const expected = { title : 'test' };
+    const expected = { title : 'test' } as typeof defaultLocale;
 
     render(Test, { props : { setLocale : () => expected } });
 
@@ -23,7 +23,7 @@ describe('useLocale', () => {
 
   it('retrieves stored locale', () => {
     const { setLocale } = useLocale();
-    const expected = { title : 'test' };
+    const expected = { title : 'test' } as typeof defaultLocale;
     setLocale(expected);
 
     let actual : typeof defaultLocale | undefined;

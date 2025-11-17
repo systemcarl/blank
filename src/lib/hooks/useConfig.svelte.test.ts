@@ -13,7 +13,9 @@ afterAll(() => { resetConfig(); });
 describe('useConfig', () => {
   it('stores config', () => {
     const { getConfig } = useConfig();
-    const expected = { likes : [{ icon : 'icon', text : 'test' }] };
+    const expected = {
+      likes : [{ icon : 'icon', text : 'test' }],
+    } as typeof defaultConfig;
 
     render(Test, { props : { setConfig : () => expected } });
 
@@ -23,7 +25,9 @@ describe('useConfig', () => {
 
   it('retrieves stored config', () => {
     const { setConfig } = useConfig();
-    const expected = { likes : [{ icon : 'icon', text : 'test' }] };
+    const expected = {
+      likes : [{ icon : 'icon', text : 'test' }],
+    } as typeof defaultConfig;
     setConfig(expected);
 
     let actual : typeof defaultConfig | undefined;

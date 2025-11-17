@@ -3,6 +3,8 @@ import type { Snippet } from 'svelte';
 import { render, within } from '@testing-library/svelte';
 
 import { makeComponent, wrapOriginal } from '$lib/tests/component';
+import { defaultConfig } from '$lib/utils/config';
+import { defaultLocale } from '$lib/utils/locale';
 import Page from '$lib/materials/page.svelte';
 
 import Layout from './+layout.svelte';
@@ -64,8 +66,8 @@ vi.mock('$lib/materials/page.svelte', async original => ({
 }));
 
 const data = {
-  config : {},
-  locale : {},
+  config : defaultConfig,
+  locale : defaultLocale,
   themes : {},
   graphics : { graphic : '<svg></svg>' },
 };
@@ -81,7 +83,9 @@ describe('/+layout.svelte', () => {
   });
 
   it('stores loaded config', () => {
-    const expected = { likes : [{ icon : 'icon', text : 'test' }] };
+    const expected = {
+      likes : [{ icon : 'icon', text : 'test' }],
+    } as typeof defaultConfig;
     render(Layout, {
       data : { ...data, config : expected },
       children : ((() => {}) as Snippet<[]>),
@@ -90,7 +94,7 @@ describe('/+layout.svelte', () => {
   });
 
   it('stores loaded locale', () => {
-    const expected = { test : {} };
+    const expected = { title : '' } as typeof defaultLocale;
     render(Layout, {
       data : { ...data, locale : expected },
       children : ((() => {}) as Snippet<[]>),

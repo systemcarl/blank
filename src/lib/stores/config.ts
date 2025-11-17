@@ -1,17 +1,16 @@
 import { get, writable } from 'svelte/store';
+import { defaultConfig } from '$lib/utils/config';
 
-import { buildConfig } from '$lib/utils/config';
-
-let config = writable<unknown>();
+let config = writable(defaultConfig);
 
 export function resetConfig() {
-  config = writable<unknown>();
+  config = writable(defaultConfig);
 }
 
-export function setConfig(newConfig : unknown) {
-  config.set(buildConfig(newConfig));
+export function setConfig(newConfig : typeof defaultConfig) {
+  config.set(newConfig);
 }
 
 export function getConfig() {
-  return buildConfig(get(config));
+  return get(config);
 }

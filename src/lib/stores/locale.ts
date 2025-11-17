@@ -1,17 +1,17 @@
 import { get, writable } from 'svelte/store';
 
-import { buildLocale } from '$lib/utils/locale';
+import { defaultLocale } from '$lib/utils/locale';
 
-let locale = writable<unknown>();
+let locale = writable(defaultLocale);
 
 export function resetLocale() {
-  locale = writable<unknown>();
+  locale = writable(defaultLocale);
 }
 
-export function setLocale(newLocale : unknown) {
-  locale.set(buildLocale(newLocale));
+export function setLocale(newLocale : typeof defaultLocale) {
+  locale.set(newLocale);
 }
 
 export function getLocale() {
-  return buildLocale(get(locale));
+  return get(locale);
 }
