@@ -94,6 +94,51 @@ describe('config dislikes', () => {
   });
 });
 
+describe('config highlights', () => {
+  it('returns config with valid highlights', () => {
+    const config = buildConfig({
+      ...testConfig,
+      highlights : [
+        { type : 'tag', key : 'tag1', section : 'Section 1' },
+        { type : 'tag', key : 'tag2' },
+      ],
+    });
+    expect(config).toEqual(expect.objectContaining({
+      highlights : [
+        { type : 'tag', key : 'tag1', section : 'Section 1' },
+        { type : 'tag', key : 'tag2' },
+      ],
+    }));
+  });
+
+  it('filters out invalid highlights', () => {
+    const config = buildConfig({
+      ...testConfig,
+      highlights : [
+        { type : 'tag', key : 'tag1', section : 'Section 1' },
+        { type : 'category', key : 'cat1' },
+        { type : 'tag', key : 123 },
+        { type : 'tag', key : 'tag2', section : 456 },
+      ],
+    });
+    expect(config).toEqual(expect.objectContaining({
+      highlights : [
+        { type : 'tag', key : 'tag1', section : 'Section 1' },
+      ],
+    }));
+  });
+
+  it('drops invalid highlights property', () => {
+    const config = buildConfig({
+      ...testConfig,
+      highlights : 'invalid',
+    });
+    expect(config).toEqual(expect.objectContaining({
+      highlights : null,
+    }));
+  });
+});
+
 describe('config contact', () => {
   it('returns config with valid contact', () => {
     const config = buildConfig({

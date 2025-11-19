@@ -3,17 +3,31 @@ import { render, within } from '@testing-library/svelte';
 
 import { tryGet } from '$lib/utils/typing';
 import { wrapOriginal } from '$lib/tests/component';
+import type { Config } from '$lib/utils/config';
 import { defaultLocale } from '$lib/utils/locale';
 import Content from '$lib/materials/content.svelte';
 import Nav from '$lib/components/nav.svelte';
 import Profile from '$lib/components/profile.svelte';
+import Highlight from '$lib/components/highlight.svelte';
 import Contact from '$lib/components/contact.svelte';
 
 import HomePage from './+page.svelte';
 
+let config = vi.hoisted(() => ({} as Config));
+const getConfigMock = vi.hoisted(() => vi.fn(() => config));
 let locale = vi.hoisted(() => ({} as typeof defaultLocale));
 const getLocaleMock = vi.hoisted(() => vi.fn(() => locale));
 
+vi.mock('$lib/hooks/useConfig', async (original) => {
+  const originalDefault =
+    ((await original()) as { default : () => object; }).default;
+  return {
+    default : () => ({
+      ...originalDefault(),
+      getConfig : getConfigMock,
+    }),
+  };
+});
 vi.mock('$lib/hooks/useLocale', async (original) => {
   const originalDefault =
     ((await original()) as { default : () => object; }).default;
@@ -38,6 +52,9 @@ vi.mock('$lib/components/nav.svelte', async (original) => {
 });
 vi.mock('$lib/components/profile.svelte', async (original) => {
   return { default : await wrapOriginal(original, { testId : 'profile' }) };
+});
+vi.mock('$lib/components/highlight.svelte', async (original) => {
+  return { default : await wrapOriginal(original, { testId : 'highlight' }) };
 });
 vi.mock('$lib/components/contact.svelte', async (original) => {
   return { default : await wrapOriginal(original, { testId : 'contact' }) };
@@ -105,6 +122,41 @@ describe('+page.svelte', () => {
     expect(Nav).toHaveBeenCalledOnce();
     expect(Nav).toHaveBeenCalledWithProps(expect.objectContaining({
       contact : true,
+    }));
+  });
+
+  it('does not render highlight without configuration', () => {
+    const { container } = render(HomePage);
+
+    const highlight = within(container)
+      .queryByTestId('highlight') as HTMLElement;
+    expect(highlight).not.toBeInTheDocument();
+
+    expect(Highlight).not.toHaveBeenCalled();
+  });
+
+  it('renders configured highlights', () => {
+    config = {
+      highlights : [
+        {
+          type : 'tag',
+          key : 'example',
+          section : 'exampleSection',
+        },
+      ],
+    } as Config;
+    const { container } = render(HomePage);
+
+    const content = within(container)
+      .queryByTestId('content-exampleSection') as HTMLElement;
+    expect(content).toBeInTheDocument();
+    const highlight = within(content)
+      .queryByTestId('highlight') as HTMLElement;
+    expect(highlight).toBeInTheDocument();
+
+    expect(Highlight).toHaveBeenCalledOnce();
+    expect(Highlight).toHaveBeenCalledWithProps(expect.objectContaining({
+      highlight : config.highlights?.[0],
     }));
   });
 
