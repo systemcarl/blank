@@ -1,22 +1,39 @@
 import { beforeEach, afterAll, describe, expect, it, vi } from 'vitest';
 
 import { log } from './logs';
-import { fetchResource, fetchJsonResource } from './http';
 
+let ttl = vi.hoisted(() => 42000);
 let baseUrl : string | undefined = vi.hoisted(() => '/');
 
+const getCacheMock =
+  vi.hoisted(() => vi.fn(async (key : string, load : () => unknown) => load()));
+
 vi.mock('$env/dynamic/private', () => ({
-  get env() { return { BASE_URL : baseUrl }; },
+  get env() {
+    return {
+      RESOURCE_CACHE_TTL : `${ttl}`,
+      BASE_URL : baseUrl,
+    };
+  },
 }));
 vi.mock('./logs', () => ({
   log : vi.fn(),
+}));
+vi.mock('./cache', async () => ({
+  Cache : vi.fn(() => ({ get : getCacheMock })),
 }));
 
 const fetchMock = vi.fn();
 
 beforeEach(() => {
+  vi.resetModules();
   vi.clearAllMocks();
+
   baseUrl = '/';
+  ttl = 42000;
+
+  getCacheMock
+    .mockImplementation(async (key : string, load : () => unknown) => load());
   fetchMock.mockReturnValue(Promise.resolve({
     ok : true,
     text : () => Promise.resolve('fetched text'),
@@ -38,43 +55,66 @@ describe('fetchResource', () => {
     ['base url with double slashes', '/base/', '/resource', '/base/resource'],
     ['relative url', './base', './resource', '/base/resource'],
   ])('fetches from local folder with %s', async (_, base, res, expected) => {
+    const { fetchResource } = await import('./http');
     baseUrl = base;
+
     await fetchResource(res, { fetch : fetchMock });
     expect(fetchMock).toHaveBeenCalledWith(expected);
   });
 
   it('fetches from relative URL', async () => {
+    const { fetchResource } = await import('./http');
     baseUrl = 'http://example.com/';
+
     await fetchResource('/resource', { fetch : fetchMock });
     expect(fetchMock).toHaveBeenCalledWith(new URL('/resource', baseUrl));
   });
 
   it('fetches from absolute URL', async () => {
+    const { fetchResource } = await import('./http');
     baseUrl = 'http://example.com/';
+
     await fetchResource('http://example.org/resource', { fetch : fetchMock });
     expect(fetchMock)
       .toHaveBeenCalledWith(new URL('http://example.org/resource'));
   });
 
+  it('logs outgoing request', async () => {
+    const { fetchResource } = await import('./http');
+
+    await fetchResource('/resource', { fetch : fetchMock });
+    expect(log).toHaveBeenCalledWith({
+      message : 'Requesting resource',
+      url : '/resource',
+      type : 'http',
+    }, { level : 'info' });
+  });
+
   it('returns response text', async () => {
+    const { fetchResource } = await import('./http');
     fetchMock.mockResolvedValue({
       ok : true,
       text : () => Promise.resolve('fetched text'),
     });
+
     const result = await fetchResource('/resource', { fetch : fetchMock });
     expect(result).toEqual('fetched text');
   });
 
   it('returns null on fetch error', async () => {
+    const { fetchResource } = await import('./http');
     fetchMock.mockRejectedValue(new Error('Network error'));
+
     const result = await fetchResource('/resource', { fetch : fetchMock });
     expect(fetchMock).toHaveBeenCalledWith('/resource');
     expect(result).toBeNull();
   });
 
   it('logs a warning on fetch error', async () => {
+    const { fetchResource } = await import('./http');
     const error = new Error('Network error');
     fetchMock.mockRejectedValue(error);
+
     await fetchResource('/resource', { fetch : fetchMock });
     expect(log).toHaveBeenCalledWith({
       message : 'Error fetching resource',
@@ -84,14 +124,18 @@ describe('fetchResource', () => {
   });
 
   it('returns null when fetch not ok', async () => {
+    const { fetchResource } = await import('./http');
     fetchMock.mockRejectedValue(new Error('Network error'));
+
     const result = await fetchResource('/resource', { fetch : fetchMock });
     expect(fetchMock).toHaveBeenCalledWith('/resource');
     expect(result).toBeNull();
   });
 
   it('logs a warning when fetch not ok', async () => {
+    const { fetchResource } = await import('./http');
     fetchMock.mockResolvedValue({ ok : false, status : 404 });
+
     const result = await fetchResource('/resource', { fetch : fetchMock });
     expect(fetchMock).toHaveBeenCalledWith('/resource');
     expect(result).toBeNull();
@@ -103,22 +147,26 @@ describe('fetchResource', () => {
   });
 
   it('returns null when text parsing fails', async () => {
+    const { fetchResource } = await import('./http');
     fetchMock.mockResolvedValue({
       ok : true,
       text : async () => { throw new Error('Text parsing error'); },
     });
+
     const result = await fetchResource('/resource', { fetch : fetchMock });
     expect(fetchMock).toHaveBeenCalledWith('/resource');
     expect(result).toBeNull();
   });
 
   it('logs a warning when text parsing fails', async () => {
+    const { fetchResource } = await import('./http');
     const error = new Error('Text parsing error');
     fetchMock.mockResolvedValue({
       ok : true,
       status : 200,
       text : async () => { throw error; },
     });
+
     const result = await fetchResource('/resource', { fetch : fetchMock });
     expect(fetchMock).toHaveBeenCalledWith('/resource');
     expect(result).toBeNull();
@@ -128,6 +176,20 @@ describe('fetchResource', () => {
       response : { status : 200 },
       error,
     }, { level : 'warn' });
+  });
+
+  it('returns cached response', async () => {
+    const { fetchResource } = await import('./http');
+    getCacheMock.mockImplementation(async () => 'cached response');
+
+    const result = await fetchResource('/resource', { fetch : fetchMock });
+    expect(result).toBe('cached response');
+    expect(getCacheMock).toHaveBeenCalledWith(
+      '/resource',
+      expect.any(Function),
+    );
+    expect(fetchMock).not.toHaveBeenCalled();
+    expect(log).not.toHaveBeenCalled();
   });
 });
 
@@ -143,19 +205,25 @@ describe('fetchJsonResource', () => {
     ['with base url with double slashes', '/base/', '/res', '/base/res'],
     ['with relative url', './base', './res', '/base/res'],
   ])('fetches from local folder %s', async (_, base, resource, expected) => {
+    const { fetchJsonResource } = await import('./http');
     baseUrl = base;
+
     await fetchJsonResource(resource, { fetch : fetchMock });
     expect(fetchMock).toHaveBeenCalledWith(expected);
   });
 
   it('fetches from relative URL', async () => {
+    const { fetchJsonResource } = await import('./http');
     baseUrl = 'http://example.com/';
+
     await fetchJsonResource('/resource', { fetch : fetchMock });
     expect(fetchMock).toHaveBeenCalledWith(new URL('/resource', baseUrl));
   });
 
   it('fetches from absolute URL', async () => {
+    const { fetchJsonResource } = await import('./http');
     baseUrl = 'http://example.com/';
+
     await fetchJsonResource(
       'http://example.org/resource',
       { fetch : fetchMock },
@@ -164,25 +232,42 @@ describe('fetchJsonResource', () => {
       .toHaveBeenCalledWith(new URL('http://example.org/resource'));
   });
 
+  it('logs outgoing request', async () => {
+    const { fetchJsonResource } = await import('./http');
+
+    await fetchJsonResource('/resource', { fetch : fetchMock });
+    expect(log).toHaveBeenCalledWith({
+      message : 'Requesting resource',
+      url : '/resource',
+      type : 'http',
+    }, { level : 'info' });
+  });
+
   it('returns JSON response', async () => {
+    const { fetchJsonResource } = await import('./http');
     fetchMock.mockResolvedValue({
       ok : true,
       json : () => Promise.resolve({ fetched : 'json' }),
     });
+
     const result = await fetchJsonResource('/resource', { fetch : fetchMock });
     expect(result).toEqual({ fetched : 'json' });
   });
 
   it('returns null on fetch error', async () => {
-    fetchMock.mockRejectedValue(new Error('Network error'));
+    const { fetchJsonResource } = await import('./http');
+    fetchMock.mockRejectedValue(new Error('Network error'))
+    ;
     const result = await fetchJsonResource('/resource', { fetch : fetchMock });
     expect(fetchMock).toHaveBeenCalledWith('/resource');
     expect(result).toBeNull();
   });
 
   it('logs a warning on fetch error', async () => {
+    const { fetchJsonResource } = await import('./http');
     const error = new Error('Network error');
     fetchMock.mockRejectedValue(error);
+
     await fetchJsonResource('/resource', { fetch : fetchMock });
     expect(log).toHaveBeenCalledWith({
       message : 'Error fetching resource',
@@ -192,14 +277,18 @@ describe('fetchJsonResource', () => {
   });
 
   it('returns null when fetch not ok', async () => {
+    const { fetchJsonResource } = await import('./http');
     fetchMock.mockResolvedValue({ ok : false, status : 404 });
+
     const result = await fetchJsonResource('/resource', { fetch : fetchMock });
     expect(fetchMock).toHaveBeenCalledWith('/resource');
     expect(result).toBeNull();
   });
 
   it('logs a warning when fetch not ok', async () => {
+    const { fetchJsonResource } = await import('./http');
     fetchMock.mockResolvedValue({ ok : false, status : 404 });
+
     const result = await fetchJsonResource('/resource', { fetch : fetchMock });
     expect(fetchMock).toHaveBeenCalledWith('/resource');
     expect(result).toBeNull();
@@ -211,22 +300,26 @@ describe('fetchJsonResource', () => {
   });
 
   it('returns null when JSON parsing fails', async () => {
+    const { fetchJsonResource } = await import('./http');
     fetchMock.mockResolvedValue({
       ok : true,
       json : async () => { throw new Error('Error reading JSON'); },
     });
+
     const result = await fetchJsonResource('/resource', { fetch : fetchMock });
     expect(fetchMock).toHaveBeenCalledWith('/resource');
     expect(result).toBeNull();
   });
 
   it('logs a warning when JSON parsing fails', async () => {
+    const { fetchJsonResource } = await import('./http');
     const error = new Error('Error reading JSON');
     fetchMock.mockResolvedValue({
       ok : true,
       status : 200,
       json : async () => { throw error; },
     });
+
     const result = await fetchJsonResource('/resource', { fetch : fetchMock });
     expect(fetchMock).toHaveBeenCalledWith('/resource');
     expect(result).toBeNull();
@@ -236,5 +329,19 @@ describe('fetchJsonResource', () => {
       response : { status : 200 },
       error,
     }, { level : 'warn' });
+  });
+
+  it('returns cached JSON response', async () => {
+    const { fetchJsonResource } = await import('./http');
+    getCacheMock.mockImplementation(async () => ({ cached : 'json' }));
+
+    const result = await fetchJsonResource('/resource', { fetch : fetchMock });
+    expect(result).toEqual({ cached : 'json' });
+    expect(getCacheMock).toHaveBeenCalledWith(
+      '/resource',
+      expect.any(Function),
+    );
+    expect(fetchMock).not.toHaveBeenCalled();
+    expect(log).not.toHaveBeenCalled();
   });
 });
