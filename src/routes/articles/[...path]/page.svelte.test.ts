@@ -65,6 +65,7 @@ describe('+page.svelte', () => {
     expect(Nav).toHaveBeenCalledOnce();
     expect(Nav).toHaveBeenCalledWithProps(expect.objectContaining({
       home : true,
+      highlights : true,
       contact : true,
     }));
   });

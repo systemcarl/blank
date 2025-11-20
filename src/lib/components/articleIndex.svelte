@@ -5,7 +5,7 @@
   import Heading from '$lib/materials/heading.svelte';
   import Abstract from '$lib/components/abstract.svelte';
 
-  const { tag } : { tag ?: string; } = $props();
+  const { id, tag } : { id ?: string; tag ?: string; } = $props();
 
   const { getIndex } = useArticles();
   const index = getIndex();
@@ -16,7 +16,7 @@
     : Object.values(index.articles);
 </script>
 
-<Heading level={2}>{ title }</Heading>
+<Heading id={id} level={2}>{ title }</Heading>
 <Grid>
   {#each articles as article (article.slug)}
     <Card>

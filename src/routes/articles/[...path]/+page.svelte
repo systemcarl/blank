@@ -12,7 +12,7 @@
 </script>
 
 <Content section="article" hasTopNav>
-  <Nav home contact />
+  <Nav home highlights contact />
   <Post content={data.markdown} />
 </Content>
 <Content section="footer">

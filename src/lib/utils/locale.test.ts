@@ -40,6 +40,20 @@ describe('buildLocale', () => {
     expect(result.errors.default).toBe(defaultLocale.errors.default);
   });
 
+  it('resolves local map', () => {
+    const expectedHighlights = { highlight1 : 'Highlight One' };
+    const locale = { nav : { highlights : expectedHighlights } };
+    const result = buildLocale(locale);
+    expect(result.nav.highlights.highlight1)
+      .toBe(expectedHighlights.highlight1);
+  });
+
+  it('resolves locale map to default if not provided', () => {
+    const locale = { nav : {} };
+    const result = buildLocale(locale);
+    expect(result.nav.highlights.highlight1).toBeUndefined();
+  });
+
   it('ignores unexpected string values', () => {
     const locale = { errors : 'I\'m a teapot' };
     const result = buildLocale(locale);

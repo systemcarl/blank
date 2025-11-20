@@ -20,10 +20,10 @@
   alignment="centre"
   justification="centre"
 >
-  <Nav contact/>
+  <Nav highlights contact/>
   <Profile />
 </Content>
-{#each highlights as highlight (`${highlight.type}-${highlight.key}`)}
+{#each highlights as highlight (highlight.id)}
   <Content section={highlight.section ?? 'default'}>
     <Highlight {highlight} />
   </Content>

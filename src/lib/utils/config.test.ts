@@ -99,14 +99,14 @@ describe('config highlights', () => {
     const config = buildConfig({
       ...testConfig,
       highlights : [
-        { type : 'tag', key : 'tag1', section : 'Section 1' },
-        { type : 'tag', key : 'tag2' },
+        { id : 'tag1', type : 'tag', key : 'tag1', section : 'Section 1' },
+        { id : 'tag2', type : 'tag', key : 'tag2' },
       ],
     });
     expect(config).toEqual(expect.objectContaining({
       highlights : [
-        { type : 'tag', key : 'tag1', section : 'Section 1' },
-        { type : 'tag', key : 'tag2' },
+        { id : 'tag1', type : 'tag', key : 'tag1', section : 'Section 1' },
+        { id : 'tag2', type : 'tag', key : 'tag2' },
       ],
     }));
   });
@@ -115,15 +115,35 @@ describe('config highlights', () => {
     const config = buildConfig({
       ...testConfig,
       highlights : [
+        { id : 'tag1', type : 'tag', key : 'tag1', section : 'Section 1' },
         { type : 'tag', key : 'tag1', section : 'Section 1' },
-        { type : 'category', key : 'cat1' },
-        { type : 'tag', key : 123 },
-        { type : 'tag', key : 'tag2', section : 456 },
+        { id : 'cat1', type : 'category', key : 'cat1' },
+        { id : 'tag2', type : 'tag' },
+        { id : 'tag3', type : 'tag', key : 123 },
+        { id : 'tag4', type : 'tag', key : 'tag2', section : 456 },
       ],
     });
     expect(config).toEqual(expect.objectContaining({
       highlights : [
-        { type : 'tag', key : 'tag1', section : 'Section 1' },
+        { id : 'tag1', type : 'tag', key : 'tag1', section : 'Section 1' },
+      ],
+    }));
+  });
+
+  it('filters out duplicate highlight IDs', () => {
+    const config = buildConfig({
+      ...testConfig,
+      highlights : [
+        { id : 'tag1', type : 'tag', key : 'tag1' },
+        { id : 'tag1', type : 'tag', key : 'tag1-duplicate' },
+        { id : 'tag2', type : 'tag', key : 'tag2' },
+        { id : 'tag2', type : 'tag', key : 'tag2-duplicate' },
+      ],
+    });
+    expect(config).toEqual(expect.objectContaining({
+      highlights : [
+        { id : 'tag1', type : 'tag', key : 'tag1' },
+        { id : 'tag2', type : 'tag', key : 'tag2' },
       ],
     }));
   });

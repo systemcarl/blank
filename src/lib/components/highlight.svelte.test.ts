@@ -15,6 +15,7 @@ afterAll(() => { vi.restoreAllMocks(); });
 describe('Highlight', () => {
   it('renders article index with highlight tag', async () => {
     const highlight = {
+      id : 'test-highlight',
       type : 'tag',
       key : 'test',
       section : 'highlightTest',
@@ -27,7 +28,10 @@ describe('Highlight', () => {
 
     expect(ArticleIndex).toHaveBeenCalledTimes(1);
     expect(ArticleIndex).toHaveBeenCalledWithProps(
-      expect.objectContaining({ tag : 'test' }),
+      expect.objectContaining({
+        id : 'test-highlight',
+        tag : 'test',
+      }),
     );
   });
 });

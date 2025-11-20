@@ -8,5 +8,5 @@
 </script>
 
 {#if highlight.type === 'tag'}
-  <ArticleIndex tag={highlight.key} />
+  <ArticleIndex id={highlight.id} tag={highlight.key} />
 {/if}

@@ -70,6 +70,18 @@ describe('ArticleIndex', () => {
     );
   });
 
+  it('renders index heading with id', async () => {
+    const { container } = render(ArticleIndex, { id : 'test' });
+
+    const heading = within(container).queryByTestId('heading') as HTMLElement;
+    expect(heading).toBeInTheDocument();
+
+    expect(Heading).toHaveBeenCalledTimes(1);
+    expect(Heading).toHaveBeenCalledWithProps(
+      expect.objectContaining({ id : 'test' }),
+    );
+  });
+
   it('renders articles as abstracts', async () => {
     index = {
       articles : {},
