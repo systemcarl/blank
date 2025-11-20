@@ -15,6 +15,7 @@ export const defaultLocale = {
   },
   nav : {
     home : 'Home',
+    highlights : {} as Record<string, string>,
     contact : 'Contact',
   },
   alt : {
@@ -44,6 +45,16 @@ function proxy<T extends Record<string, unknown>>(
       if (typeof prop !== 'string') return undefined;
       if (typeof defaults[prop] === 'string') {
         if (typeof locale[prop] === 'string') return locale[prop];
+        return defaults[prop];
+      }
+
+      if (
+        ((typeof defaults[prop] === 'object') && (defaults[prop] !== null)
+          && Object.keys(defaults[prop]).length === 0)
+      ) {
+        if ((typeof locale[prop] === 'object') && (locale[prop] !== null)) {
+          return locale[prop];
+        }
         return defaults[prop];
       }
 

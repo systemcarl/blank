@@ -4,7 +4,7 @@
 
   interface Props {
     src ?: string;
-    setLocale ?: () => unknown;
+    setLocale ?: () => typeof defaultLocale;
     getLocale ?: (locale : typeof defaultLocale) => void;
   }
 

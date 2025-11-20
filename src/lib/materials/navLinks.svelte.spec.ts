@@ -84,6 +84,7 @@ describe('NavLinks', () => {
   it('justifies links to left', async () => {
     const expectedGap = 32;
     const expectedMargin = expectedGap / 4;
+    await page.viewport(768, 1024);
 
     const links = [
       { text : 'Link 1', href : '#link1' },
@@ -120,6 +121,7 @@ describe('NavLinks', () => {
   it('justifies links to right', async () => {
     const expectedGap = 32;
     const expectedMargin = expectedGap / 4;
+    await page.viewport(768, 1024);
 
     const links = [
       { text : 'Link 1', href : '#link1' },
@@ -154,8 +156,9 @@ describe('NavLinks', () => {
   });
 
   it('justifies links to top', async () => {
-    const expectedGap = 32;
-    const expectedMargin = expectedGap / 4;
+    const expectedGap = 16;
+    const expectedMargin = expectedGap / 2;
+    await page.viewport(768, 1024);
 
     const links = [
       { text : 'Link 1', href : '#link1' },
@@ -172,7 +175,7 @@ describe('NavLinks', () => {
     expect(nav).toBeInTheDocument();
 
     container.style.setProperty('height', '200px');
-    container.style.setProperty('--padding-inset', `${expectedGap}px`);
+    container.style.setProperty('--padding-inset', `${expectedGap * 2}px`);
 
     const anchors = page.elementLocator(container).getByRole('link').elements();
     expect(anchors.length).toBe(links.length);
@@ -189,7 +192,78 @@ describe('NavLinks', () => {
     expect(firstBounds.left).toEqual(containerBounds.left);
     expect(firstBounds.top).toEqual(containerBounds.top + expectedMargin);
     expect(firstBounds.left).toEqual(secondBounds.left);
-    console.log({ firstBounds, secondBounds, expectedGap });
+    expect(firstBounds.bottom + 1).toEqual(secondBounds.top - expectedGap);
+  });
+
+  it('stacks left aligned links on mobile', async () => {
+    const expectedGap = 16;
+    const expectedMargin = expectedGap / 2;
+    await page.viewport(767, 1024);
+
+    const links = [
+      { text : 'Link 1', href : '#link1' },
+      { text : 'Link 2', href : '#link2' },
+    ];
+
+    const { container } = render(navLinks, { links, justify : 'start' });
+
+    container.style.setProperty('width', '400px');
+    container.style.setProperty('--padding-inset', `${expectedGap * 2}px`);
+
+    const nav = container.children[0] as HTMLElement;
+    expect(nav).toBeInTheDocument();
+
+    const anchors = page.elementLocator(container).getByRole('link').elements();
+    expect(anchors.length).toBe(links.length);
+
+    const first = anchors[0] as HTMLElement;
+    const second = anchors[1] as HTMLElement;
+
+    const containerBounds = container.getBoundingClientRect();
+    const navBounds = nav.getBoundingClientRect();
+    const firstBounds = first.getBoundingClientRect();
+    const secondBounds = second.getBoundingClientRect();
+
+    expect(navBounds.top).toEqual(containerBounds.top + expectedMargin);
+    expect(firstBounds.left).toEqual(containerBounds.left);
+    expect(firstBounds.top).toEqual(containerBounds.top + expectedMargin);
+    expect(firstBounds.left).toEqual(secondBounds.left);
+    expect(firstBounds.bottom + 1).toEqual(secondBounds.top - expectedGap);
+  });
+
+  it('stacks right aligned links on mobile', async () => {
+    const expectedGap = 16;
+    const expectedMargin = expectedGap / 2;
+    await page.viewport(767, 1024);
+
+    const links = [
+      { text : 'Link 1', href : '#link1' },
+      { text : 'Link 2', href : '#link2' },
+    ];
+
+    const { container } = render(navLinks, { links, justify : 'end' });
+
+    container.style.setProperty('width', '400px');
+    container.style.setProperty('--padding-inset', `${expectedGap * 2}px`);
+
+    const nav = container.children[0] as HTMLElement;
+    expect(nav).toBeInTheDocument();
+
+    const anchors = page.elementLocator(container).getByRole('link').elements();
+    expect(anchors.length).toBe(links.length);
+
+    const first = anchors[0] as HTMLElement;
+    const second = anchors[1] as HTMLElement;
+
+    const containerBounds = container.getBoundingClientRect();
+    const navBounds = nav.getBoundingClientRect();
+    const firstBounds = first.getBoundingClientRect();
+    const secondBounds = second.getBoundingClientRect();
+
+    expect(navBounds.top).toEqual(containerBounds.top + expectedMargin);
+    expect(firstBounds.right).toEqual(containerBounds.right);
+    expect(firstBounds.top).toEqual(containerBounds.top + expectedMargin);
+    expect(firstBounds.right).toEqual(secondBounds.right);
     expect(firstBounds.bottom + 1).toEqual(secondBounds.top - expectedGap);
   });
 });

@@ -11,12 +11,7 @@
     justification = 'top',
     children,
   } : {
-    section ?: 'default'
-      | 'profile'
-      | 'contact'
-      | 'article'
-      | 'footer'
-      | 'error';
+    section ?: string;
     hasTopNav ?: boolean;
     hasBottomNav ?: boolean;
     alignment ?: 'left' | 'centre';

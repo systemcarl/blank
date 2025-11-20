@@ -1,4 +1,16 @@
-import { fetchResource } from './http';
+import { resolveWeblogIndex } from '$lib/utils/weblog';
+import { fetchResource, fetchJsonResource } from './http';
+
+export async function loadIndex(
+  basePath : string,
+  { fetch } : { fetch : typeof window.fetch; },
+) {
+  if (!basePath) return resolveWeblogIndex({});
+  basePath = basePath.endsWith('/') ? basePath : basePath + '/';
+  const url = `${basePath}index.json`;
+  const result = await fetchJsonResource(url, { fetch });
+  return resolveWeblogIndex(result);
+}
 
 export async function loadAbstract(
   basePath : string,

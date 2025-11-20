@@ -4,7 +4,7 @@
 
   interface Props {
     src ?: string;
-    setConfig ?: () => unknown;
+    setConfig ?: () => typeof defaultConfig;
     getConfig ?: (locale : typeof defaultConfig) => void;
   }
 

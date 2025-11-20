@@ -2,6 +2,7 @@ import { beforeEach, afterAll, describe, it, expect, vi } from 'vitest';
 import { loadConfig } from '$lib/server/config';
 import { loadLocale } from '$lib/server/locale';
 import { loadGraphics, loadThemes } from '$lib/server/theme';
+import { loadIndex } from '$lib/server/weblog';
 
 import type { LayoutServerLoadEvent } from './$types';
 import { load } from './+layout.server';
@@ -19,6 +20,7 @@ const loadConfigMock = vi.hoisted(() => vi.fn());
 const loadLocaleMock = vi.hoisted(() => vi.fn());
 const loadThemesMock = vi.hoisted(() => vi.fn());
 const loadGraphicsMock = vi.hoisted(() => vi.fn());
+const loadIndexMock = vi.hoisted(() => vi.fn());
 
 vi.mock('$lib/server/config', async original => ({
   ...(await original()),
@@ -33,8 +35,18 @@ vi.mock('$lib/server/theme', async original => ({
   loadThemes : loadThemesMock,
   loadGraphics : loadGraphicsMock,
 }));
+vi.mock('$lib/server/weblog', async original => ({
+  ...(await original()),
+  loadIndex : loadIndexMock,
+}));
 
-beforeEach(() => { vi.clearAllMocks(); });
+beforeEach(() => {
+  vi.clearAllMocks();
+  loadConfigMock.mockResolvedValue({
+    weblog : { url : '/weblog/' },
+  });
+});
+
 afterAll(() => { vi.restoreAllMocks(); });
 
 describe('+layout.server.ts', () => {
@@ -45,7 +57,7 @@ describe('+layout.server.ts', () => {
   });
 
   it('returns config data', async () => {
-    const expected = { test : {} };
+    const expected = { test : {}, weblog : { url : '/weblog/' } };
     loadConfigMock.mockResolvedValueOnce(expected);
     const result = await load(event) as { config : object; };
     expect(result.config).toEqual(expected);
@@ -90,5 +102,20 @@ describe('+layout.server.ts', () => {
     loadGraphicsMock.mockResolvedValueOnce(expected);
     const result = await load(event) as { graphics : object; };
     expect(result.graphics).toEqual(expected);
+  });
+
+  it('loads weblog index', async () => {
+    const expectedUrl = '/test-weblog/';
+    const fetch = vi.fn();
+    loadConfigMock.mockResolvedValueOnce({ weblog : { url : expectedUrl } });
+    await load({ ...event, fetch });
+    expect(loadIndex).toHaveBeenCalledWith(expectedUrl, { fetch });
+  });
+
+  it('returns weblog index data', async () => {
+    const expected = { articles : [] };
+    loadIndexMock.mockResolvedValueOnce(expected);
+    const result = await load(event) as { articleIndex : object; };
+    expect(result.articleIndex).toEqual(expected);
   });
 });

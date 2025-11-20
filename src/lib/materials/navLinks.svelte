@@ -12,7 +12,7 @@
 </script>
 
 {#if links.length > 0}
-  <nav class={className} style="flex-direction: {direction};">
+  <nav class={className} style="--direction: {direction};">
     <ul>
       {#each links as { text, href } (text)}
         <li>
@@ -28,7 +28,10 @@
 <style>
   nav {
     display: flex;
-    gap : var(--padding-inset);
+    flex-direction: var(--direction);
+    flex-wrap: wrap;
+    column-gap : var(--padding-inset);
+    row-gap : calc(var(--padding-inset) / 2);
     width: 100%;
     margin: calc(var(--padding-inset) / 4) 0;
   }
@@ -43,5 +46,15 @@
 
   ul, li {
     display: contents;
+  }
+
+  @media (max-width: 767px) {
+    nav {
+      flex-direction: column;
+    }
+
+    .justify-end {
+      align-items: flex-end;
+    }
   }
 </style>

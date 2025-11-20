@@ -1,7 +1,15 @@
+export interface Highlight {
+  id : string;
+  type : 'tag';
+  key : string;
+  section ?: string;
+}
+
 export interface Config {
   likes : { icon : string; text : string; }[] | null;
   dislikes : { icon : string; text : string; }[] | null;
   profileLinks : { text : string; href : string; }[] | null;
+  highlights : Highlight[] | null;
   contact : {
     icon : string;
     text ?: string;
@@ -16,6 +24,7 @@ export interface Config {
 export const defaultConfig : Config = {
   likes : null,
   dislikes : null,
+  highlights : null,
   contact : null,
   profileLinks : null,
   weblog : {},
@@ -42,6 +51,22 @@ export function buildConfig(config : unknown) : Config {
       if (typeof item !== 'object' || item === null) return false;
       if (!('icon' in item) || typeof item.icon !== 'string') return false;
       if (!('text' in item) || typeof item.text !== 'string') return false;
+      return true;
+    });
+  }
+
+  if (!Array.isArray((conf.highlights))) {
+    conf.highlights = defaultConfig.highlights;
+  } else {
+    const highlightIds : string[] = [];
+    conf.highlights = conf.highlights.filter((item) => {
+      if (typeof item !== 'object' || item === null) return false;
+      if (!('id' in item) || typeof item.id !== 'string') return false;
+      if (highlightIds.includes(item.id)) return false;
+      if (!('type' in item) || item.type !== 'tag') return false;
+      if (!('key' in item) || typeof item.key !== 'string') return false;
+      if ('section' in item && typeof item.section !== 'string') return false;
+      highlightIds.push(item.id);
       return true;
     });
   }

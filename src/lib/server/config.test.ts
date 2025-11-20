@@ -1,9 +1,13 @@
 import { beforeEach, afterAll, describe, it, expect, vi } from 'vitest';
 
+import { buildConfig } from '$lib/utils/config';
 import { loadConfig } from './config';
 
 const FetchJsonResourceMock = vi.hoisted(() => vi.fn());
 
+vi.mock('$lib/utils/config', () => ({
+  buildConfig : vi.fn(data => data),
+}));
 vi.mock('./http', () => ({
   fetchJsonResource : FetchJsonResourceMock,
 }));
@@ -23,16 +27,12 @@ describe('loadConfig', () => {
       .toHaveBeenCalledWith('/config.json', { fetch });
   });
 
-  it('returns fetched config', async () => {
+  it('returns built config', async () => {
     const config = { key : 'value' };
     FetchJsonResourceMock.mockResolvedValue(config);
     const result = await loadConfig({ fetch : vi.fn() });
-    expect(result).toEqual(config);
-  });
 
-  it('returns empty config if fetch fails', async () => {
-    FetchJsonResourceMock.mockResolvedValue(null);
-    const result = await loadConfig({ fetch : vi.fn() });
-    expect(result).toEqual({});
+    expect(result).toEqual(config);
+    expect(buildConfig).toHaveBeenCalledWith(config);
   });
 });
