@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { get } from 'svelte/store';
   import { defaultLocale } from '$lib/utils/locale';
   import useLocale from './useLocale';
 
@@ -11,12 +12,11 @@
   const props : Props = $props();
 
   const {
-    setLocale,
-    getLocale,
+    locale,
   } = useLocale();
 
   $effect(() => {
-    if (props.setLocale) setLocale(props.setLocale());
-    if (props.getLocale) props.getLocale(getLocale());
+    if (props.setLocale) locale.set(props.setLocale());
+    if (props.getLocale) props.getLocale(get(locale));
   });
 </script>

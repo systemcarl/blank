@@ -33,18 +33,15 @@
     children : Snippet<[]>;
   } = $props();
 
-  const { makeProvider } = useThemes();
-  const { provider } = makeProvider({ typographyKey : typography });
-  const { class : classes, ...attr } = provider;
+  const { providerClasses } = useThemes({ typographyKey : typography });
 
-  const className = [classes, 'text'];
+  const className = [$providerClasses, 'text'];
   if (centred) className.push('text-centred');
   if (flex) className.push('text-flex');
   if (inset) className.push('text-inset');
 </script>
 
 <svelte:element
-  {...attr}
   id={id}
   class="{className.join(' ')}"
   this={as}

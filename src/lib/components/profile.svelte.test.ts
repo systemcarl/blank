@@ -13,8 +13,10 @@ import FavouriteList from '$lib/components/favouriteList.svelte';
 
 import Profile from './profile.svelte';
 
-let config : { profileLinks : { href : string; text : string; }[]; } =
+const defaultConfig : { profileLinks : { href : string; text : string; }[]; } =
   vi.hoisted(() => ({ profileLinks : [] }));
+let setConfig : ((value : unknown) => void) = vi.hoisted(() => () => {});
+
 const locale = vi.hoisted(() => ({
   title : 'Test Title',
   subtitle : 'Test Subtitle',
@@ -24,10 +26,13 @@ const locale = vi.hoisted(() => ({
 vi.mock('$lib/hooks/useConfig', async (original) => {
   const originalDefault =
     ((await original()) as { default : () => object; }).default;
+  const writable = (await import('svelte/store')).writable;
+  const config = writable<unknown>();
+  setConfig = (value : unknown) => config.set(value);
   return {
     default : () => ({
       ...originalDefault(),
-      getConfig : vi.fn(() => config),
+      config,
     }),
   };
 });
@@ -35,10 +40,11 @@ vi.mock('$lib/hooks/useConfig', async (original) => {
 vi.mock('$lib/hooks/useLocale', async (original) => {
   const originalDefault =
     ((await original()) as { default : () => object; }).default;
+  const writable = (await import('svelte/store')).writable;
   return {
     default : () => ({
       ...originalDefault(),
-      getLocale : vi.fn(() => locale),
+      locale : writable(locale),
     }),
   };
 });
@@ -89,8 +95,8 @@ vi.mock('$lib/components/favouriteList.svelte', async (original) => {
 });
 
 beforeEach(() => {
-  config = { profileLinks : [] };
   vi.clearAllMocks();
+  setConfig(defaultConfig);
 });
 afterAll(() => { vi.restoreAllMocks(); });
 
@@ -251,7 +257,7 @@ describe('Profile', () => {
   });
 
   it('does not render nav links if not configured', () => {
-    config = { ...config, profileLinks : [] };
+    setConfig({ profileLinks : [] });
 
     const { container } = render(Profile);
 
@@ -261,10 +267,12 @@ describe('Profile', () => {
   });
 
   it('renders configured nav links', () => {
-    config = { ...config, profileLinks : [
+    const expectedLinks = [
       { href : '/test1', text : 'Test Link 1' },
       { href : '/test2', text : 'Test Link 2' },
-    ] };
+    ];
+    setConfig({ profileLinks : expectedLinks });
+
     const { container } = render(Profile);
 
     const nav = within(container).queryByTestId('navLinks') as HTMLElement;
@@ -272,7 +280,7 @@ describe('Profile', () => {
 
     expect(NavLinks).toHaveBeenCalledOnce();
     expect(NavLinks).toHaveBeenCalledWithProps(expect.objectContaining({
-      links : config.profileLinks,
+      links : expectedLinks,
       justify : 'start',
     }));
   });

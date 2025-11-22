@@ -1,11 +1,11 @@
+import { get } from 'svelte/store';
 import type { RequestHandler } from '@sveltejs/kit';
 
-import { getThemes } from '$lib/stores/theme';
+import { themes } from '$lib/stores/theme';
 import { compileStyles } from '$lib/utils/styles';
 
 export const GET : RequestHandler = async () => {
-  const themes = getThemes();
-  const styles = compileStyles(themes);
+  const styles = compileStyles(get(themes));
 
   return new Response((styles), {
     headers : {

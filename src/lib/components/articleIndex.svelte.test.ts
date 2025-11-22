@@ -12,15 +12,18 @@ import ArticleIndex from './articleIndex.svelte';
 
 const defaultIndex =
   vi.hoisted(() => ({ articles : {}, tags : {} } as WeblogIndex));
-let index = vi.hoisted(() => ({ ...defaultIndex }));
+let setIndex : ((value : WeblogIndex) => void) = vi.hoisted(() => () => {});
 
 vi.mock('$lib/hooks/useArticles', async (original) => {
   const originalDefault =
     ((await original()) as { default : () => object; }).default;
+  const writable = (await import('svelte/store')).writable;
+  const index = writable<WeblogIndex>();
+  setIndex = (value : WeblogIndex) => index.set(value);
   return {
     default : () => ({
       ...originalDefault(),
-      getIndex : vi.fn(() => index),
+      index,
     }),
   };
 });
@@ -43,19 +46,19 @@ vi.mock('$lib/components/abstract.svelte', async (original) => {
 
 beforeEach(() => {
   vi.clearAllMocks();
-  index = { ...defaultIndex };
+  setIndex({ ...defaultIndex });
 });
 
 afterAll(() => { vi.restoreAllMocks(); });
 
 describe('ArticleIndex', () => {
   it('renders index heading', async () => {
-    index = {
+    setIndex({
       articles : {},
       tags : {
         test : { slug : 'test', name : 'Test', articles : [] },
       },
-    };
+    });
 
     const { container } = render(ArticleIndex, { tag : 'test' });
 
@@ -83,7 +86,7 @@ describe('ArticleIndex', () => {
   });
 
   it('renders articles as abstracts', async () => {
-    index = {
+    const index = {
       articles : {},
       tags : {
         test : {
@@ -104,6 +107,7 @@ describe('ArticleIndex', () => {
         },
       },
     };
+    setIndex(index);
 
     const { container } = render(ArticleIndex, { tag : 'test' });
 
@@ -124,7 +128,7 @@ describe('ArticleIndex', () => {
   });
 
   it('renders article in card', async () => {
-    index = {
+    const index = {
       articles : {},
       tags : {
         test : {
@@ -145,6 +149,7 @@ describe('ArticleIndex', () => {
         },
       },
     };
+    setIndex(index);
 
     const { container } = render(ArticleIndex, { tag : 'test' });
 
@@ -162,7 +167,7 @@ describe('ArticleIndex', () => {
   });
 
   it('renders article cards in grid', async () => {
-    index = {
+    setIndex({
       articles : {},
       tags : {
         test : {
@@ -182,7 +187,7 @@ describe('ArticleIndex', () => {
           ],
         },
       },
-    };
+    });
     const { container } = render(ArticleIndex, { tag : 'test' });
 
     const grid = within(container).queryByTestId('grid') as HTMLElement;

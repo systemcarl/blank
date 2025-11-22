@@ -1,24 +1,23 @@
 <script lang="ts">
+  import { onDestroy } from 'svelte';
   import { browser } from '$app/environment';
-  import type { Section } from '$lib/utils/theme';
   import useTheme from '$lib/hooks/useThemes';
   import useGraphics from '$lib/hooks/useGraphics';
   import Graphic from './graphic.svelte';
 
   const { children } = $props();
 
-  const { onSectionChange } = useTheme();
+  const { section } = useTheme();
   const { isGraphic } = useGraphics();
 
-  let section = $state<Section>();
   let hasGraphic = $state<boolean>(true);
 
   if (browser) {
-    onSectionChange((s) => {
-      section = s;
-      hasGraphic = !!section?.background.img
-        && isGraphic(section?.background.img?.src ?? '');
+    const unsubscribe = section.subscribe((s) => {
+      hasGraphic = !!s?.background.img
+        && isGraphic(s?.background.img?.src ?? '');
     });
+    onDestroy(unsubscribe);
   };
 </script>
 
@@ -30,7 +29,7 @@
   >
     {#if hasGraphic}
       <div class="background-graphic">
-        <Graphic src={section?.background.img?.src} />
+        <Graphic src={$section?.background.img?.src} />
       </div>
     {/if}
   </div>

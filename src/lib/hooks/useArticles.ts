@@ -1,9 +1,8 @@
 import * as articleStore from '$lib/stores/articles';
 
-const useArticles = () => {
+export const useArticles = () => {
   return {
-    getIndex : articleStore.getIndex,
-    setIndex : articleStore.setIndex,
+    index : articleStore.index,
   };
 };
 

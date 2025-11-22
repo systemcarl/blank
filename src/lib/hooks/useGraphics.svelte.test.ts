@@ -1,5 +1,6 @@
 import { beforeEach, afterAll, describe, it, expect } from 'vitest';
 import { render } from '@testing-library/svelte';
+import { get } from 'svelte/store';
 
 import { resetThemes as resetGraphics } from '$lib/stores/theme';
 
@@ -11,12 +12,12 @@ afterAll(() => { resetGraphics(); });
 
 describe('useGraphics', () => {
   it('stores graphics', () => {
-    const { getGraphics } = useGraphics();
+    const { graphics } = useGraphics();
     const expected = { test : 'test' };
 
     render(Test, { props : { setGraphics : () => expected } });
 
-    const actual = getGraphics();
+    const actual = get(graphics);
     expect(actual).toEqual(expected);
   });
 
@@ -31,9 +32,9 @@ describe('useGraphics', () => {
   });
 
   it('renders graphic from store', () => {
-    const { setGraphics } = useGraphics();
+    const { graphics } = useGraphics();
     const expected = '<svg>Test Graphic</svg>';
-    setGraphics({ test : expected });
+    graphics.set({ test : expected });
 
     let actual;
     render(Test, { props : {

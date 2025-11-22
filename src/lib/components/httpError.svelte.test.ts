@@ -6,7 +6,7 @@ import TitleCard from '$lib/materials/titleCard.svelte';
 
 import HttpError from './httpError.svelte';
 
-const errorLocale = vi.hoisted(() => ({
+const locale = vi.hoisted(() => ({
   errors : {
     default : 'Default Message',
     invalid : 'Invalid Message',
@@ -20,10 +20,11 @@ const errorLocale = vi.hoisted(() => ({
 vi.mock('$lib/hooks/useLocale', async (original) => {
   const originalDefault =
     ((await original()) as { default : () => object; }).default;
+  const writable = (await import('svelte/store')).writable;
   return {
     default : () => ({
       ...originalDefault(),
-      getLocale : vi.fn(() => errorLocale),
+      locale : writable(locale),
     }),
   };
 });
@@ -48,7 +49,7 @@ describe('HttpError', () => {
     expect(TitleCard).toHaveBeenCalledOnce();
     expect(TitleCard).toHaveBeenCalledWithProps(expect.objectContaining({
       title : `${statusCode} ${key}`,
-      subtitle : errorLocale.errors[key],
+      subtitle : locale.errors[key],
     }));
   });
 });

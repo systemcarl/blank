@@ -1,5 +1,6 @@
 <script lang="ts">
-  import type { Graphic } from '$lib/utils/theme';
+  import { onDestroy } from 'svelte';
+  import { browser } from '$app/environment';
   import useGraphics from '$lib/hooks/useGraphics';
   import useThemes from '$lib/hooks/useThemes';
 
@@ -10,24 +11,26 @@
   } = $props();
 
   const { isGraphic, renderGraphic } = useGraphics();
-  const { onGraphicChange, makeProvider } = useThemes();
+  const { graphic, providerClasses } = useThemes({ graphicKey });
 
-  let graphic = $state<Graphic | undefined>();
-  let content = $derived<string>(renderGraphic(src ?? graphic?.src ?? ''));
+  let content = $state<string>('');
 
-  const { provider } = makeProvider({ graphicKey });
-  onGraphicChange((g) => { graphic = g; });
-  const { class : className, ...rest } = provider;
+  if (browser) {
+    const unsubscribe = graphic.subscribe((g) => {
+      content = renderGraphic(src ?? g?.src ?? '');
+    });
+    onDestroy(unsubscribe);
+  };
 </script>
 
 {#if content}
-  <div class={`${className} graphic`} {...rest} aria-hidden="true">
+  <div class={`${$providerClasses} graphic`} aria-hidden="true">
     {@html content}
   </div>
-{:else if (!isGraphic(src ?? graphic?.src ?? ''))}
+{:else if (!isGraphic(src ?? $graphic?.src ?? ''))}
   <img
     class="graphic"
-    src={src ?? graphic?.src ?? ''}
-    alt={alt ?? graphic?.alt ?? ''}
+    src={src ?? $graphic?.src ?? ''}
+    alt={alt ?? $graphic?.alt ?? ''}
   />
 {/if}

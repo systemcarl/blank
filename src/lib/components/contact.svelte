@@ -5,8 +5,8 @@
 
   const { id } : { id ?: string; } = $props();
 
-  const locale = useLocale().getLocale();
+  const { locale } = useLocale();
 </script>
 
-<Heading id={id} level={2}>{ locale.contact.header }</Heading>
+<Heading id={id} level={2}>{ $locale.contact.header }</Heading>
 <ContactInfo />

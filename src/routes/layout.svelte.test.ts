@@ -28,7 +28,7 @@ vi.mock('$lib/hooks/useConfig', async (original) => {
   return {
     default : () => ({
       ...originalDefault(),
-      setConfig : setConfigMock,
+      config : { set : setConfigMock },
     }),
   };
 });
@@ -38,7 +38,7 @@ vi.mock('$lib/hooks/useLocale', async (original) => {
   return {
     default : () => ({
       ...originalDefault(),
-      setLocale : setLocaleMock,
+      locale : { set : setLocaleMock },
     }),
   };
 });
@@ -48,7 +48,7 @@ vi.mock('$lib/hooks/useThemes', async (original) => {
   return {
     default : () => ({
       ...originalDefault(),
-      setThemes : setThemesMock,
+      themes : { set : setThemesMock },
     }),
   };
 });
@@ -58,7 +58,7 @@ vi.mock('$lib/hooks/useGraphics', async (original) => {
   return {
     default : () => ({
       ...originalDefault(),
-      setGraphics : setGraphicsMock,
+      graphics : { set : setGraphicsMock },
     }),
   };
 });
@@ -68,7 +68,7 @@ vi.mock('$lib/hooks/useArticles', async (original) => {
   return {
     default : () => ({
       ...originalDefault(),
-      setIndex : setArticleIndexMock,
+      index : { set : setArticleIndexMock },
     }),
   };
 });

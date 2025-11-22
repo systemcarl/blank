@@ -1,16 +1,26 @@
 import { browser } from '$app/environment';
+import { getContext, setContext } from 'svelte';
+import type { Writable } from 'svelte/store';
 import { get, writable } from 'svelte/store';
 
+import { log } from '$lib/utils/log';
 import type { Section, Typography, Graphic } from '$lib/utils/theme';
+import { defaultTheme, getSection } from '$lib/utils/theme';
 import { kebabCase } from '$lib/utils/styles';
-import * as themeStore from '$lib/stores/theme';
+import { themes, theme } from '$lib/stores/theme';
+
+const ck = {
+  section : Symbol('useThemesSection'),
+  typography : Symbol('useThemesTypography'),
+  graphic : Symbol('useThemesGraphic'),
+};
 
 const handleStorageEvent = (event : StorageEvent) => {
   if (event.key !== 'theme') return;
-  themeStore.setTheme(event.newValue, false);
+  theme.set(event.newValue ?? 'default', false);
   window.dispatchEvent(new CustomEvent(
     'themeUpdated',
-    { detail : event.newValue },
+    { detail : event.newValue ?? 'default' },
   ));
 };
 
@@ -19,7 +29,7 @@ function subscribeLocalTheme() {
   if (!browser) return () => {};
   if (!subscribed) {
     subscribed = true;
-    themeStore.setTheme(localStorage.getItem('theme'), false);
+    theme.set(localStorage.getItem('theme') ?? 'default', false);
     window.addEventListener('storage', handleStorageEvent);
   }
   return () => {
@@ -28,115 +38,184 @@ function subscribeLocalTheme() {
   };
 }
 
-function useThemes() {
-  const sectionKey = writable(themeStore.getSectionContext());
-  const typographyKey = writable(themeStore.getTypographyContext());
-  const graphicKey = writable(themeStore.getGraphicContext());
+function makeSectionStore(sectionKey : string) {
+  const allThemes = get(themes);
+  const currentTheme = allThemes[get(theme)]
+    ?? allThemes.default
+    ?? defaultTheme;
+  const initSection = getSection(currentTheme, { key : sectionKey });
+  return writable(initSection, (set) => {
+    const unsubscribe = theme.subscribe((t) => {
+      const theme = allThemes[t] ?? allThemes.default ?? defaultTheme;
+      set(getSection(theme, { key : sectionKey }));
+    });
+    return () => { unsubscribe(); };
+  });
+}
 
-  const section = writable<Section>(
-    themeStore.getThemeSection(get(sectionKey)),
-  );
-  const typography = writable<Typography>(
-    themeStore.getSectionTypography(get(section), get(typographyKey)),
-  );
-  const graphic = writable<Graphic | undefined>(
-    themeStore.getSectionGraphic(get(section), get(graphicKey)),
-  );
+function makeTypographyStore(
+  typographyKey : string,
+  sectionStore : Writable<Section>,
+) {
+  const section = get(sectionStore);
+  const initTypography = section.typography[typographyKey]
+    ?? section.typography.body;
+  return writable(initTypography, (set) => {
+    const unsubscribe = sectionStore.subscribe((s) => {
+      set(s.typography[typographyKey] ?? s.typography.body);
+    });
+    return () => { unsubscribe(); };
+  });
+}
 
-  function handleSectionChange(key : string | undefined) {
-    if (key !== undefined) sectionKey.set(key);
-    section.set(themeStore.getThemeSection(key ?? get(sectionKey)));
-  }
-  let unsubscribeSection = themeStore.onSectionChange(handleSectionChange);
+function makeGraphicStore(
+  graphicKey : string | undefined,
+  sectionStore : Writable<Section>,
+) {
+  const section = get(sectionStore);
+  const initGraphic = graphicKey !== undefined
+    ? section.graphics?.[graphicKey]
+    : undefined;
+  return writable<Graphic | undefined>(initGraphic, (set) => {
+    if (graphicKey === undefined) return () => {};
+    const unsubscribe = sectionStore.subscribe((s) => {
+      set(s.graphics?.[graphicKey]);
+    });
+    return () => { unsubscribe(); };
+  });
+}
 
-  function handleTypographyChange(key : string | undefined) {
-    if (key !== undefined) typographyKey.set(key);
-    const currentSection = themeStore.getThemeSection(get(sectionKey));
-    typography.set(themeStore.getSectionTypography(
-      currentSection,
-      key ?? get(typographyKey),
-    ));
-  }
-  let unsubscribeTypography =
-    themeStore.onTypographyChange(handleTypographyChange);
+function makeClasses(
+  sectionKey ?: string,
+  typographyKey ?: string,
+  graphicKey ?: string,
+) {
+  const classes = [];
+  if (sectionKey) classes.push(`section-${kebabCase(sectionKey)}`);
+  if (typographyKey) classes.push(`typography-${kebabCase(typographyKey)}`);
+  if (graphicKey) classes.push(`graphic-${kebabCase(graphicKey)}`);
+  return classes.join(' ');
+}
 
-  function handleGraphicChange(key : string | undefined) {
-    if (key !== undefined) graphicKey.set(key);
-    const currentSection = themeStore.getThemeSection(get(sectionKey));
-    graphic.set(themeStore.getSectionGraphic(
-      currentSection,
-      key ?? get(graphicKey),
-    ));
-  }
-  let unsubscribeGraphic = themeStore.onGraphicChange(handleGraphicChange);
+function logSetWithoutContext(context : string, key ?: string) {
+  log({
+    message : `Attempted to set ${context} key to '${key}'`
+      + ' without initializing context.',
+  }, { level : 'warn' });
+}
 
-  function getSection() { return get(section); }
-  function getTypography() { return get(typography); }
-  function getGraphic() { return get(graphic); }
+function useThemes({ sectionKey, typographyKey, graphicKey } : {
+  sectionKey ?: string;
+  typographyKey ?: string;
+  graphicKey ?: string;
+} = {}) {
+  const section = sectionKey
+    ? setContext(ck.section, makeSectionStore(sectionKey))
+    : (getContext<Writable<Section>>(ck.section)
+      ?? setContext(ck.section, makeSectionStore('default')));
 
-  function onSectionChange(callback : (section : Section) => void) {
-    return section.subscribe(callback);
-  }
-  function onTypographyChange(callback : (typography : Typography) => void) {
-    return typography.subscribe(callback);
-  }
-  function onGraphicChange(callback : (graphic : Graphic | undefined) => void) {
-    return graphic.subscribe(callback);
-  }
+  const typography = typographyKey
+    ? setContext(ck.typography, makeTypographyStore(typographyKey, section))
+    : getContext<Writable<Typography>>(ck.typography)
+      ?? setContext(ck.typography, makeTypographyStore('body', section));
 
-  function makeProvider({ sectionKey, typographyKey, graphicKey } : {
-    sectionKey ?: string;
-    typographyKey ?: string;
-    graphicKey ?: string;
-  }) {
-    if (sectionKey !== undefined) {
-      unsubscribeSection();
-      themeStore.setSectionContext(sectionKey);
-      unsubscribeSection = themeStore.onSectionChange(handleSectionChange);
+  const graphic = graphicKey
+    ? setContext(ck.graphic, makeGraphicStore(graphicKey, section))
+    : getContext<Writable<Graphic | undefined>>(ck.graphic)
+      ?? setContext(ck.graphic, makeGraphicStore(undefined, section));
+
+  const providerClasses = (sectionKey || typographyKey || graphicKey)
+    ? writable(makeClasses(sectionKey, typographyKey, graphicKey))
+    : undefined;
+
+  let currentSectionKey = sectionKey;
+  let currentTypographyKey = typographyKey;
+  let currentGraphicKey = graphicKey;
+
+  function updateProviderClasses(
+    sectionKey ?: string,
+    typographyKey ?: string,
+    graphicKey ?: string,
+  ) {
+    currentSectionKey = sectionKey;
+    currentTypographyKey = typographyKey;
+    currentGraphicKey = graphicKey;
+    if (providerClasses) {
+      providerClasses.set(
+        makeClasses(sectionKey, typographyKey, graphicKey),
+      );
     }
-    if (typographyKey !== undefined) {
-      unsubscribeTypography();
-      themeStore.setTypographyContext(typographyKey);
-      unsubscribeTypography =
-        themeStore.onTypographyChange(handleTypographyChange);
-    }
-    if (graphicKey !== undefined) {
-      unsubscribeGraphic();
-      themeStore.setGraphicContext(graphicKey);
-      unsubscribeGraphic = themeStore.onGraphicChange(handleGraphicChange);
-    }
+  }
 
-    const classes : string[] = [];
-    if (sectionKey) classes.push(`section-${kebabCase(sectionKey)}`);
-    if (typographyKey) classes.push(`typography-${kebabCase(typographyKey)}`);
-    if (graphicKey) classes.push(`graphic-${kebabCase(graphicKey)}`);
+  function setSection(key : string) {
+    if (sectionKey === undefined) {
+      logSetWithoutContext('section', key);
+      return;
+    }
+    const allThemes = get(themes);
+    const currentTheme = allThemes[get(theme)]
+      ?? allThemes.default
+      ?? defaultTheme;
+    section.set(getSection(currentTheme, { key }));
+    updateProviderClasses(key, currentTypographyKey, currentGraphicKey);
+  }
 
-    return {
-      provider : { class : classes.join(' ') },
-      setSection : (sectionKey !== undefined)
-        ? themeStore.updateSectionContext
-        : () => {},
-      setTypography : (typographyKey !== undefined)
-        ? themeStore.updateTypographyContext
-        : () => {},
-      setGraphic : (graphicKey !== undefined)
-        ? themeStore.updateGraphicContext
-        : () => {},
-    };
+  function updateSection(
+    callback : (prevKey : string) => string,
+  ) {
+    setSection(callback(currentSectionKey ?? 'default'));
+  }
+
+  function setTypography(key : string) {
+    if (typographyKey === undefined) {
+      logSetWithoutContext('typography', key);
+      return;
+    }
+    typography.set(get(section).typography[key]
+      ?? get(section).typography.body);
+    updateProviderClasses(currentSectionKey, key, currentGraphicKey);
+  }
+
+  function updateTypography(
+    callback : (prevKey : string) => string,
+  ) {
+    setTypography(callback(currentTypographyKey ?? 'body'));
+  }
+
+  function setGraphic(key ?: string) {
+    if (graphicKey === undefined) {
+      logSetWithoutContext('graphic', key);
+      return;
+    }
+    graphic.set((key !== undefined) ? get(section).graphics?.[key] : undefined);
+    updateProviderClasses(currentSectionKey, currentTypographyKey, key);
+  }
+
+  function updateGraphic(
+    callback : (prevKey : string | undefined) => string | undefined,
+  ) {
+    setGraphic(callback(currentGraphicKey));
   }
 
   return {
-    getThemes : themeStore.getThemes,
-    setThemes : themeStore.setThemes,
-    getTheme : themeStore.getTheme,
-    setTheme : themeStore.setTheme,
-    getSection : getSection,
-    getTypography : getTypography,
-    getGraphic : getGraphic,
-    onSectionChange : onSectionChange,
-    onTypographyChange : onTypographyChange,
-    onGraphicChange : onGraphicChange,
-    makeProvider,
+    themes,
+    theme,
+    section : {
+      ...section,
+      set : setSection,
+      update : updateSection,
+    },
+    typography : {
+      ...typography,
+      set : setTypography,
+      update : updateTypography,
+    },
+    graphic : {
+      ...graphic,
+      set : setGraphic,
+      update : updateGraphic,
+    },
+    providerClasses,
     subscribeLocalTheme,
   };
 }

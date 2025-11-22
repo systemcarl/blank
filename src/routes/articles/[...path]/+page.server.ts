@@ -1,10 +1,12 @@
 import { error } from '@sveltejs/kit';
-import type { PageServerLoad } from './$types';
+import { get } from 'svelte/store';
+
 import { loadAbstract, loadArticle } from '$lib/server/weblog';
-import { getConfig } from '$lib/stores/config';
+import { config as configStore } from '$lib/stores/config';
+import type { PageServerLoad } from './$types';
 
 export const load : PageServerLoad = async ({ params, fetch }) => {
-  const config = getConfig();
+  const config = get(configStore);
   if (!params.path || !config.weblog.url) return { markdown : '' };
 
   const { title, body : abstract } =

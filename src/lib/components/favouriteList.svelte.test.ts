@@ -17,7 +17,7 @@ const defaultConfig = vi.hoisted(() => ({
     { icon : 'icon4', text : 'dislike2' },
   ],
 }));
-let config = vi.hoisted(() => ({ ...defaultConfig }));
+let setConfig : ((value : unknown) => void) = vi.hoisted(() => () => {});
 
 const locale = vi.hoisted(() => ({
   favourites : {
@@ -30,20 +30,24 @@ const locale = vi.hoisted(() => ({
 vi.mock('$lib/hooks/useConfig', async (original) => {
   const originalDefault =
     ((await original()) as { default : () => object; }).default;
+  const writable = (await import('svelte/store')).writable;
+  const config = writable<unknown>();
+  setConfig = (value : unknown) => config.set(value);
   return {
     default : () => ({
       ...originalDefault(),
-      getConfig : vi.fn(() => config),
+      config,
     }),
   };
 });
 vi.mock('$lib/hooks/useLocale', async (original) => {
   const originalDefault =
     ((await original()) as { default : () => object; }).default;
+  const writable = (await import('svelte/store')).writable;
   return {
     default : () => ({
       ...originalDefault(),
-      getLocale : vi.fn(() => locale),
+      locale : writable(locale),
     }),
   };
 });
@@ -62,7 +66,7 @@ vi.mock('$lib/materials/listItem.svelte', async (original) => {
 
 beforeEach(() => {
   vi.clearAllMocks();
-  config = { ...defaultConfig };
+  setConfig({ ...defaultConfig });
 });
 
 afterAll(() => { vi.restoreAllMocks(); });
@@ -72,7 +76,7 @@ describe('FavouriteList', () => {
     ['likes', 'most'],
     ['dislikes', 'least'],
   ])('does not render if no %s configured', (key, rank) => {
-    config[key as 'likes' | 'dislikes'] = [];
+    setConfig({ ...defaultConfig, [key] : [] });
 
     const { container } = render(FavouriteList, {
       rank : rank as 'most' | 'least',
@@ -118,10 +122,11 @@ describe('FavouriteList', () => {
 
     const items = within(list).queryAllByRole('listitem');
     expect(items)
-      .toHaveLength(config[rank === 'most' ? 'likes' : 'dislikes'].length);
+      .toHaveLength(defaultConfig[rank === 'most' ? 'likes' : 'dislikes']
+        .length);
     for (const item of items) expect(item).toBeInTheDocument();
 
-    for (const fav of config[rank === 'most' ? 'likes' : 'dislikes']) {
+    for (const fav of defaultConfig[rank === 'most' ? 'likes' : 'dislikes']) {
       const item = within(list)
         .queryByTestId(`item-${fav.icon}`) as HTMLElement;
       expect(item).toBeInTheDocument();

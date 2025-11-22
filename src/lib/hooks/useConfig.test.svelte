@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { get } from 'svelte/store';
   import { defaultConfig } from '$lib/utils/config';
   import useConfig from './useConfig';
 
@@ -11,12 +12,11 @@
   const props : Props = $props();
 
   const {
-    setConfig,
-    getConfig,
+    config,
   } = useConfig();
 
   $effect(() => {
-    if (props.setConfig) setConfig(props.setConfig());
-    if (props.getConfig) props.getConfig(getConfig());
+    if (props.setConfig) config.set(props.setConfig());
+    if (props.getConfig) props.getConfig(get(config));
   });
 </script>

@@ -14,7 +14,7 @@ const defaultConfig = vi.hoisted(() => ({
     { icon : 'icon2', text : 'text2', link : 'link2', href : 'href2' },
   ],
 }));
-let config = vi.hoisted(() => ({ ...defaultConfig }));
+let setConfig : ((value : unknown) => void) = vi.hoisted(() => () => {});
 
 const locale = vi.hoisted(() => ({
   contact : { infoHeader : 'Contact Info Header' },
@@ -23,20 +23,24 @@ const locale = vi.hoisted(() => ({
 vi.mock('$lib/hooks/useConfig', async (original) => {
   const originalDefault =
     ((await original()) as { default : () => object; }).default;
+  const writable = (await import('svelte/store')).writable;
+  const config = writable<unknown>();
+  setConfig = (value : unknown) => config.set(value);
   return {
     default : () => ({
       ...originalDefault(),
-      getConfig : vi.fn(() => config),
+      config,
     }),
   };
 });
 vi.mock('$lib/hooks/useLocale', async (original) => {
   const originalDefault =
     ((await original()) as { default : () => object; }).default;
+  const writable = (await import('svelte/store')).writable;
   return {
     default : () => ({
       ...originalDefault(),
-      getLocale : vi.fn(() => locale),
+      locale : writable(locale),
     }),
   };
 });
@@ -58,14 +62,14 @@ vi.mock('$lib/materials/listItem.svelte', async (original) => {
 
 beforeEach(() => {
   vi.clearAllMocks();
-  config = { ...defaultConfig };
+  setConfig(defaultConfig);
 });
 
 afterAll(() => { vi.restoreAllMocks(); });
 
 describe('ContactInfo', () => {
   it('does not render when no contact info configured', () => {
-    config.contact = [];
+    setConfig({ contact : [] });
 
     const { container } = render(ContactInfo);
 
@@ -92,10 +96,10 @@ describe('ContactInfo', () => {
     expect(list).toBeInTheDocument();
 
     const items = within(list).queryAllByRole('listitem');
-    expect(items).toHaveLength(config.contact.length);
+    expect(items).toHaveLength(defaultConfig.contact.length);
     for (const item of items) expect(item).toBeInTheDocument();
 
-    for (const info of config.contact) {
+    for (const info of defaultConfig.contact) {
       const item = within(list)
         .queryByTestId(`item-${info.icon}`) as HTMLElement;
       expect(item).toBeInTheDocument();

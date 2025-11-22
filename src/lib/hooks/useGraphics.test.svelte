@@ -10,12 +10,12 @@
   const props : Props = $props();
 
   const {
-    setGraphics,
+    graphics,
     renderGraphic,
   } = useGraphics();
 
   $effect(() => {
-    if (props.setGraphics) setGraphics(props.setGraphics());
+    if (props.setGraphics) graphics.set(props.setGraphics());
     if (props.src && props.renderGraphic)
       props.renderGraphic(renderGraphic(props.src));
   });

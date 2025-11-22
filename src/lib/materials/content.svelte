@@ -19,7 +19,7 @@
     children ?: Snippet<[]>;
   } = $props();
 
-  const { provider } = useThemes().makeProvider({ sectionKey : section });
+  const { providerClasses } = useThemes({ sectionKey : section });
 
   const classes = ['layout'];
   if (hasTopNav) classes.push('top-nav');
@@ -31,7 +31,7 @@
     : justification === 'centre' ? 'center' : 'flex-start';
 </script>
 
-<section class={provider.class}>
+<section class={$providerClasses}>
   <Background>
     <div
       class={classes.join(' ')}

@@ -1,5 +1,6 @@
 import { beforeEach, afterAll, describe, it, expect } from 'vitest';
 import { render } from '@testing-library/svelte';
+import { get } from 'svelte/store';
 
 import { defaultConfig } from '$lib/utils/config';
 import { resetConfig } from '$lib/stores/config';
@@ -12,23 +13,23 @@ afterAll(() => { resetConfig(); });
 
 describe('useConfig', () => {
   it('stores config', () => {
-    const { getConfig } = useConfig();
+    const { config } = useConfig();
     const expected = {
       likes : [{ icon : 'icon', text : 'test' }],
     } as typeof defaultConfig;
 
     render(Test, { props : { setConfig : () => expected } });
 
-    const actual = getConfig();
+    const actual = get(config);
     expect(actual.likes).toEqual(expected.likes);
   });
 
   it('retrieves stored config', () => {
-    const { setConfig } = useConfig();
+    const { config } = useConfig();
     const expected = {
       likes : [{ icon : 'icon', text : 'test' }],
     } as typeof defaultConfig;
-    setConfig(expected);
+    config.set(expected);
 
     let actual : typeof defaultConfig | undefined;
     render(Test, { props : { getConfig : (config) => { actual = config; } } });

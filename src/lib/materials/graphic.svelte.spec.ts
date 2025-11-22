@@ -32,22 +32,20 @@ const defaultGraphic = vi.hoisted(() => ({
   src : 'default-graphic.svg',
   alt : 'Default Graphic',
 }));
+let setGraphic : ((value : unknown) => void) = vi.hoisted(() => () => {});
 
-let graphic = vi.hoisted(() => defaultGraphic as unknown);
 let graphicContent = vi.hoisted(() => '');
-
-let updateGraphic = vi.hoisted(() => (() => {}) as (arg : unknown) => void);
 
 vi.mock('$lib/hooks/useThemes', async (original) => {
   const originalDefault =
     ((await original()) as { default : () => object; }).default;
+  const writable = (await import('svelte/store')).writable;
+  const graphic = writable<unknown>();
+  setGraphic = (value : unknown) => graphic.set(value);
   return {
     default : () => ({
       ...originalDefault(),
-      onGraphicChange : vi.fn((callback) => {
-        updateGraphic = callback;
-        callback(graphic);
-      }),
+      graphic,
     }),
   };
 });
@@ -64,7 +62,12 @@ vi.mock('$lib/hooks/useGraphics', async (original) => {
 });
 
 beforeAll(async () => await loadStyles());
-beforeEach(() => { vi.clearAllMocks(); });
+
+beforeEach(() => {
+  vi.clearAllMocks();
+  setGraphic(defaultGraphic);
+  graphicContent = '';
+});
 
 afterAll(() => { vi.restoreAllMocks(); });
 
@@ -95,7 +98,7 @@ describe('Graphic', () => {
   });
 
   it('renders graphic image', () => {
-    graphic = { src : 'test-graphic.png', alt : 'Test Graphic' };
+    setGraphic({ src : 'test-graphic.png', alt : 'Test Graphic' });
 
     const { container } = render(Graphic);
 
@@ -119,7 +122,8 @@ describe('Graphic', () => {
   });
 
   it('renders graphic SVG', async () => {
-    graphic = { src : 'test-graphic.svg' };
+    const graphic = { src : 'test-graphic.svg' };
+    setGraphic(graphic);
     graphicContent = svgTemplate('Test Graphic');
 
     const { container } = render(Graphic);
@@ -134,7 +138,7 @@ describe('Graphic', () => {
     expect(svg.outerHTML).toContain('Test Graphic');
 
     graphicContent = svgTemplate('Updated Graphic');
-    updateGraphic(graphic);
+    setGraphic(graphic);
 
     await tick();
 
