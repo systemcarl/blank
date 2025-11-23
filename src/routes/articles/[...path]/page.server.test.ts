@@ -16,10 +16,15 @@ const event = {
 const loadAbstractMock = vi.hoisted(() => vi.fn());
 const loadArticleMock = vi.hoisted(() => vi.fn());
 
-vi.mock('$lib/stores/config', async original => ({
-  ...(await original()),
-  getConfig : () => ({ weblog : { url : 'test-weblog' } }),
-}));
+vi.mock('$lib/stores/config', async (original) => {
+  const originalDefault =
+    ((await original()) as { default : () => object; }).default;
+  const writable = (await import('svelte/store')).writable;
+  return {
+    ...originalDefault,
+    config : writable({ weblog : { url : 'test-weblog' } }),
+  };
+});
 vi.mock('$lib/server/weblog', async original => ({
   ...(await original()),
   loadAbstract : loadAbstractMock,

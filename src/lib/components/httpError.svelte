@@ -7,8 +7,8 @@
     message ?: string;
   } = $props();
 
-  const { getLocale } = useLocale();
-  const errorLocale = getLocale().errors;
+  const { locale } = useLocale();
+  const errorLocale = $locale.errors;
 
   let detail : string = $state(errorLocale.default);
   if (status === 400) detail = errorLocale.invalid;

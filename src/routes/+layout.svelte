@@ -10,17 +10,17 @@
 
   const { data, children } = $props();
 
-  const { setConfig } = useConfig();
-  const { setLocale } = useLocale();
-  const { setThemes, subscribeLocalTheme } = useThemes();
-  const { setGraphics } = useGraphics();
-  const { setIndex } = useArticles();
+  const { config } = useConfig();
+  const { locale } = useLocale();
+  const { themes, subscribeLocalTheme } = useThemes();
+  const { graphics } = useGraphics();
+  const { index } = useArticles();
 
-  setConfig(data.config);
-  setLocale(data.locale);
-  setThemes(data.themes);
-  setGraphics(data.graphics);
-  setIndex(data.articleIndex);
+  config.set(data.config);
+  locale.set(data.locale);
+  themes.set(data.themes);
+  graphics.set(data.graphics);
+  index.set(data.articleIndex);
 
   subscribeLocalTheme();
 </script>

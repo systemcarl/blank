@@ -1,5 +1,6 @@
 import { beforeEach, afterAll, describe, it, expect } from 'vitest';
 import { render } from '@testing-library/svelte';
+import { get } from 'svelte/store';
 
 import { defaultLocale } from '$lib/utils/locale';
 import { resetLocale } from '$lib/stores/locale';
@@ -12,19 +13,19 @@ afterAll(() => { resetLocale(); });
 
 describe('useLocale', () => {
   it('stores locale', () => {
-    const { getLocale } = useLocale();
+    const { locale } = useLocale();
     const expected = { title : 'test' } as typeof defaultLocale;
 
     render(Test, { props : { setLocale : () => expected } });
 
-    const actual = getLocale();
+    const actual = get(locale);
     expect(actual.title).toEqual(expected.title);
   });
 
   it('retrieves stored locale', () => {
-    const { setLocale } = useLocale();
+    const { locale } = useLocale();
     const expected = { title : 'test' } as typeof defaultLocale;
-    setLocale(expected);
+    locale.set(expected);
 
     let actual : typeof defaultLocale | undefined;
     render(Test, { props : { getLocale : (locale) => { actual = locale; } } });

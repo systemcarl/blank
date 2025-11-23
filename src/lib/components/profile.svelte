@@ -10,11 +10,8 @@
 
   import FavouriteList from './favouriteList.svelte';
 
-  const { getConfig } = useConfig();
-  const { getLocale } = useLocale();
-
-  const config = getConfig();
-  const locale = getLocale();
+  const { config } = useConfig();
+  const { locale } = useLocale();
 </script>
 
 <SplitStack divide stack={['mobile', 'tablet', 'desktop']}>
@@ -23,15 +20,15 @@
       <Frame rotation={45}>
         <Graphic graphic="avatar" />
       </Frame>
-      <TitleCard title={locale.title} subtitle={locale.subtitle} />
+      <TitleCard title={$locale.title} subtitle={$locale.subtitle} />
     </SplitStack>
-    <Tagline>{ locale.tagline }</Tagline>
+    <Tagline>{ $locale.tagline }</Tagline>
   </SplitStack>
   <SplitStack alignment="start" stack={['mobile', 'wide']}>
     <FavouriteList rank="most" headingElement="h2" />
     <FavouriteList rank="least" headingElement="h2" />
   </SplitStack>
 </SplitStack>
-{#if config.profileLinks && (config.profileLinks.length > 0)}
-  <NavLinks links={config.profileLinks} justify="start" />
+{#if $config.profileLinks && ($config.profileLinks.length > 0)}
+  <NavLinks links={$config.profileLinks} justify="start" />
 {/if}

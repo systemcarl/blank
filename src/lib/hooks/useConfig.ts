@@ -2,8 +2,7 @@ import * as configStore from '$lib/stores/config';
 
 const useConfig = () => {
   return {
-    getConfig : configStore.getConfig,
-    setConfig : configStore.setConfig,
+    config : configStore.config,
   };
 };
 

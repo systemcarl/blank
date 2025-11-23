@@ -6,15 +6,17 @@ import Heading from '$lib/materials/heading.svelte';
 import ContactInfo from './contactInfo.svelte';
 import Contact from './contact.svelte';
 
-const locale = vi.hoisted(() => ({ contact : { header : 'Contact Header' } }));
+const locale =
+  vi.hoisted(() => ({ contact : { header : 'Contact Header' } }));
 
 vi.mock('$lib/hooks/useLocale', async (original) => {
   const originalDefault =
     ((await original()) as { default : () => object; }).default;
+  const writable = (await import('svelte/store')).writable;
   return {
     default : () => ({
       ...originalDefault(),
-      getLocale : vi.fn(() => locale),
+      locale : writable<unknown>(locale),
     }),
   };
 });

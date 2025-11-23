@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { get } from 'svelte/store';
   import type { WeblogIndex } from '$lib/utils/weblog';
   import useArticles from './useArticles';
 
@@ -11,12 +12,11 @@
   const props : Props = $props();
 
   const {
-    setIndex,
-    getIndex,
+    index,
   } = useArticles();
 
   $effect(() => {
-    if (props.setIndex) setIndex(props.setIndex());
-    if (props.getIndex) props.getIndex(getIndex());
+    if (props.setIndex) index.set(props.setIndex());
+    if (props.getIndex) props.getIndex(get(index));
   });
 </script>

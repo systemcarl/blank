@@ -6,13 +6,14 @@ import NavLinks from '$lib/materials/navLinks.svelte';
 
 import Nav from './nav.svelte';
 
-const navConfig = vi.hoisted(() => ({
+const defaultConfig = vi.hoisted(() => ({
   highlights : [
     { id : 'highlight1', type : 'tag', key : 'tag1', section : 'section1' },
     { id : 'highlight2', type : 'tag', key : 'tag2', section : 'section2' },
   ],
 }));
-const navLocale = vi.hoisted(() => ({
+
+const locale = vi.hoisted(() => ({
   nav : {
     home : 'Test Home',
     highlights : {
@@ -26,20 +27,22 @@ const navLocale = vi.hoisted(() => ({
 vi.mock('$lib/hooks/useConfig', async (original) => {
   const originalDefault =
     ((await original()) as { default : () => object; }).default;
+  const writable = (await import('svelte/store')).writable;
   return {
     default : () => ({
       ...originalDefault(),
-      getConfig : vi.fn(() => navConfig),
+      config : writable(defaultConfig),
     }),
   };
 });
 vi.mock('$lib/hooks/useLocale', async (original) => {
   const originalDefault =
     ((await original()) as { default : () => object; }).default;
+  const writable = (await import('svelte/store')).writable;
   return {
     default : () => ({
       ...originalDefault(),
-      getLocale : vi.fn(() => navLocale),
+      locale : writable(locale),
     }),
   };
 });

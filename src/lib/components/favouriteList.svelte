@@ -9,12 +9,12 @@
     headingElement ?: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'p';
   } = $props();
 
-  const config = useConfig().getConfig();
-  const locale = useLocale().getLocale();
+  const { config } = useConfig();
+  const { locale } = useLocale();
 
   const favourites = (rank === 'most'
-    ? config.likes
-    : config.dislikes) ?? [];
+    ? $config.likes
+    : $config.dislikes) ?? [];
 </script>
 
 {#if favourites.length > 0}
@@ -22,13 +22,13 @@
     <svelte:element this={headingElement} class="favourite-heading">
       <Text typography="list-header-emphasis">
         {#if rank === 'most'}
-          { locale.favourites.most }
+          { $locale.favourites.most }
         {:else}
-          { locale.favourites.least }
+          { $locale.favourites.least }
         {/if}
       </Text>
       <Text typography="list-header">
-        { locale.favourites.header }
+        { $locale.favourites.header }
       </Text>
     </svelte:element>
 

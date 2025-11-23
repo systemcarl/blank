@@ -7,10 +7,10 @@
   import Contact from '$lib/components/contact.svelte';
   import Highlight from '$lib/components/highlight.svelte';
 
-  const config = useConfig().getConfig();
-  const locale = useLocale().getLocale();
+  const { config } = useConfig();
+  const { locale } = useLocale();
 
-  const highlights = config.highlights ?? [];
+  const highlights = $config.highlights ?? [];
 </script>
 
 <Content
@@ -33,10 +33,10 @@
 </Content>
 
 <svelte:head>
-  {#if locale.meta.title}
-    <title>{locale.meta.title}</title>
+  {#if $locale.meta.title}
+    <title>{$locale.meta.title}</title>
   {/if}
-  {#if locale.meta.description}
-    <meta name="description" content="{locale.meta.description}" />
+  {#if $locale.meta.description}
+    <meta name="description" content="{$locale.meta.description}" />
   {/if}
 </svelte:head>

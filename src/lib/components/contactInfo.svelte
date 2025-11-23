@@ -9,17 +9,17 @@
     headingElement ?: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'p';
   } = $props();
 
-  const config = useConfig().getConfig();
-  const locale = useLocale().getLocale();
+  const { config } = useConfig();
+  const { locale } = useLocale();
 </script>
 
-{#if config.contact && (config.contact.length > 0)}
+{#if $config.contact && ($config.contact.length > 0)}
   <div>
     <Text as={headingElement} typography="list-header">
-      { locale.contact.infoHeader }
+      { $locale.contact.infoHeader }
     </Text>
     <ul>
-      {#each config.contact ?? [] as item (item.text)}
+      {#each $config.contact ?? [] as item (item.text)}
       <ListItem icon={item.icon}>
         <Text flex>
           { item.text }

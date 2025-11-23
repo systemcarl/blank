@@ -13,19 +13,19 @@
     contact ?: boolean;
   } = $props();
 
-  const config = useConfig().getConfig();
-  const locale = useLocale().getLocale();
+  const { config } = useConfig();
+  const { locale } = useLocale();
 
   const links : { text : string; href : string; }[] = [];
   if (highlights) {
-    for (const highlight of (config.highlights ?? [])) {
-      const text = locale.nav.highlights[highlight.id] || '';
+    for (const highlight of ($config.highlights ?? [])) {
+      const text = $locale.nav.highlights[highlight.id] || '';
       if (!text) continue;
       links.push({ text, href : `/#${highlight.id}` });
     }
   }
-  if (home) links.push({ text : locale.nav.home, href : '/' });
-  if (contact) links.push({ text : locale.nav.contact, href : '/#contact' });
+  if (home) links.push({ text : $locale.nav.home, href : '/' });
+  if (contact) links.push({ text : $locale.nav.contact, href : '/#contact' });
 </script>
 
 <NavLinks links={links} justify="end" />

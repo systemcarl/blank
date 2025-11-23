@@ -13,28 +13,34 @@ import Contact from '$lib/components/contact.svelte';
 
 import HomePage from './+page.svelte';
 
-let config = vi.hoisted(() => ({} as Config));
-const getConfigMock = vi.hoisted(() => vi.fn(() => config));
-let locale = vi.hoisted(() => ({} as typeof defaultLocale));
-const getLocaleMock = vi.hoisted(() => vi.fn(() => locale));
+const defaultConfig = vi.hoisted(() => ({} as Config));
+let setConfig : ((value : unknown) => void) = vi.hoisted(() => () => {});
+
+let setLocale : ((value : unknown) => void) = vi.hoisted(() => () => {});
 
 vi.mock('$lib/hooks/useConfig', async (original) => {
   const originalDefault =
     ((await original()) as { default : () => object; }).default;
+  const writable = (await import('svelte/store')).writable;
+  const config = writable<unknown>();
+  setConfig = (value : unknown) => config.set(value);
   return {
     default : () => ({
       ...originalDefault(),
-      getConfig : getConfigMock,
+      config,
     }),
   };
 });
 vi.mock('$lib/hooks/useLocale', async (original) => {
   const originalDefault =
     ((await original()) as { default : () => object; }).default;
+  const writable = (await import('svelte/store')).writable;
+  const locale = writable<unknown>(defaultLocale);
+  setLocale = (value : unknown) => locale.set(value);
   return {
     default : () => ({
       ...originalDefault(),
-      getLocale : getLocaleMock,
+      locale,
     }),
   };
 });
@@ -62,8 +68,9 @@ vi.mock('$lib/components/contact.svelte', async (original) => {
 
 beforeEach(() => {
   vi.clearAllMocks();
+  setConfig(defaultConfig);
+  setLocale(defaultLocale);
   document.head.innerHTML = '';
-  locale = { ...defaultLocale };
 });
 afterAll(() => { vi.restoreAllMocks(); });
 
@@ -137,7 +144,7 @@ describe('+page.svelte', () => {
   });
 
   it('renders configured highlights', () => {
-    config = {
+    const config = {
       highlights : [
         {
           type : 'tag',
@@ -146,6 +153,8 @@ describe('+page.svelte', () => {
         },
       ],
     } as Config;
+    setConfig(config);
+
     const { container } = render(HomePage);
 
     const content = within(container)
@@ -189,7 +198,10 @@ describe('+page.svelte', () => {
   });
 
   it('adds title to head', async () => {
-    locale = { ...locale, meta : { ...locale.meta, title : 'Test Title' } };
+    setLocale({
+      ...defaultLocale,
+      meta : { ...defaultLocale.meta, title : 'Test Title' },
+    });
     render(HomePage);
 
     const title = document.head.querySelector('title');
@@ -198,7 +210,10 @@ describe('+page.svelte', () => {
   });
 
   it('does not add title to head if not set', async () => {
-    locale = { ...locale, meta : { ...locale.meta, title : '' } };
+    setLocale({
+      ...defaultLocale,
+      meta : { ...defaultLocale.meta, title : '' },
+    });
     render(HomePage);
 
     const title = document.head.querySelector('title');
@@ -206,10 +221,10 @@ describe('+page.svelte', () => {
   });
 
   it('adds meta description to head', async () => {
-    locale = {
-      ...locale,
-      meta : { ...locale.meta, description : 'Test Description' },
-    };
+    setLocale({
+      ...defaultLocale,
+      meta : { ...defaultLocale.meta, description : 'Test Description' },
+    });
     render(HomePage);
 
     const meta = document.head
@@ -219,7 +234,10 @@ describe('+page.svelte', () => {
   });
 
   it('does not add meta description to head if not set', async () => {
-    locale = { ...locale, meta : { ...locale.meta, description : '' } };
+    setLocale({
+      ...defaultLocale,
+      meta : { ...defaultLocale.meta, description : '' },
+    });
     render(HomePage);
 
     const meta = document.head

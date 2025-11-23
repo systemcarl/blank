@@ -7,13 +7,12 @@
 
   const { id, tag } : { id ?: string; tag ?: string; } = $props();
 
-  const { getIndex } = useArticles();
-  const index = getIndex();
+  const { index } = useArticles();
 
-  const title = tag ? (index.tags[tag]?.name ?? 'Articles') : 'All Articles';
+  const title = tag ? ($index.tags[tag]?.name ?? 'Articles') : 'All Articles';
   const articles = tag
-    ? (index.tags[tag]?.articles ?? [])
-    : Object.values(index.articles);
+    ? ($index.tags[tag]?.articles ?? [])
+    : Object.values($index.articles);
 </script>
 
 <Heading id={id} level={2}>{ title }</Heading>

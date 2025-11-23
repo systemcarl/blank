@@ -1,9 +1,9 @@
 import { beforeEach, afterAll, describe, it, expect, vi } from 'vitest';
 import { render } from '@testing-library/svelte';
+import { get } from 'svelte/store';
 
-import { resetThemes } from '$lib/stores/theme';
-
-import { getThemes, setThemes, getTheme, setTheme } from '$lib/stores/theme';
+import { log } from '$lib/utils/log';
+import { themes, theme, resetThemes } from '$lib/stores/theme';
 import Test from './useThemes.inner.test.svelte';
 import NestedTest from './useThemes.outer.test.svelte';
 
@@ -12,6 +12,11 @@ const section = vi.hoisted(() => ({
   graphics : { graphic : { src : 'graphic' } },
 }));
 const getSectionMock = vi.hoisted(() => vi.fn((_, _opts) => section));
+
+vi.mock('$lib/utils/log', async original => ({
+  ...(await original()),
+  log : vi.fn(),
+}));
 vi.mock('$lib/utils/theme', async original => ({
   ...(await original()),
   getSection : getSectionMock,
@@ -34,18 +39,18 @@ describe('useThemes', () => {
 
     render(Test, { props : { setThemes : () => expected } });
 
-    const actual = getThemes();
+    const actual = get(themes);
     expect(actual).toEqual(expected);
   });
 
   it('retrieves empty object if no themes stored', () => {
-    const store = getThemes();
+    const store = get(themes);
     expect(store).toEqual({});
   });
 
   it('retrieves stored themes', () => {
     const expected = { test : {} };
-    setThemes(expected);
+    themes.set(expected);
 
     let actual;
     render(Test, { props : { getThemes : (themes) => { actual = themes; } } });
@@ -54,19 +59,19 @@ describe('useThemes', () => {
   });
 
   it('sets theme', () => {
-    setThemes({ default : {}, test : {} });
+    themes.set({ default : {}, test : {} });
     const expected = 'test';
 
     render(Test, { props : { setTheme : () => expected } });
 
-    const actual = getTheme();
+    const actual = get(theme);
     expect(actual).toEqual(expected);
   });
 
   it('gets theme', () => {
-    setThemes({ default : {}, test : {} });
+    themes.set({ default : {}, test : {} });
     const expected = 'test';
-    setTheme(expected);
+    theme.set(expected);
 
     let actual;
     render(Test, { props : { getTheme : (theme) => { actual = theme; } } });
@@ -76,74 +81,72 @@ describe('useThemes', () => {
 
   it('makes section provider', () => {
     let className;
-    render(Test, { props : { makeProvider : {
-      keys : { sectionKey : 'test' },
-      className : (name) => { className = name; },
-    } } });
+    render(Test, { props : {
+      sectionKey : 'test',
+      getProviderClasses : (name) => { className = name; },
+    } });
 
     expect(className).toBe('section-test');
   });
 
   it('makes section provider with kebab case', () => {
     let className;
-    render(Test, { props : { makeProvider : {
-      keys : { sectionKey : 'testSection' },
-      className : (name) => { className = name; },
-    } } });
+    render(Test, { props : {
+      sectionKey : 'testSection',
+      getProviderClasses : (name) => { className = name; },
+    } });
 
     expect(className).toBe('section-test-section');
   });
 
   it('makes typography provider', () => {
     let className;
-    render(Test, { props : { makeProvider : {
-      keys : { typographyKey : 'test' },
-      className : (name) => { className = name; },
-    } } });
+    render(Test, { props : {
+      typographyKey : 'test',
+      getProviderClasses : (name) => { className = name; },
+    } });
 
     expect(className).toBe('typography-test');
   });
 
   it('makes typography provider with kebab case', () => {
     let className;
-    render(Test, { props : { makeProvider : {
-      keys : { typographyKey : 'testTypography' },
-      className : (name) => { className = name; },
-    } } });
+    render(Test, { props : {
+      typographyKey : 'testTypography',
+      getProviderClasses : (name) => { className = name; },
+    } });
 
     expect(className).toBe('typography-test-typography');
   });
 
   it('makes graphic provider', () => {
     let className;
-    render(Test, { props : { makeProvider : {
-      keys : { graphicKey : 'test' },
-      className : (name) => { className = name; },
-    } } });
+    render(Test, { props : {
+      graphicKey : 'test',
+      getProviderClasses : (name) => { className = name; },
+    } });
 
     expect(className).toBe('graphic-test');
   });
 
   it('makes graphic provider with kebab case', () => {
     let className;
-    render(Test, { props : { makeProvider : {
-      keys : { graphicKey : 'testGraphic' },
-      className : (name) => { className = name; },
-    } } });
+    render(Test, { props : {
+      graphicKey : 'testGraphic',
+      getProviderClasses : (name) => { className = name; },
+    } });
 
     expect(className).toBe('graphic-test-graphic');
   });
 
   it('combines provides', () => {
     let className;
-    render(Test, { props : { makeProvider : {
-      keys : {
-        sectionKey : 'section',
-        typographyKey : 'typography',
-        graphicKey : 'graphic',
-      },
-      className : (name) => { className = name; },
-    } } });
+    render(Test, { props : {
+      sectionKey : 'section',
+      typographyKey : 'typography',
+      graphicKey : 'graphic',
+      getProviderClasses : (name) => { className = name; },
+    } });
 
     expect(className).toContain('section-section');
     expect(className).toContain('typography-typography');
@@ -166,7 +169,7 @@ describe('useThemes', () => {
   });
 
   it('loads client theme', () => {
-    setThemes({ default : {}, test : {} });
+    themes.set({ default : {}, test : {} });
 
     render(Test);
     window.dispatchEvent(new StorageEvent(
@@ -174,32 +177,32 @@ describe('useThemes', () => {
       { key : 'theme', newValue : 'test' },
     ));
 
-    const result = getTheme();
+    const result = get(theme);
     expect(result).toEqual('test');
   });
 
   it('sets client theme on local storage event', () => {
-    setThemes({ default : {}, test : {} });
+    themes.set({ default : {}, test : {} });
 
     render(Test);
     window.dispatchEvent(new StorageEvent(
       'storage',
       { key : 'theme', newValue : 'test' },
     ));
-    const result = getTheme();
+    const result = get(theme);
 
     expect(result).toEqual('test');
   });
 
   it('defaults client theme on unexpected storage event', () => {
-    setThemes({ test : {} });
+    themes.set({ test : {} });
 
     render(Test);
     window.dispatchEvent(new StorageEvent(
       'storage',
       { key : 'theme', newValue : 'unexpected' },
     ));
-    const result = getTheme();
+    const result = get(theme);
 
     expect(result).toEqual('test');
   });
@@ -209,7 +212,7 @@ describe('useThemes', () => {
 
     let actual;
     render(NestedTest, { props : {
-      makeProvider : { keys : { sectionKey : 'test' } },
+      sectionKey : 'test',
       innerProps : { getSection : (section) => { actual = section; } },
     } });
 
@@ -223,7 +226,7 @@ describe('useThemes', () => {
 
     let actual;
     render(NestedTest, { props : {
-      makeProvider : { keys : { typographyKey : 'typography' } },
+      typographyKey : 'typography',
       innerProps : { getTypography : (typography) => { actual = typography; } },
     } });
 
@@ -235,9 +238,9 @@ describe('useThemes', () => {
 
     let actual;
     render(NestedTest, { props : {
-      makeProvider : { keys : { sectionKey : 'test' } },
+      sectionKey : 'test',
       innerProps : {
-        makeProvider : { keys : { typographyKey : 'typography' } },
+        typographyKey : 'typography',
         getSection : (section) => { actual = section; },
       },
     } });
@@ -252,7 +255,7 @@ describe('useThemes', () => {
 
     let actual;
     render(NestedTest, { props : {
-      makeProvider : { keys : { graphicKey : 'graphic' } },
+      graphicKey : 'graphic',
       innerProps : { getGraphic : (graphic) => { actual = graphic; } },
     } });
 
@@ -264,9 +267,9 @@ describe('useThemes', () => {
 
     let actual;
     render(NestedTest, { props : {
-      makeProvider : { keys : { sectionKey : 'test' } },
+      sectionKey : 'test',
       innerProps : {
-        makeProvider : { keys : { graphicKey : 'graphic' } },
+        graphicKey : 'graphic',
         getSection : (section) => { actual = section; },
       },
     } });
@@ -277,11 +280,11 @@ describe('useThemes', () => {
   });
 
   it('passes themes store updates', async () => {
-    setThemes({ default : { default : {} }, test : { test : {} } });
+    themes.set({ default : { default : {} }, test : { test : {} } });
 
     let actual;
     const props = {
-      makeProvider : { keys : { sectionKey : 'test' } },
+      sectionKey : 'test',
       innerProps : {
         onSectionChange : (section : unknown) => { actual = section; },
       },
@@ -299,7 +302,7 @@ describe('useThemes', () => {
   it('passes section context updates', async () => {
     let actual;
     const props = {
-      makeProvider : { keys : { sectionKey : 'default' } },
+      sectionKey : 'default',
       innerProps : {
         onSectionChange : (section : unknown) => { actual = section; },
       },
@@ -316,7 +319,6 @@ describe('useThemes', () => {
 
   it('does not pass unregistered section context updates', async () => {
     const props = {
-      makeProvider : { keys : {} },
       innerProps : { onSectionChange : () => {} },
     };
     const rendered = render(NestedTest, { props });
@@ -324,6 +326,13 @@ describe('useThemes', () => {
 
     expect(getSectionMock)
       .not.toHaveBeenCalledWith(expect.anything(), { key : 'test' });
+    expect(log).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message : 'Attempted to set section key to \'test\' without'
+          + ' initializing context.',
+      }),
+      expect.objectContaining({ level : 'warn' }),
+    );
   });
 
   it('passes section context typography update', async () => {
@@ -342,10 +351,8 @@ describe('useThemes', () => {
 
     let actual;
     const props = {
-      makeProvider : { keys : {
-        sectionKey : 'default',
-        typographyKey : 'body',
-      } },
+      sectionKey : 'default',
+      typographyKey : 'body',
       innerProps : {
         onTypographyChange : (typography : unknown) => { actual = typography; },
       },
@@ -359,7 +366,7 @@ describe('useThemes', () => {
   it('passes typography context updates', async () => {
     let actual;
     const props = {
-      makeProvider : { keys : { typographyKey : 'body' } },
+      typographyKey : 'body',
       innerProps : {
         onTypographyChange : (typography : unknown) => { actual = typography; },
       },
@@ -373,7 +380,6 @@ describe('useThemes', () => {
   it('does not pass unregistered typography context updates', async () => {
     let actual;
     const props = {
-      makeProvider : { keys : {} },
       innerProps : {
         onTypographyChange : (typography : unknown) => { actual = typography; },
       },
@@ -382,6 +388,13 @@ describe('useThemes', () => {
     await rendered.rerender({ ...props, setTypography : () => 'typography' });
 
     expect(actual).not.toEqual(section.typography.typography);
+    expect(log).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message : 'Attempted to set typography key to \'typography\' without'
+          + ' initializing context.',
+      }),
+      expect.objectContaining({ level : 'warn' }),
+    );
   });
 
   it('passes section context graphic update', async () => {
@@ -400,10 +413,8 @@ describe('useThemes', () => {
 
     let actual;
     const props = {
-      makeProvider : { keys : {
-        sectionKey : 'default',
-        graphicKey : 'graphic',
-      } },
+      sectionKey : 'default',
+      graphicKey : 'graphic',
       innerProps : {
         onGraphicChange : (graphic : unknown) => { actual = graphic; },
       },
@@ -417,7 +428,7 @@ describe('useThemes', () => {
   it('passes graphic context updates', async () => {
     let actual;
     const props = {
-      makeProvider : { keys : { graphicKey : '' } },
+      graphicKey : '',
       innerProps : {
         onGraphicChange : (graphic : unknown) => { actual = graphic; },
       },
@@ -431,7 +442,6 @@ describe('useThemes', () => {
   it('does not pass unregistered graphic context updates', async () => {
     let actual;
     const props = {
-      makeProvider : { keys : {} },
       innerProps : {
         onGraphicChange : (graphic : unknown) => { actual = graphic; },
       },
@@ -440,5 +450,12 @@ describe('useThemes', () => {
     await rendered.rerender({ ...props, setGraphic : () => 'graphic' });
 
     expect(actual).not.toEqual(section.graphics.graphic);
+    expect(log).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message : 'Attempted to set graphic key to \'graphic\' without'
+          + ' initializing context.',
+      }),
+      expect.objectContaining({ level : 'warn' }),
+    );
   });
 });

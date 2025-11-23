@@ -30,28 +30,21 @@ const svgTemplate = (text : string) => `
 </svg>
 `;
 
-const defaultSection = vi.hoisted(() => ({
-  background : { fill : '#FFF' },
-}));
+const defaultSection = vi.hoisted(() => ({ background : { fill : '#FFF' } }));
+let setSection : ((value : unknown) => void) = vi.hoisted(() => () => {});
 
-let section = vi.hoisted(() => defaultSection as unknown);
 let graphicContent = vi.hoisted(() => '');
-
-let updateSelection = vi.hoisted(() => (() => {}) as (arg : unknown) => void);
-
-const onSectionChangeMock = vi.hoisted(() => vi.fn((callback) => {
-  updateSelection = callback;
-  callback(section);
-}));
 
 vi.mock('$lib/hooks/useThemes', async (original) => {
   const originalDefault =
     ((await original()) as { default : () => object; }).default;
+  const writable = (await import('svelte/store')).writable;
+  const section = writable<unknown>();
+  setSection = (value : unknown) => section.set(value);
   return {
     default : () => ({
       ...originalDefault(),
-      getSection : vi.fn(() => section),
-      onSectionChange : onSectionChangeMock,
+      section,
     }),
   };
 });
@@ -79,15 +72,11 @@ const TestContent = makeComponent({
   },
 });
 
-beforeAll(async () => await loadStyles());
+beforeAll(async () => { await loadStyles(); });
 
 beforeEach(() => {
   vi.clearAllMocks();
-  onSectionChangeMock.mockImplementation((callback) => {
-    updateSelection = callback;
-    callback(section);
-  });
-  section = defaultSection;
+  setSection(defaultSection);
   graphicContent = '';
 });
 
@@ -95,7 +84,7 @@ afterAll(() => { vi.restoreAllMocks(); });
 
 describe('Background', () => {
   it('renders background fill', async () => {
-    section = { background : { fill : '#FFF' } };
+    setSection({ background : { fill : '#FFF' } });
 
     const { container } = render(Background, { children : TestContent });
 
@@ -193,7 +182,7 @@ describe('Background', () => {
   });
 
   it('renders SVG background image', async () => {
-    section = { background : { img : { src : 'test-background.svg' } } };
+    setSection({ background : { img : { src : 'test-background.svg' } } });
     graphicContent = svgTemplate('Background Graphic');
 
     const { container } = render(Background, { children : TestContent });
@@ -218,7 +207,7 @@ describe('Background', () => {
       src : 'test-background.svg',
     }));
 
-    updateSelection({ background : { img : {
+    setSection({ background : { img : {
       src : 'updated-background.svg',
     } } });
 
@@ -239,9 +228,8 @@ describe('Background', () => {
   });
 
   it('renders SVG background image on first pass', async () => {
-    section = { background : { img : { src : 'test-background.svg' } } };
+    setSection({ background : { img : { src : 'test-background.svg' } } });
     graphicContent = svgTemplate('Background Graphic');
-    onSectionChangeMock.mockImplementation(() => {});
 
     const { container } = render(Background, { children : TestContent });
 

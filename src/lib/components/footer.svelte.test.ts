@@ -9,7 +9,7 @@ import Graphic from '$lib/materials/graphic.svelte';
 
 import Footer from './footer.svelte';
 
-const navLocale = vi.hoisted(() => ({
+const locale = vi.hoisted(() => ({
   alt : { logo : 'Test Logo' },
   nav : {
     home : 'Test Home',
@@ -20,10 +20,11 @@ const navLocale = vi.hoisted(() => ({
 vi.mock('$lib/hooks/useLocale', async (original) => {
   const originalDefault =
     ((await original()) as { default : () => object; }).default;
+  const writable = (await import('svelte/store')).writable;
   return {
     default : () => ({
       ...originalDefault(),
-      getLocale : vi.fn(() => navLocale),
+      locale : writable(locale),
     }),
   };
 });
@@ -54,8 +55,8 @@ describe('Footer', () => {
     expect(NavLinks).toHaveBeenCalledWithProps(expect.objectContaining({
       direction : 'column',
       links : [
-        { text : navLocale.nav.home, href : '/' },
-        { text : navLocale.nav.contact, href : '/#contact' },
+        { text : locale.nav.home, href : '/' },
+        { text : locale.nav.contact, href : '/#contact' },
       ],
     }));
   });
@@ -68,7 +69,7 @@ describe('Footer', () => {
     expect(Graphic).toHaveBeenCalledOnce();
     expect(Graphic).toHaveBeenCalledWithProps(expect.objectContaining({
       graphic : 'logo',
-      alt : navLocale.alt.logo,
+      alt : locale.alt.logo,
     }));
   });
 
