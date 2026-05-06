@@ -8,7 +8,7 @@
     links : { text : string; href : string; }[];
   } = $props();
 
-  let className = `justify-${justify}`;
+  const className = $derived.by(() => `justify-${justify}`);
 </script>
 
 {#if links.length > 0}

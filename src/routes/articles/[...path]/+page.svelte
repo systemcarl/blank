@@ -5,10 +5,11 @@
   import Post from '$lib/components/post.svelte';
 
   const { data } = $props();
-  const description = (data?.abstract ?? '')
+
+  const description = $derived((data?.abstract ?? '')
     ?.replace(/\r?\n|\r/g, ' ')
     ?.replace(/\s+/g, ' ')
-    ?.trim();
+    ?.trim());
 </script>
 
 <Content section="article" hasTopNav>

@@ -7,7 +7,7 @@ import {
   expect,
   vi,
 } from 'vitest';
-import { page } from '@vitest/browser/context';
+import { page } from 'vitest/browser';
 import { render } from '@testing-library/svelte';
 
 import { tryGet } from '$lib/utils/typing';

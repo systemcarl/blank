@@ -1,32 +1,24 @@
 <script lang="ts">
-  import { onDestroy } from 'svelte';
   import { browser } from '$app/environment';
-  import useTheme from '$lib/hooks/useThemes';
+  import useThemes from '$lib/hooks/useThemes';
   import useGraphics from '$lib/hooks/useGraphics';
   import Graphic from './graphic.svelte';
 
   const { children } = $props();
 
-  const { section } = useTheme();
-  const { isGraphic } = useGraphics();
+  const { section } = (() => useThemes())();
+  const { isGraphic } = (() => useGraphics())();
 
-  let hasGraphic = $state<boolean>(true);
-
-  if (browser) {
-    const unsubscribe = section.subscribe((s) => {
-      hasGraphic = !!s?.background.img
-        && isGraphic(s?.background.img?.src ?? '');
-    });
-    onDestroy(unsubscribe);
-  };
+  const hasGraphic = $derived(!!$section?.background.img
+    && isGraphic($section?.background.img?.src ?? ''));
+  const underClass = $derived(
+    'background-underlay' + ((!browser || hasGraphic) ? ' bg-disabled' : ''),
+  );
 </script>
 
 <div class="background">
   {@render children()}
-  <div
-    class="background-underlay"
-    style={hasGraphic ? 'background-image: none;' : ''}
-  >
+  <div class={underClass}>
     {#if hasGraphic}
       <div class="background-graphic">
         <Graphic src={$section?.background.img?.src} />
@@ -51,6 +43,10 @@
     background-image: var(--bg-img);
     background-size: var(--bg-size);
     background-repeat: var(--bg-repeat);
+  }
+
+  .background-underlay.bg-disabled {
+    background-image: none;
   }
 
   .background-graphic {

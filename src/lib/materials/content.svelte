@@ -19,16 +19,21 @@
     children ?: Snippet<[]>;
   } = $props();
 
-  const { providerClasses } = useThemes({ sectionKey : section });
+  const { providerClasses } = (() => useThemes({ sectionKey : section }))();
 
-  const classes = ['layout'];
-  if (hasTopNav) classes.push('top-nav');
+  const classes = $derived.by(() => {
+    const cls = ['layout'];
+    if (hasTopNav) cls.push('top-nav');
+    return cls;
+  });
 
-  const align = alignment === 'centre' ? 'center' : 'flex-start';
+  const align = $derived(alignment === 'centre' ? 'center' : 'flex-start');
   // shift vertical centred layout to align top nav or bottom links
-  const justify = ((hasTopNav || hasBottomNav) && justification === 'centre')
-    ? 'space-between'
-    : justification === 'centre' ? 'center' : 'flex-start';
+  const justify = $derived(
+    ((hasTopNav || hasBottomNav) && justification === 'centre')
+      ? 'space-between'
+      : justification === 'centre' ? 'center' : 'flex-start',
+  );
 </script>
 
 <section class={$providerClasses}>

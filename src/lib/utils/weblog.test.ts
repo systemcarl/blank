@@ -291,8 +291,8 @@ describe('renderArticle', () => {
     document.body.innerHTML = renderArticle(text);
     const { getAllByText } = within(document.body);
     const container = getAllByText((content, element) => {
-      return !!(element?.textContent.includes('const y = 20;')
-        && element?.textContent.includes('console.log(y);'));
+      return !!(element?.textContent?.includes('const y = 20;')
+        && element?.textContent?.includes('console.log(y);'));
     });
     expect(container.some(el => el.tagName === 'PRE')).toBe(true);
     expect(container.some(el => el.tagName === 'CODE')).toBe(true);

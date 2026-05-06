@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { onDestroy } from 'svelte';
   import { browser } from '$app/environment';
   import useGraphics from '$lib/hooks/useGraphics';
   import useThemes from '$lib/hooks/useThemes';
@@ -10,17 +9,12 @@
     alt ?: string;
   } = $props();
 
-  const { isGraphic, renderGraphic } = useGraphics();
-  const { graphic, providerClasses } = useThemes({ graphicKey });
+  const { isGraphic, renderGraphic } = (() => useGraphics())();
+  const { graphic, providerClasses } = (() => useThemes({ graphicKey }))();
 
-  let content = $state<string>('');
-
-  if (browser) {
-    const unsubscribe = graphic.subscribe((g) => {
-      content = renderGraphic(src ?? g?.src ?? '');
-    });
-    onDestroy(unsubscribe);
-  };
+  const content = $derived(
+    browser ? renderGraphic(src ?? $graphic?.src ?? '') : '',
+  );
 </script>
 
 {#if content}

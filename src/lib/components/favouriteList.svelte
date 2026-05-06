@@ -12,9 +12,9 @@
   const { config } = useConfig();
   const { locale } = useLocale();
 
-  const favourites = (rank === 'most'
-    ? $config.likes
-    : $config.dislikes) ?? [];
+  const favourites = $derived.by(
+    () => (rank === 'most' ? $config.likes : $config.dislikes) ?? [],
+  );
 </script>
 
 {#if favourites.length > 0}

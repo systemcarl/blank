@@ -33,17 +33,22 @@
     children : Snippet<[]>;
   } = $props();
 
-  const { providerClasses } = useThemes({ typographyKey : typography });
+  const { providerClasses } = (() => useThemes({
+    typographyKey : typography,
+  }))();
 
-  const className = [$providerClasses, 'text'];
-  if (centred) className.push('text-centred');
-  if (flex) className.push('text-flex');
-  if (inset) className.push('text-inset');
+  const className = $derived.by(() => {
+    const cls = [$providerClasses, 'text'];
+    if (centred) cls.push('text-centred');
+    if (flex) cls.push('text-flex');
+    if (inset) cls.push('text-inset');
+    return cls.join(' ');
+  });
 </script>
 
 <svelte:element
   id={id}
-  class="{className.join(' ')}"
+  class={className}
   this={as}
 >
   {@render children()}

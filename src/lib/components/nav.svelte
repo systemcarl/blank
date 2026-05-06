@@ -16,16 +16,19 @@
   const { config } = useConfig();
   const { locale } = useLocale();
 
-  const links : { text : string; href : string; }[] = [];
-  if (highlights) {
-    for (const highlight of ($config.highlights ?? [])) {
-      const text = $locale.nav.highlights[highlight.id] || '';
-      if (!text) continue;
-      links.push({ text, href : `/#${highlight.id}` });
+  const links = $derived.by(() => {
+    const ln : { text : string; href : string; }[] = [];
+    if (highlights) {
+      for (const highlight of ($config.highlights ?? [])) {
+        const text = $locale.nav.highlights[highlight.id] || '';
+        if (!text) continue;
+        ln.push({ text, href : `/#${highlight.id}` });
+      }
     }
-  }
-  if (home) links.push({ text : $locale.nav.home, href : '/' });
-  if (contact) links.push({ text : $locale.nav.contact, href : '/#contact' });
+    if (home) ln.push({ text : $locale.nav.home, href : '/' });
+    if (contact) ln.push({ text : $locale.nav.contact, href : '/#contact' });
+    return ln;
+  });
 </script>
 
 <NavLinks links={links} justify="end" />

@@ -10,12 +10,16 @@
   const { locale } = useLocale();
   const errorLocale = $locale.errors;
 
-  let detail : string = $state(errorLocale.default);
-  if (status === 400) detail = errorLocale.invalid;
-  if (status === 401) detail = errorLocale.notAuthenticated;
-  if (status === 403) detail = errorLocale.forbidden;
-  if (status === 404) detail = errorLocale.notFound;
-  if (status === 500) detail = errorLocale.unexpected;
+  const detail = $derived.by(() => {
+    switch (status) {
+      case 400: return errorLocale.invalid;
+      case 401: return errorLocale.notAuthenticated;
+      case 403: return errorLocale.forbidden;
+      case 404: return errorLocale.notFound;
+      case 500: return errorLocale.unexpected;
+      default: return errorLocale.default;
+    }
+  });
 </script>
 
 <TitleCard title={`${status} ${message}`} subtitle={detail} />

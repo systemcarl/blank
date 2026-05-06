@@ -1,5 +1,5 @@
 import { beforeAll, describe, it, expect } from 'vitest';
-import { page } from '@vitest/browser/context';
+import { page } from 'vitest/browser';
 import { render } from '@testing-library/svelte';
 
 import { loadStyles } from '$lib/tests/browser';

@@ -9,10 +9,14 @@
 
   const { index } = useArticles();
 
-  const title = tag ? ($index.tags[tag]?.name ?? 'Articles') : 'All Articles';
-  const articles = tag
-    ? ($index.tags[tag]?.articles ?? [])
-    : Object.values($index.articles);
+  const title = $derived.by(
+    () => tag ? ($index.tags[tag]?.name ?? 'Articles') : 'All Articles',
+  );
+  const articles = $derived.by(
+    () => tag
+      ? ($index.tags[tag]?.articles ?? [])
+      : Object.values($index.articles),
+  );
 </script>
 
 <Heading id={id} level={2}>{ title }</Heading>
