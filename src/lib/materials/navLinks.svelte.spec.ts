@@ -8,7 +8,7 @@ import {
   vi,
 } from 'vitest';
 import { page } from 'vitest/browser';
-import { render } from '@testing-library/svelte';
+import { cleanup, render } from '@testing-library/svelte';
 
 import { tryGet } from '$lib/utils/typing';
 import { loadStyles } from '$lib/tests/browser';
@@ -28,7 +28,11 @@ vi.mock('$lib/materials/link.svelte', async original => ({
 }));
 
 beforeAll(async () => await loadStyles());
-beforeEach(() => { vi.clearAllMocks(); });
+
+beforeEach(() => {
+  vi.clearAllMocks();
+  cleanup();
+});
 
 afterAll(() => { vi.restoreAllMocks(); });
 

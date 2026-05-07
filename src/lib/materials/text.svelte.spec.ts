@@ -8,14 +8,18 @@ import {
   vi,
 } from 'vitest';
 import { page } from 'vitest/browser';
-import { render } from '@testing-library/svelte';
+import { cleanup, render } from '@testing-library/svelte';
 
 import { loadStyles } from '$lib/tests/browser';
 import { makeHtml } from '$lib/tests/component';
 import Text from './text.svelte';
 
 beforeAll(async () => await loadStyles());
-beforeEach(() => { vi.clearAllMocks(); });
+
+beforeEach(() => {
+  vi.clearAllMocks();
+  cleanup();
+});
 
 afterAll(() => { vi.restoreAllMocks(); });
 

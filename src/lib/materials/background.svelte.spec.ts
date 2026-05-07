@@ -8,7 +8,7 @@ import {
   vi,
 } from 'vitest';
 import { page } from 'vitest/browser';
-import { render } from '@testing-library/svelte';
+import { cleanup, render } from '@testing-library/svelte';
 
 import { loadStyles } from '$lib/tests/browser';
 import { makeComponent, wrapOriginal } from '$lib/tests/component';
@@ -76,6 +76,7 @@ beforeAll(async () => { await loadStyles(); });
 
 beforeEach(() => {
   vi.clearAllMocks();
+  cleanup();
   setSection(defaultSection);
   graphicContent = '';
 });

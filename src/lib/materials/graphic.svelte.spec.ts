@@ -8,7 +8,7 @@ import {
   vi,
 } from 'vitest';
 import { tick } from 'svelte';
-import { render } from '@testing-library/svelte';
+import { cleanup, render } from '@testing-library/svelte';
 
 import { loadStyles } from '$lib/tests/browser';
 import Graphic from './graphic.svelte';
@@ -65,6 +65,7 @@ beforeAll(async () => await loadStyles());
 
 beforeEach(() => {
   vi.clearAllMocks();
+  cleanup();
   setGraphic(defaultGraphic);
   graphicContent = '';
 });

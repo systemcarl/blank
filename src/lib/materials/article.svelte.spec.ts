@@ -1,11 +1,12 @@
-import { beforeAll, describe, it, expect } from 'vitest';
+import { beforeAll, beforeEach, describe, it, expect } from 'vitest';
 import { page } from 'vitest/browser';
-import { render } from '@testing-library/svelte';
+import { cleanup, render } from '@testing-library/svelte';
 
 import { loadStyles } from '$lib/tests/browser';
 import Article from './article.svelte';
 
 beforeAll(async () => await loadStyles());
+beforeEach(() => { cleanup(); });
 
 describe('Article', () => {
   it('renders content', async () => {

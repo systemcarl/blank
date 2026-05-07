@@ -1,14 +1,16 @@
-import { beforeAll, describe, it, expect } from 'vitest';
+import { beforeAll, beforeEach, describe, it, expect } from 'vitest';
 import { page } from 'vitest/browser';
-import { render } from '@testing-library/svelte';
+import { cleanup, render } from '@testing-library/svelte';
 
 import { loadStyles } from '$lib/tests/browser';
 import { makeComponent, addChildComponent } from '$lib/tests/component';
+
 import Grid from './grid.svelte';
 
 const TestComponent = makeComponent({ testId : 'child' });
 
 beforeAll(async () => await loadStyles());
+beforeEach(() => { cleanup(); });
 
 describe('Grid', () => {
   it('renders children on mobile', async () => {
