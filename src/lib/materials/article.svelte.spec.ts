@@ -19,13 +19,14 @@ describe('Article', () => {
   });
 
   it('renders content scrim', async () => {
+    const expectedScrim = 8;
     const { container } = render(Article, {
       content : '<p data-testid="article-content">Test Article</p>',
     });
 
     container.style.setProperty('padding', '32px');
     container.style.setProperty('background-color', '#000');
-    container.style.setProperty('--font-size', '16px');
+    container.style.setProperty('--font-size', `${expectedScrim * 2}px`);
     container.style.setProperty('--bg-colour', 'rgba(255, 255, 255, 0.9)');
 
     const article = page
@@ -41,8 +42,8 @@ describe('Article', () => {
       .match(/\/\s*([0-9.]+)/)?.[1] ?? '');
     expect(backgroundAlpha).toBeCloseTo(0.6, 2);
     expect(boxShadowAlpha).toBeCloseTo(0.6, 2);
-    expect(boxShadowBlur).toBe('16px');
-    expect(boxShadowSpread).toBe('16px');
+    expect(boxShadowBlur).toBe('8px');
+    expect(boxShadowSpread).toBe('8px');
   });
 
   it('renders alerts', async () => {
