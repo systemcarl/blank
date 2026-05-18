@@ -9,6 +9,7 @@
     hasBottomNav = false,
     alignment = 'left',
     justification = 'top',
+    showBackground = true,
     children,
   } : {
     section ?: string;
@@ -16,6 +17,7 @@
     hasBottomNav ?: boolean;
     alignment ?: 'left' | 'centre';
     justification ?: 'top' | 'centre';
+    showBackground ?: boolean;
     children ?: Snippet<[]>;
   } = $props();
 
@@ -37,7 +39,7 @@
 </script>
 
 <section class={$providerClasses}>
-  <Background>
+  <Background show={showBackground}>
     <div
       class={classes.join(' ')}
       style="--content-align: {align}; --content-justify: {justify};"

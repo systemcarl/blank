@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { browser } from '$app/environment';
   import useConfig from '$lib/hooks/useConfig';
   import useLocale from '$lib/hooks/useLocale';
   import Text from '$lib/materials/text.svelte';
@@ -34,7 +35,7 @@
 
     <ul>
       {#each favourites as item (item.text)}
-        <ListItem icon={item.icon}>
+        <ListItem icon={item.icon} showIcon={browser}>
           <Text>{ item.text }</Text>
         </ListItem>
       {/each}

@@ -1,10 +1,13 @@
 <script lang="ts">
-  import { browser } from '$app/environment';
+  import type { Snippet } from 'svelte';
   import useThemes from '$lib/hooks/useThemes';
   import useGraphics from '$lib/hooks/useGraphics';
   import Graphic from './graphic.svelte';
 
-  const { children } = $props();
+  const { show = true, children } : {
+    show ?: boolean;
+    children : Snippet<[]>;
+  } = $props();
 
   const { section } = (() => useThemes())();
   const { isGraphic } = (() => useGraphics())();
@@ -12,7 +15,7 @@
   const hasGraphic = $derived(!!$section?.background.img
     && isGraphic($section?.background.img?.src ?? ''));
   const underClass = $derived(
-    'background-underlay' + ((!browser || hasGraphic) ? ' bg-disabled' : ''),
+    'background-underlay' + ((!show || hasGraphic) ? ' bg-disabled' : ''),
   );
 </script>
 
@@ -21,7 +24,7 @@
   <div class={underClass}>
     {#if hasGraphic}
       <div class="background-graphic">
-        <Graphic src={$section?.background.img?.src} />
+        <Graphic src={$section?.background.img?.src} show={show} />
       </div>
     {/if}
   </div>

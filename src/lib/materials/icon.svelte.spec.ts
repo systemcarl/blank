@@ -45,4 +45,21 @@ describe('Icon', () => {
       graphic : 'icon-graphic',
     }));
   });
+
+  it('hides graphic when show is false', () => {
+    const { container } = render(Icon, {
+      graphic : 'icon-graphic',
+      show : false,
+    });
+
+    const icon = container.children[0] as HTMLElement;
+    expect(icon).toBeInTheDocument();
+
+    expect(Graphic).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        show : false,
+      }),
+    );
+  });
 });

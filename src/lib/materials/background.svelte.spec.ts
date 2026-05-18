@@ -182,6 +182,28 @@ describe('Background', () => {
     expect(underlayStyle.backgroundRepeat).toBe('repeat');
   });
 
+  it('does not render background image if show is false', async () => {
+    const { container } = render(Background, {
+      show : false,
+      children : TestContent,
+    });
+
+    container.style.setProperty('display', 'flex');
+    container.style.setProperty('width', '100%');
+    container.style.setProperty('height', '200px');
+    container.style.setProperty('--bg-img', 'url(test-background.png)');
+
+    const background = container.children[0] as HTMLElement;
+    await expect.element(background).toBeInTheDocument();
+    const underlay = Array.from(background.children)
+      .find(c => getComputedStyle(c).position === 'absolute') as HTMLElement;
+    await expect.element(underlay).toBeInTheDocument();
+
+    const underlayStyle = getComputedStyle(underlay);
+
+    expect(underlayStyle.backgroundImage).not.toContain('/test-background.png');
+  });
+
   it('renders SVG background image', async () => {
     setSection({ background : { img : { src : 'test-background.svg' } } });
     graphicContent = svgTemplate('Background Graphic');

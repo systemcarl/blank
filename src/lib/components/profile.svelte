@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { browser } from '$app/environment';
   import useConfig from '$lib/hooks/useConfig';
   import useLocale from '$lib/hooks/useLocale';
   import SplitStack from '$lib/materials/splitStack.svelte';
@@ -17,10 +18,14 @@
 <SplitStack divide stack={['mobile', 'tablet', 'desktop']}>
   <SplitStack stack={['mobile', 'tablet', 'desktop', 'wide']}>
     <SplitStack stackOrder="reverse" stack={['mobile', 'tablet']}>
-      <Frame rotation={45}>
-        <Graphic graphic="avatar" />
+      <Frame rotation={45} show={browser}>
+        <Graphic graphic="avatar" show={browser} />
       </Frame>
-      <TitleCard title={$locale.title} subtitle={$locale.subtitle} />
+      <TitleCard
+        title={$locale.title}
+        subtitle={$locale.subtitle}
+        showGraphic={browser}
+      />
     </SplitStack>
     <Tagline>{ $locale.tagline }</Tagline>
   </SplitStack>

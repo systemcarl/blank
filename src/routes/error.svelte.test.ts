@@ -7,9 +7,11 @@ import HttpError from '$lib/components/httpError.svelte';
 
 import ErrorPage from './+error.svelte';
 
+let isBrowser = vi.hoisted(() => true);
 let status = vi.hoisted(() => 500);
 let message = vi.hoisted(() => 'Test error');
 
+vi.mock('$app/environment', () => ({ get browser() { return isBrowser; } }));
 vi.mock('$app/state', async () => ({
   page : {
     get status() { return status; },
@@ -26,6 +28,7 @@ vi.mock('$lib/components/httpError.svelte', async (original) => {
 
 beforeEach(() => {
   vi.clearAllMocks();
+  isBrowser = true;
   status = 500;
   message = 'Test error';
 });
@@ -63,6 +66,16 @@ describe('/+error.svelte', () => {
         alignment : 'centre',
         justification : 'centre',
       }),
+    );
+  });
+
+  it('hides content background server-side', () => {
+    isBrowser = false;
+    render(ErrorPage);
+
+    expect(Content).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ showBackground : false }),
     );
   });
 

@@ -17,6 +17,19 @@ import Title from './title.svelte';
 import Subtitle from './subtitle.svelte';
 import TitleCard from './titleCard.svelte';
 
+vi.mock('$lib/hooks/useThemes', async (original) => {
+  const originalDefault =
+    ((await original()) as { default : () => object; }).default;
+  const writable = (await import('svelte/store')).writable;
+  const graphic = writable<unknown>({ src : 'test-graphic.png' });
+  return {
+    default : () => ({
+      ...originalDefault(),
+      graphic,
+    }),
+  };
+});
+
 vi.mock('$lib/materials/graphic.svelte', async original => ({
   default : await wrapOriginal(original, { testId : 'graphic' }),
 }));

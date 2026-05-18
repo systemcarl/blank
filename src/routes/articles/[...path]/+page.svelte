@@ -1,4 +1,5 @@
 <script>
+  import { browser } from '$app/environment';
   import Content from '$lib/materials/content.svelte';
   import Nav from '$lib/components/nav.svelte';
   import Footer from '$lib/components/footer.svelte';
@@ -12,11 +13,11 @@
     ?.trim());
 </script>
 
-<Content section="article" hasTopNav>
+<Content section="article" hasTopNav showBackground={browser}>
   <Nav home highlights contact />
   <Post content={data.markdown} />
 </Content>
-<Content section="footer">
+<Content section="footer" showBackground={browser}>
   <Footer />
 </Content>
 

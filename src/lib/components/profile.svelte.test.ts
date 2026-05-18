@@ -17,11 +17,15 @@ const defaultConfig : { profileLinks : { href : string; text : string; }[]; } =
   vi.hoisted(() => ({ profileLinks : [] }));
 let setConfig : ((value : unknown) => void) = vi.hoisted(() => () => {});
 
+let isBrowser = vi.hoisted(() => true);
+
 const locale = vi.hoisted(() => ({
   title : 'Test Title',
   subtitle : 'Test Subtitle',
   tagline : 'Test Tagline',
 }));
+
+vi.mock('$app/environment', () => ({ get browser() { return isBrowser; } }));
 
 vi.mock('$lib/hooks/useConfig', async (original) => {
   const originalDefault =
@@ -96,6 +100,7 @@ vi.mock('$lib/components/favouriteList.svelte', async (original) => {
 
 beforeEach(() => {
   vi.clearAllMocks();
+  isBrowser = true;
   setConfig(defaultConfig);
 });
 afterAll(() => { vi.restoreAllMocks(); });
@@ -283,5 +288,35 @@ describe('Profile', () => {
       links : expectedLinks,
       justify : 'start',
     }));
+  });
+
+  it('hides frame server-side', () => {
+    isBrowser = false;
+    render(Profile);
+
+    expect(Frame).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ show : false }),
+    );
+  });
+
+  it('hides avatar graphic server-side', () => {
+    isBrowser = false;
+    render(Profile);
+
+    expect(Graphic).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ show : false }),
+    );
+  });
+
+  it('hides title accent graphic server-side', () => {
+    isBrowser = false;
+    render(Profile);
+
+    expect(TitleCard).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ showGraphic : false }),
+    );
   });
 });

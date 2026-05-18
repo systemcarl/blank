@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { browser } from '$app/environment';
   import useLocale from '$lib/hooks/useLocale';
   import TitleCard from '$lib/materials/titleCard.svelte';
 
@@ -22,4 +23,8 @@
   });
 </script>
 
-<TitleCard title={`${status} ${message}`} subtitle={detail} />
+<TitleCard
+  title={`${status} ${message}`}
+  subtitle={detail}
+  showGraphic={browser}
+/>

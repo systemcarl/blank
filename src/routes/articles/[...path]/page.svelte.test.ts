@@ -12,6 +12,10 @@ import Footer from '$lib/components/footer.svelte';
 
 import ArticlePage from './+page.svelte';
 
+let isBrowser = vi.hoisted(() => true);
+
+vi.mock('$app/environment', () => ({ get browser() { return isBrowser; } }));
+
 vi.mock('$lib/materials/content.svelte', async (original) => {
   return {
     default : await wrapOriginal(original, {
@@ -41,7 +45,10 @@ const data = {
   markdown : 'Test Content',
 };
 
-beforeEach(() => { vi.clearAllMocks(); });
+beforeEach(() => {
+  vi.clearAllMocks();
+  isBrowser = true;
+});
 afterAll(() => { vi.restoreAllMocks(); });
 
 describe('+page.svelte', () => {
@@ -106,6 +113,17 @@ describe('+page.svelte', () => {
     expect(Footer).toHaveBeenCalledOnce();
     expect(articleContent.compareDocumentPosition(footerContent))
       .toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+  });
+
+  it('hides content background server-side', () => {
+    isBrowser = false;
+
+    render(ArticlePage, { data });
+
+    vi.mocked(Content).mock.calls.forEach((args) => {
+      expect(args[1])
+        .toEqual(expect.objectContaining({ showBackground : false }));
+    });
   });
 
   it('adds article title to head', () => {

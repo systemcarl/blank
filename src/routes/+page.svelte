@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { browser } from '$app/environment';
   import useConfig from '$lib/hooks/useConfig';
   import useLocale from '$lib/hooks/useLocale';
   import Content from '$lib/materials/content.svelte';
@@ -19,16 +20,17 @@
   hasBottomNav
   alignment="centre"
   justification="centre"
+  showBackground={browser}
 >
   <Nav highlights contact/>
   <Profile />
 </Content>
 {#each highlights as highlight (highlight.id)}
-  <Content section={highlight.section ?? 'default'}>
+  <Content section={highlight.section ?? 'default'} showBackground={browser}>
     <Highlight {highlight} />
   </Content>
 {/each}
-<Content section="contact">
+<Content section="contact" showBackground={browser}>
   <Contact id="contact" />
 </Content>
 

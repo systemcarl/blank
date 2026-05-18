@@ -16,6 +16,8 @@ import {
   addChildComponent,
   wrapOriginal,
 } from '$lib/tests/component';
+
+import Background from './background.svelte';
 import Content from './content.svelte';
 
 vi.mock('./background.svelte', async original => ({
@@ -378,5 +380,14 @@ describe('Content', () => {
 
     expect(firstBounds.height).toEqual(2 * expectedHeight);
     expect(secondBounds.height).toEqual(expectedHeight);
+  });
+
+  it('hides background when showBackground is false', () => {
+    render(Content, { showBackground : false });
+
+    expect(Background).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ show : false }),
+    );
   });
 });

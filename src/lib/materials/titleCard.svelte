@@ -3,9 +3,10 @@
   import Subtitle from './subtitle.svelte';
   import Graphic from './graphic.svelte';
 
-  const { title, subtitle } : {
+  const { title, subtitle, showGraphic = true } : {
     title ?: string;
     subtitle ?: string;
+    showGraphic ?: boolean;
   } = $props();
 </script>
 
@@ -15,7 +16,7 @@
     <Subtitle as="h2" flex>{ subtitle }</Subtitle>
     <div class="filler">
       <div class="filler-content">
-        <Graphic graphic="titleAccent" />
+        <Graphic graphic="titleAccent" show={showGraphic} />
       </div>
     </div>
   </div>

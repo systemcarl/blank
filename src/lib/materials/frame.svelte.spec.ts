@@ -15,6 +15,26 @@ import { makeComponent, wrapOriginal } from '$lib/tests/component';
 import Graphic from './graphic.svelte';
 import Frame from './frame.svelte';
 
+const defaultGraphic = vi.hoisted(() => ({
+  src : 'frame.png',
+  colourMap : {},
+}));
+let setGraphic : ((value : unknown) => void) = vi.hoisted(() => () => {});
+
+vi.mock('$lib/hooks/useThemes', async (original) => {
+  const originalDefault =
+    ((await original()) as { default : () => object; }).default;
+  const writable = (await import('svelte/store')).writable;
+  const graphic = writable<unknown>();
+  setGraphic = (value : unknown) => graphic.set(value);
+  return {
+    default : () => ({
+      ...originalDefault(),
+      graphic,
+    }),
+  };
+});
+
 vi.mock('./graphic.svelte', async original => ({
   default : await wrapOriginal(original, { testId : 'graphic' }),
 }));
@@ -40,6 +60,7 @@ beforeAll(async () => await loadStyles());
 beforeEach(() => {
   vi.clearAllMocks();
   cleanup();
+  setGraphic(defaultGraphic);
 });
 
 afterAll(() => { vi.restoreAllMocks(); });
@@ -211,5 +232,22 @@ describe('Frame', () => {
     expect(frameRotation).toEqual(45);
     expect(graphicRotation).toEqual(0);
     expect(contentRotation).toEqual(-45);
+  });
+
+  it('hides graphic when show is false', () => {
+    const { container } = render(Frame, {
+      show : false,
+      children : TestContent,
+    });
+
+    const frame = container.children[0] as HTMLElement;
+    expect(frame).toBeInTheDocument();
+
+    expect(Graphic).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        show : false,
+      }),
+    );
   });
 });

@@ -13,10 +13,14 @@ import Contact from '$lib/components/contact.svelte';
 
 import HomePage from './+page.svelte';
 
+let isBrowser = vi.hoisted(() => true);
+
 const defaultConfig = vi.hoisted(() => ({} as Config));
 let setConfig : ((value : unknown) => void) = vi.hoisted(() => () => {});
 
 let setLocale : ((value : unknown) => void) = vi.hoisted(() => () => {});
+
+vi.mock('$app/environment', () => ({ get browser() { return isBrowser; } }));
 
 vi.mock('$lib/hooks/useConfig', async (original) => {
   const originalDefault =
@@ -68,6 +72,7 @@ vi.mock('$lib/components/contact.svelte', async (original) => {
 
 beforeEach(() => {
   vi.clearAllMocks();
+  isBrowser = true;
   setConfig(defaultConfig);
   setLocale(defaultLocale);
   document.head.innerHTML = '';
@@ -207,6 +212,27 @@ describe('+page.svelte', () => {
     const title = document.head.querySelector('title');
     expect(title).not.toBeNull();
     expect(title?.textContent).toBe('Test Title');
+  });
+
+  it('hides content background server-side', () => {
+    isBrowser = false;
+    const config = {
+      highlights : [
+        {
+          type : 'tag',
+          key : 'example',
+          section : 'exampleSection',
+        },
+      ],
+    } as Config;
+    setConfig(config);
+
+    render(HomePage);
+
+    vi.mocked(Content).mock.calls.forEach((args) => {
+      expect(args[1])
+        .toEqual(expect.objectContaining({ showBackground : false }));
+    });
   });
 
   it('does not add title to head if not set', async () => {
