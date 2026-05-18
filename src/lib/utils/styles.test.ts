@@ -593,6 +593,85 @@ describe('compileStyles', () => {
     expect(block?.[0]).contains(`color: #123456;`);
   });
 
+  it.each([
+    'cover' as const,
+    'tile' as const,
+  ])('returns without initial background image position', (mode) => {
+    const section = {
+      ...testSection,
+      background : {
+        ...testSection.background,
+        img : { ...testSection.background.img, mode },
+      },
+    };
+    getAllSectionsMock.mockReturnValue({ test : section });
+
+    const styles = compileStyles(testThemes);
+
+    const block = matchBlock(styles, { section : 'test' });
+    expect(block?.[0]).contains(`--bg-position: initial;`);
+  });
+
+  it('returns top background image position', () => {
+    const section = {
+      ...testSection,
+      background : {
+        ...testSection.background,
+        img : {
+          ...testSection.background.img,
+          mode : 'fixed' as const,
+          anchor : 'centre' as const,
+        },
+      },
+    };
+    getAllSectionsMock.mockReturnValue({ test : section });
+
+    const styles = compileStyles(testThemes);
+
+    const block = matchBlock(styles, { section : 'test' });
+    expect(block?.[0]).contains(`--bg-position: top;`);
+  });
+
+  it('returns top left background image position', () => {
+    const section = {
+      ...testSection,
+      background : {
+        ...testSection.background,
+        img : {
+          ...testSection.background.img,
+          mode : 'fixed' as const,
+          anchor : 'left' as const,
+        },
+      },
+    };
+    getAllSectionsMock.mockReturnValue({ test : section });
+
+    const styles = compileStyles(testThemes);
+
+    const block = matchBlock(styles, { section : 'test' });
+    expect(block?.[0]).contains(`--bg-position: top left;`);
+  });
+
+  it('returns top right background image position', () => {
+    const section = {
+      ...testSection,
+      background : {
+        ...testSection.background,
+        img : {
+          ...testSection.background.img,
+          mode : 'fixed' as const,
+          anchor : 'right' as const,
+        },
+      },
+    };
+    getAllSectionsMock.mockReturnValue({ test : section });
+
+    const styles = compileStyles(testThemes);
+
+    const block = matchBlock(styles, { section : 'test' });
+    expect(block?.[0]).contains(`--bg-position: top right;`);
+  });
+
   it('returns compiled typography styles', () => {
     const styles = compileStyles(testThemes);
 

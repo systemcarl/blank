@@ -12,6 +12,21 @@
   const { section } = (() => useThemes())();
   const { isGraphic } = (() => useGraphics())();
 
+  const graphicClass = $derived.by(() => {
+    const mode = $section?.background.img?.mode ?? 'cover';
+    const base = 'background-graphic';
+    if (mode === 'fixed') {
+      if ($section?.background.img?.anchor === 'right') {
+        return `${base} ${base}-fixed ${base}-anchor-right`;
+      } else if ($section?.background.img?.anchor === 'centre') {
+        return `${base} ${base}-fixed ${base}-anchor-centre`;
+      } else {
+        return `${base} ${base}-fixed ${base}-anchor-left`;
+      }
+    }
+    return `${base} ${base}-cover`;
+  });
+
   const hasGraphic = $derived(!!$section?.background.img
     && isGraphic($section?.background.img?.src ?? ''));
   const underClass = $derived(
@@ -23,7 +38,7 @@
   {@render children()}
   <div class={underClass}>
     {#if hasGraphic}
-      <div class="background-graphic">
+      <div class={graphicClass}>
         <Graphic src={$section?.background.img?.src} show={show} />
       </div>
     {/if}
@@ -46,6 +61,7 @@
     background-image: var(--bg-img);
     background-size: var(--bg-size);
     background-repeat: var(--bg-repeat);
+    background-position: var(--bg-position);
   }
 
   .background-underlay.bg-disabled {
@@ -54,10 +70,29 @@
 
   .background-graphic {
     position: absolute;
-    inset: -10%;
     z-index: var(--z-graphic-overlay);
     opacity: var(--bg-opacity);
     background-size: var(--bg-size);
     background-repeat: var(--bg-repeat);
+  }
+
+  .background-graphic-cover {
+    inset: -10%;
+  }
+
+  .background-graphic-anchor-left {
+    top: 0;
+    left: 0;
+  }
+
+  .background-graphic-anchor-centre {
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .background-graphic-anchor-right {
+    top: 0;
+    right: 0;
   }
 </style>

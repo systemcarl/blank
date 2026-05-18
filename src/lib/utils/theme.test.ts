@@ -1329,6 +1329,7 @@ describe('getSection background', () => {
   it.each([
     { mode : 'cover' },
     { mode : 'tile' },
+    { mode : 'fixed' },
   ])('returns %s background image mode', ({ mode }) => {
     const theme = {
       ...testTheme,
@@ -1344,6 +1345,54 @@ describe('getSection background', () => {
     const section = getSection(theme);
     expect(section.background)
       .toEqual(expect.objectContaining(expectedBackground));
+  });
+
+  it('drops anchor to if invalid', () => {
+    const theme = {
+      ...testTheme,
+      backgrounds : {
+        ...testTheme.backgrounds,
+        [testTheme.sections.default.background] : {
+          ...testTheme.backgrounds.custom,
+          img : { src : 'image.jpg', anchor : 0 },
+        },
+      },
+    };
+    const expectedBackground = { img : expect.objectContaining({
+      src : 'image.jpg',
+    }) };
+    const unexpectedBackground = { img : expect.objectContaining({
+      anchor : expect.anything(),
+    }) };
+    const section = getSection(theme);
+    expect(section.background)
+      .toEqual(expect.objectContaining(expectedBackground));
+    expect(section.background)
+      .toEqual(expect.not.objectContaining(unexpectedBackground));
+  });
+
+  it('drops anchor not valid option', () => {
+    const theme = {
+      ...testTheme,
+      backgrounds : {
+        ...testTheme.backgrounds,
+        [testTheme.sections.default.background] : {
+          ...testTheme.backgrounds.custom,
+          img : { src : 'image.jpg', anchor : 'bad' },
+        },
+      },
+    };
+    const expectedBackground = { img : expect.objectContaining({
+      src : 'image.jpg',
+    }) };
+    const unexpectedBackground = { img : expect.objectContaining({
+      anchor : expect.anything(),
+    }) };
+    const section = getSection(theme);
+    expect(section.background)
+      .toEqual(expect.objectContaining(expectedBackground));
+    expect(section.background)
+      .toEqual(expect.not.objectContaining(unexpectedBackground));
   });
 
   it('drops invalid image opacity', () => {

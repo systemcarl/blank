@@ -31,7 +31,8 @@ export interface Font {
 export interface Background {
   img ?: {
     src : string;
-    mode : 'cover' | 'tile';
+    mode : 'cover' | 'fixed' | 'tile';
+    anchor ?: 'right' | 'centre' | 'left';
     opacity ?: number;
     colourMap ?: Record<string, string>;
   };
@@ -260,8 +261,14 @@ function makeBackground(background : unknown, { palette } : {
     } else {
       if (typeof bkg.img.mode !== 'string') {
         bkg.img.mode = 'cover';
-      } else if (!['cover', 'tile'].includes(bkg.img.mode)) {
+      } else if (!['cover', 'tile', 'fixed'].includes(bkg.img.mode)) {
         bkg.img.mode = 'cover';
+      }
+
+      if (typeof bkg.img.anchor != 'string') {
+        delete bkg.img.anchor;
+      } else if (!['left', 'centre', 'right'].includes(bkg.img.anchor)) {
+        delete bkg.img.anchor;
       }
 
       if (bkg.img.opacity !== undefined) {
