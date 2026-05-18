@@ -183,7 +183,6 @@ a {
 }
 
 .frame-content {
-  overflow: hidden;
   position: relative;
   top: calc(50% * (1 - 1 / var(--frame-factor)));
   left: calc(50% * (1 - 1 / var(--frame-factor)));
@@ -195,6 +194,10 @@ a {
   transition-property: width, height, top, right;
   transition-duration: var(--transition-fast);
   transition-timing-function: var(--transition-ease);
+}
+
+.frame-content.has-frame {
+  overflow: hidden;
 }
 
 .frame-content > * {

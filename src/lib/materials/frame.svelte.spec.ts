@@ -234,6 +234,34 @@ describe('Frame', () => {
     expect(contentRotation).toEqual(-45);
   });
 
+  it('hides content overflow', async () => {
+    const { container } = render(Frame, { children : TestContent });
+
+    const content = page.elementLocator(container).getByTestId('content');
+    await expect.element(content).toBeInTheDocument();
+    const contentParent = content.element().parentElement as HTMLElement;
+    expect(contentParent).toBeInTheDocument();
+
+    const contentParentStyles = getComputedStyle(contentParent);
+    expect(contentParentStyles.overflow).toBe('hidden');
+  });
+
+  it('does not render frame if no theme graphic', async () => {
+    setGraphic(undefined);
+
+    const { container } = render(Frame, { children : TestContent });
+
+    const content = page.elementLocator(container).getByTestId('content');
+    await expect.element(content).toBeInTheDocument();
+    const contentParent = content.element().parentElement as HTMLElement;
+    expect(contentParent).toBeInTheDocument();
+
+    expect(Graphic).not.toHaveBeenCalled();
+
+    const contentParentStyles = getComputedStyle(contentParent);
+    expect(contentParentStyles.overflow).toBe('visible');
+  });
+
   it('hides graphic when show is false', () => {
     const { container } = render(Frame, {
       show : false,

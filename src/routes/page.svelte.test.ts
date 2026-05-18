@@ -122,6 +122,59 @@ describe('+page.svelte', () => {
     );
   });
 
+  it('adjusts profile content for top profile nav', () => {
+    const { container } = render(HomePage);
+
+    const content = within(container)
+      .queryByTestId('content-profile') as HTMLElement;
+    expect(content).toBeInTheDocument();
+    const profile = within(content).queryByTestId('profile') as HTMLElement;
+    expect(profile).toBeInTheDocument();
+
+    expect(Content).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ hasTopNav : true }),
+    );
+  });
+
+  it('adjusts profile content for bottom profile nav', () => {
+    setConfig({
+      ...defaultConfig,
+      profileLinks : [{ text : 'Test Link', href : '#test' }],
+    });
+    const { container } = render(HomePage);
+
+    const content = within(container)
+      .queryByTestId('content-profile') as HTMLElement;
+    expect(content).toBeInTheDocument();
+    const profile = within(content).queryByTestId('profile') as HTMLElement;
+    expect(profile).toBeInTheDocument();
+
+    expect(Content).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ hasBottomNav : true }),
+    );
+  });
+
+  it('does not adjust profile content for empty bottom profile nav', () => {
+    setConfig({
+      ...defaultConfig,
+      profileLinks : [],
+    });
+    const { container } = render(HomePage);
+
+    const content = within(container)
+      .queryByTestId('content-profile') as HTMLElement;
+    expect(content).toBeInTheDocument();
+    const profile = within(content).queryByTestId('profile') as HTMLElement;
+    expect(profile).toBeInTheDocument();
+
+    expect(Content).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ hasBottomNav : false }),
+    );
+  });
+
   it('renders profile main navigation', () => {
     const { container } = render(HomePage);
 

@@ -19,11 +19,23 @@ let setConfig : ((value : unknown) => void) = vi.hoisted(() => () => {});
 
 let isBrowser = vi.hoisted(() => true);
 
-const locale = vi.hoisted(() => ({
+const defaultLocale = vi.hoisted(() => ({
   title : 'Test Title',
   subtitle : 'Test Subtitle',
   tagline : 'Test Tagline',
+  favourites : {
+    header : 'Favourite Things',
+    most : 'MOST',
+    least : 'LEAST',
+  },
 }));
+let setLocale : ((value : unknown) => void) = vi.hoisted(() => () => {});
+
+const defaultGraphic = vi.hoisted(() => ({
+  src : 'frame.png',
+  colourMap : {},
+}));
+let setGraphic : ((value : unknown) => void) = vi.hoisted(() => () => {});
 
 vi.mock('$app/environment', () => ({ get browser() { return isBrowser; } }));
 
@@ -45,10 +57,26 @@ vi.mock('$lib/hooks/useLocale', async (original) => {
   const originalDefault =
     ((await original()) as { default : () => object; }).default;
   const writable = (await import('svelte/store')).writable;
+  const locale = writable<unknown>();
+  setLocale = (value : unknown) => locale.set(value);
   return {
     default : () => ({
       ...originalDefault(),
-      locale : writable(locale),
+      locale,
+    }),
+  };
+});
+
+vi.mock('$lib/hooks/useThemes', async (original) => {
+  const originalDefault =
+    ((await original()) as { default : () => object; }).default;
+  const writable = (await import('svelte/store')).writable;
+  const graphic = writable<unknown>();
+  setGraphic = (value : unknown) => graphic.set(value);
+  return {
+    default : () => ({
+      ...originalDefault(),
+      graphic,
     }),
   };
 });
@@ -101,7 +129,9 @@ vi.mock('$lib/components/favouriteList.svelte', async (original) => {
 beforeEach(() => {
   vi.clearAllMocks();
   isBrowser = true;
+  setLocale(defaultLocale);
   setConfig(defaultConfig);
+  setGraphic(defaultGraphic);
 });
 afterAll(() => { vi.restoreAllMocks(); });
 
@@ -110,12 +140,21 @@ describe('Profile', () => {
     render(Profile);
     expect(TitleCard).toHaveBeenCalledOnce();
     expect(TitleCard).toHaveBeenCalledWithProps(expect.objectContaining({
-      title : locale.title,
-      subtitle : locale.subtitle,
+      title : defaultLocale.title,
+      subtitle : defaultLocale.subtitle,
     }));
   });
 
-  it('renders avatar graphic', () => {
+  it('does not renders avatar if not theme graphic', () => {
+    setGraphic(undefined);
+
+    render(Profile);
+    expect(Graphic).not.toHaveBeenCalledWithProps(expect.objectContaining({
+      graphic : 'avatar',
+    }));
+  });
+
+  it('does not render avatar graphic', () => {
     render(Profile);
     expect(Graphic).toHaveBeenCalledWithProps(expect.objectContaining({
       graphic : 'avatar',
@@ -161,14 +200,24 @@ describe('Profile', () => {
   });
 
   it('displays locale tagline', () => {
+    setLocale({ ...defaultLocale, tagline : 'Test Tagline' });
     const { container } = render(Profile);
 
     const tagline = within(container)
       .queryByTestId('tagline') as HTMLElement;
     expect(tagline).toBeInTheDocument();
-    expect(tagline).toHaveTextContent(locale.tagline);
+    expect(tagline).toHaveTextContent(defaultLocale.tagline);
 
     expect(Tagline).toHaveBeenCalledOnce();
+  });
+
+  it('does not display tagline if not configured', () => {
+    setLocale({ ...defaultLocale, tagline : '' });
+    const { container } = render(Profile);
+
+    const tagline = within(container)
+      .queryByTestId('tagline') as HTMLElement;
+    expect(tagline).not.toBeInTheDocument();
   });
 
   it('renders title layout and tagline in split stack', () => {
@@ -192,7 +241,30 @@ describe('Profile', () => {
     );
   });
 
+  it('renders title layout and tagline in divided split stack', () => {
+    const { container } = render(Profile);
+
+    const splitStack = within(container)
+      .queryByTestId('splitStack-divide') as HTMLElement;
+    expect(splitStack).toBeInTheDocument();
+    const first = within(splitStack)
+      .queryByTestId('splitStack-reverse') as HTMLElement;
+    expect(first).toBeInTheDocument();
+    const second = within(splitStack)
+      .queryByTestId('tagline') as HTMLElement;
+    expect(second).toBeInTheDocument();
+
+    expect(SplitStack).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        divide : true,
+        stack : expect.arrayContaining(['mobile', 'tablet', 'desktop']),
+      }),
+    );
+  });
+
   it ('renders likes list', () => {
+    setConfig({ likes : [{ icon : 'like', text : 'Test Like 1' }] });
     const { container } = render(Profile);
 
     const likesList = within(container)
@@ -205,7 +277,19 @@ describe('Profile', () => {
     }));
   });
 
+  it('does not render likes list if not configured', () => {
+    setConfig({ likes : [] });
+    const { container } = render(Profile);
+
+    const likesList = within(container)
+      .queryByTestId('favourites-most') as HTMLElement;
+    expect(likesList).not.toBeInTheDocument();
+    expect(FavouriteList).not
+      .toHaveBeenCalledWithProps(expect.objectContaining({ rank : 'most' }));
+  });
+
   it ('renders dislikes list', () => {
+    setConfig({ dislikes : [{ icon : 'dislike', text : 'Test Dislike 1' }] });
     const { container } = render(Profile);
 
     const dislikesList = within(container)
@@ -218,7 +302,22 @@ describe('Profile', () => {
     }));
   });
 
+  it('does not render dislikes list if not configured', () => {
+    setConfig({ dislikes : [] });
+    const { container } = render(Profile);
+
+    const dislikesList = within(container)
+      .queryByTestId('favourites-least') as HTMLElement;
+    expect(dislikesList).not.toBeInTheDocument();
+    expect(FavouriteList).not
+      .toHaveBeenCalledWithProps(expect.objectContaining({ rank : 'least' }));
+  });
+
   it('renders likes, dislikes lists in split stack', () => {
+    setConfig({
+      likes : [{ icon : 'like', text : 'Test Like 1' }],
+      dislikes : [{ icon : 'dislike', text : 'Test Dislike 1' }],
+    });
     const { container } = render(Profile);
 
     const splitStack = within(container)
@@ -241,6 +340,10 @@ describe('Profile', () => {
   });
 
   it('renders favourites layout in divided split stack', () => {
+    setConfig({
+      likes : [{ icon : 'like', text : 'Test Like 1' }],
+      dislikes : [{ icon : 'dislike', text : 'Test Dislike 1' }],
+    });
     const { container } = render(Profile);
 
     const splitStack = within(container)
@@ -259,6 +362,15 @@ describe('Profile', () => {
         stack : expect.arrayContaining(['mobile', 'tablet', 'desktop']),
       }),
     );
+  });
+
+  it('does not render favourites layout if neither list is configured', () => {
+    setConfig({ likes : [], dislikes : [] });
+    const { container } = render(Profile);
+
+    const splitStack = within(container)
+      .queryByTestId('splitStack-start') as HTMLElement;
+    expect(splitStack).not.toBeInTheDocument();
   });
 
   it('does not render nav links if not configured', () => {

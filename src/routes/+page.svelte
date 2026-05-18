@@ -17,7 +17,7 @@
 <Content
   section="profile"
   hasTopNav
-  hasBottomNav
+  hasBottomNav={!!$config.profileLinks?.length}
   alignment="centre"
   justification="centre"
   showBackground={browser}
