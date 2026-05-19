@@ -1,6 +1,6 @@
 import { beforeEach, afterAll, describe, it, expect, vi } from 'vitest';
 
-import { loadIndex, loadAbstract, loadArticle } from './weblog';
+import { loadIndex, loadAbstract, loadArticle, loadArticles } from './weblog';
 
 const fetchResourceMock = vi.hoisted(() => vi.fn());
 const FetchJsonResourceMock = vi.hoisted(() => vi.fn());
@@ -203,6 +203,179 @@ describe('loadArticle', () => {
     fetchResourceMock.mockResolvedValue(markdown);
 
     const actual = await loadArticle('/base', 'article', { fetch : vi.fn() });
+
+    expect(actual).toEqual(expected);
+  });
+});
+
+describe('loadArticles', () => {
+  it('fetches article markdown', async () => {
+    const fetch = vi.fn();
+    const basePath = '/base';
+    const keys = [
+      'test-article-1',
+      'test-article-2',
+    ];
+    fetchResourceMock.mockImplementation((u, _) => `Article ${u}`);
+    const expected = Object.fromEntries(
+      keys.map(k => [k, `Article ${basePath}/articles/${k}.md`]),
+    );
+
+    const actual = await loadArticles(basePath, keys, { fetch });
+
+    expect(actual).toEqual(expected);
+    expect(fetchResourceMock).toHaveBeenCalledTimes(keys.length);
+    for (const key of keys) {
+      expect(fetchResourceMock).toHaveBeenCalledWith(
+        `${basePath}/articles/${key}.md`,
+        { fetch },
+      );
+    }
+  });
+
+  it('resolves article base paths with trailing slashes', async () => {
+    const fetch = vi.fn();
+    const basePath = '/base';
+    const keys = ['test-article-1'];
+
+    await loadArticles(basePath + '/', keys, { fetch });
+    expect(fetchResourceMock).toHaveBeenCalledWith(
+      `${basePath}/articles/${keys[0]}.md`,
+      { fetch },
+    );
+  });
+
+  it('returns empty string if fetch fails', async () => {
+    const key = 'test-article-1';
+    fetchResourceMock.mockResolvedValue(null);
+    const result = await loadArticles(
+      '/base',
+      [key],
+      { fetch : vi.fn() },
+    );
+    expect(result).toEqual({ [key] : '' });
+  });
+
+  it('removes .md extensions from inline links', async () => {
+    const markdown = '[Link](./other-article.md)';
+    const expectedKey = 'article';
+    const expected = { [expectedKey] : '[Link](./other-article)' };
+    fetchResourceMock.mockResolvedValue(markdown);
+
+    const actual = await loadArticles(
+      '/base',
+      [expectedKey],
+      { fetch : vi.fn() },
+    );
+
+    expect(actual).toEqual(expected);
+  });
+
+  it('removes .md extensions from inline links with anchors', async () => {
+    const markdown = '[Link](./other-article.md#section)';
+    const expectedKey = 'article';
+    const expected = { [expectedKey] : '[Link](./other-article#section)' };
+    fetchResourceMock.mockResolvedValue(markdown);
+
+    const actual = await loadArticles(
+      '/base',
+      [expectedKey],
+      { fetch : vi.fn() },
+    );
+
+    expect(actual).toEqual(expected);
+  });
+
+  it('removes .md extensions from inline links with query', async () => {
+    const markdown = '[Link](./other-article.md?param=value)';
+    const expectedKey = 'article';
+    const expected = { [expectedKey] : '[Link](./other-article?param=value)' };
+    fetchResourceMock.mockResolvedValue(markdown);
+
+    const actual = await loadArticles(
+      '/base',
+      [expectedKey],
+      { fetch : vi.fn() },
+    );
+
+    expect(actual).toEqual(expected);
+  });
+
+  it('does not alter absolute links', async () => {
+    const markdown = '[Link](https://example.com/other-article.md)';
+    const expectedKey = 'article';
+    const expected = {
+      [expectedKey] : '[Link](https://example.com/other-article.md)',
+    };
+    fetchResourceMock.mockResolvedValue(markdown);
+
+    const actual = await loadArticles(
+      '/base',
+      [expectedKey],
+      { fetch : vi.fn() },
+    );
+
+    expect(actual).toEqual(expected);
+  });
+
+  it('removes .md extensions from implied links', async () => {
+    const markdown = '[Link]: ./other-article.md\n';
+    const expectedKey = 'article';
+    const expected = { [expectedKey] : '[Link]: ./other-article\n' };
+    fetchResourceMock.mockResolvedValue(markdown);
+
+    const actual = await loadArticles(
+      '/base',
+      [expectedKey],
+      { fetch : vi.fn() },
+    );
+
+    expect(actual).toEqual(expected);
+  });
+
+  it('removes .md extensions from implied links with anchors', async () => {
+    const markdown = '[Link]: ./other-article.md#section';
+    const expectedKey = 'article';
+    const expected = { [expectedKey] : '[Link]: ./other-article#section' };
+    fetchResourceMock.mockResolvedValue(markdown);
+
+    const actual = await loadArticles(
+      '/base',
+      [expectedKey],
+      { fetch : vi.fn() },
+    );
+
+    expect(actual).toEqual(expected);
+  });
+
+  it('removes .md extensions from implied links with query', async () => {
+    const markdown = '[Link]: ./other-article.md?param=value';
+    const expectedKey = 'article';
+    const expected = { [expectedKey] : '[Link]: ./other-article?param=value' };
+    fetchResourceMock.mockResolvedValue(markdown);
+
+    const actual = await loadArticles(
+      '/base',
+      [expectedKey],
+      { fetch : vi.fn() },
+    );
+
+    expect(actual).toEqual(expected);
+  });
+
+  it('does not alter absolute implied links', async () => {
+    const markdown = '[Link]: https://example.com/other-article.md';
+    const expectedKey = 'article';
+    const expected = {
+      [expectedKey] : '[Link]: https://example.com/other-article.md',
+    };
+    fetchResourceMock.mockResolvedValue(markdown);
+
+    const actual = await loadArticles(
+      '/base',
+      [expectedKey],
+      { fetch : vi.fn() },
+    );
 
     expect(actual).toEqual(expected);
   });

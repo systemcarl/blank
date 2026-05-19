@@ -38,3 +38,15 @@ export async function loadArticle(
     .replace(/(\]\(\.[^)]+?)\.md(?=[#?)])/g, '$1')
     .replace(/(\]:\s*\.[^)\s]+?)\.md(?=[#?\s]|$)/g, '$1');
 }
+
+export async function loadArticles(
+  basePath : string,
+  articles : string[],
+  { fetch } : { fetch : typeof window.fetch; },
+) {
+  const loader = async (article : string) : Promise<[string, string]> => [
+    article,
+    await loadArticle(basePath, article, { fetch }),
+  ];
+  return Object.fromEntries(await Promise.all(articles.map(loader)));
+}

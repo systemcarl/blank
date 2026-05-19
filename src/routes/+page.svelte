@@ -8,6 +8,8 @@
   import Contact from '$lib/components/contact.svelte';
   import Highlight from '$lib/components/highlight.svelte';
 
+  const { data } = $props();
+
   const { config } = useConfig();
   const { locale } = useLocale();
 
@@ -27,7 +29,7 @@
 </Content>
 {#each highlights as highlight (highlight.id)}
   <Content section={highlight.section ?? 'default'} showBackground={browser}>
-    <Highlight {highlight} />
+    <Highlight {highlight} article={data.articles?.[highlight.key]} />
   </Content>
 {/each}
 <Content section="contact" showBackground={browser}>

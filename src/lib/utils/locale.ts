@@ -9,6 +9,9 @@ export const defaultLocale = {
     most : 'Most',
     least : 'Least',
   },
+  highlights : {
+    defaultHeading : 'Highlights',
+  },
   contact : {
     header : 'Contact',
     infoHeader : 'Contact Info:',
@@ -17,9 +20,6 @@ export const defaultLocale = {
     home : 'Home',
     highlights : {} as Record<string, string>,
     contact : 'Contact',
-  },
-  highlights : {
-    defaultHeading : 'Highlights',
   },
   alt : {
     logo : 'Logo',

@@ -4,13 +4,13 @@ import markdown from 'markdown-it';
 import markdownFootnote from 'markdown-it-footnote';
 import { logError } from './log';
 
-interface Article {
+export interface Article {
   slug : string;
   title : string;
   abstract : string;
 }
 
-interface Tag {
+export interface Tag {
   slug : string;
   name : string;
   articles : Article[];

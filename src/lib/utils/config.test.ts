@@ -115,7 +115,9 @@ describe('config highlights', () => {
     const config = buildConfig({
       ...testConfig,
       highlights : [
+        { id : 'art1', type : 'article', key : 'art1', section : 'Section 1' },
         { id : 'tag1', type : 'tag', key : 'tag1', section : 'Section 1' },
+        { id : 'tag1', key : 'tag1', section : 'Section 1' },
         { type : 'tag', key : 'tag1', section : 'Section 1' },
         { id : 'cat1', type : 'category', key : 'cat1' },
         { id : 'tag2', type : 'tag' },
@@ -126,6 +128,7 @@ describe('config highlights', () => {
     });
     expect(config).toEqual(expect.objectContaining({
       highlights : [
+        { id : 'art1', type : 'article', key : 'art1', section : 'Section 1' },
         { id : 'tag1', type : 'tag', key : 'tag1', section : 'Section 1' },
       ],
     }));
