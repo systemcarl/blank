@@ -61,6 +61,12 @@
     display: flex;
     flex-direction: column;
     width: 100%;
+    margin-bottom: calc(-1 * var(--border-width, 0));
+    border-style: none;
+    border-width: 0;
+    border-bottom-style: solid;
+    border-bottom-width: var(--border-width, 0);
+    border-bottom-color: var(--border-colour);
   }
 
   section:first-child {

@@ -357,6 +357,64 @@ describe('Content', () => {
     expect(layoutStyle.justifyContent).toBe('space-between');
   });
 
+  it('displays bottom border', async () => {
+    await page.viewport(768, 1024);
+    const expectedSpacing = 32;
+    const expectedPadding = 2 * expectedSpacing;
+    const expectedBorder = 2;
+
+    const { container } = render(Content, {
+      section : 'profile',
+      children : TestContent,
+    });
+    addChildComponent(container, Content);
+
+    container.style.setProperty('display', 'flex');
+    container.style.setProperty('flex-direction', 'column');
+    container.style.setProperty('width', '100%');
+    container.style.setProperty('--layout-spacing', `${expectedSpacing}px`);
+    container.style.setProperty('--border-width', `${expectedBorder}px`);
+    container.style.setProperty('--border-colour', '#042');
+
+    const section = container.children[0] as HTMLElement;
+    expect(section).toBeInTheDocument();
+    const additionalContent = container.children[1] as HTMLElement;
+    expect(additionalContent).toBeInTheDocument();
+
+    const content = page.elementLocator(section).getByTestId('content');
+    await expect.element(content).toBeInTheDocument();
+
+    const layout = content.element().parentElement as HTMLElement;
+    await expect.element(layout).toBeInTheDocument();
+
+    const sectionStyle = getComputedStyle(section);
+    expect(sectionStyle.borderBottomWidth).toBe(`${expectedBorder}px`);
+    expect(sectionStyle.borderTopStyle).toBe('none');
+    expect(sectionStyle.borderRightStyle).toBe('none');
+    expect(sectionStyle.borderLeftStyle).toBe('none');
+    expect(sectionStyle.borderBottomStyle).toBe('solid');
+    expect(sectionStyle.borderBottomColor).toBe('rgb(0, 68, 34)');
+    const layoutStyle = getComputedStyle(layout);
+    expect(layoutStyle.display).toBe('flex');
+    expect(layoutStyle.flexDirection).toBe('column');
+    expect(layoutStyle.justifyContent).toBe('flex-start');
+    expect(layoutStyle.alignItems).toBe('flex-start');
+
+    const sectionBounds = section.getBoundingClientRect();
+    const contentBounds = content.element().getBoundingClientRect();
+    const additionalContentBounds = additionalContent.getBoundingClientRect();
+    expect(contentBounds.left)
+      .toEqual(sectionBounds.left + expectedPadding);
+    expect(contentBounds.right)
+      .toEqual(sectionBounds.right - expectedPadding);
+    expect(contentBounds.top)
+      .toEqual(sectionBounds.top + expectedPadding);
+    expect(contentBounds.bottom)
+      .toEqual(sectionBounds.bottom - expectedPadding - expectedBorder);
+    expect(additionalContentBounds.top)
+      .toEqual(sectionBounds.bottom - expectedBorder);
+  });
+
   it('stretches first content to fill layout', async () => {
     await page.viewport(768, 1024);
     const expectedHeight = 100;
