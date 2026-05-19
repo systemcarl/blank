@@ -119,13 +119,12 @@ describe('Content', () => {
 
   it('renders mobile content layout', async () => {
     await page.viewport(767, 1024);
-    const expectedSpacing = 32;
-    const expectedPadding = 2 * expectedSpacing;
+    const expectedPadding = 64;
 
     const { container } = render(Content, { children : TestContent });
 
     container.style.setProperty('display', 'flex');
-    container.style.setProperty('--layout-spacing', `${2 * expectedSpacing}px`);
+    container.style.setProperty('--layout-spacing', `${expectedPadding / 2}px`);
 
     const section = container.querySelector('section') as HTMLElement;
     expect(section).toBeInTheDocument();
@@ -147,9 +146,9 @@ describe('Content', () => {
     const containerBounds = container.getBoundingClientRect();
     const contentBounds = content.element().getBoundingClientRect();
     expect(contentBounds.left)
-      .toEqual(containerBounds.left + expectedPadding);
+      .toEqual(containerBounds.left + (expectedPadding / 2));
     expect(contentBounds.right)
-      .toEqual(containerBounds.right - expectedPadding);
+      .toEqual(containerBounds.right - expectedPadding / 2);
     expect(contentBounds.top)
       .toEqual(containerBounds.top + expectedPadding);
     expect(contentBounds.bottom)
