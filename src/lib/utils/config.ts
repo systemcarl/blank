@@ -2,6 +2,7 @@ export interface Highlight {
   id : string;
   type : 'tag';
   key : string;
+  title ?: string;
   section ?: string;
 }
 
@@ -65,6 +66,7 @@ export function buildConfig(config : unknown) : Config {
       if (highlightIds.includes(item.id)) return false;
       if (!('type' in item) || item.type !== 'tag') return false;
       if (!('key' in item) || typeof item.key !== 'string') return false;
+      if ('title' in item && typeof item.title !== 'string') return false;
       if ('section' in item && typeof item.section !== 'string') return false;
       highlightIds.push(item.id);
       return true;

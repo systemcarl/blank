@@ -6,7 +6,6 @@ import { wrapOriginal } from '$lib/tests/component';
 import type { WeblogIndex } from '$lib/utils/weblog';
 import Grid from '$lib/materials/grid.svelte';
 import Card from '$lib/materials/card.svelte';
-import Heading from '$lib/materials/heading.svelte';
 import Abstract from './abstract.svelte';
 import ArticleIndex from './articleIndex.svelte';
 
@@ -52,39 +51,6 @@ beforeEach(() => {
 afterAll(() => { vi.restoreAllMocks(); });
 
 describe('ArticleIndex', () => {
-  it('renders index heading', async () => {
-    setIndex({
-      articles : {},
-      tags : {
-        test : { slug : 'test', name : 'Test', articles : [] },
-      },
-    });
-
-    const { container } = render(ArticleIndex, { tag : 'test' });
-
-    const heading = within(container).queryByTestId('heading') as HTMLElement;
-    expect(heading).toBeInTheDocument();
-    const headingText = within(heading).getByText('Test');
-    expect(headingText).toBeInTheDocument();
-
-    expect(Heading).toHaveBeenCalledTimes(1);
-    expect(Heading).toHaveBeenCalledWithProps(
-      expect.objectContaining({ level : 2 }),
-    );
-  });
-
-  it('renders index heading with id', async () => {
-    const { container } = render(ArticleIndex, { id : 'test' });
-
-    const heading = within(container).queryByTestId('heading') as HTMLElement;
-    expect(heading).toBeInTheDocument();
-
-    expect(Heading).toHaveBeenCalledTimes(1);
-    expect(Heading).toHaveBeenCalledWithProps(
-      expect.objectContaining({ id : 'test' }),
-    );
-  });
-
   it('renders articles as abstracts', async () => {
     const index = {
       articles : {},

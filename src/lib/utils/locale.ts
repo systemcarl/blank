@@ -18,6 +18,9 @@ export const defaultLocale = {
     highlights : {} as Record<string, string>,
     contact : 'Contact',
   },
+  highlights : {
+    defaultHeading : 'Highlights',
+  },
   alt : {
     logo : 'Logo',
   },

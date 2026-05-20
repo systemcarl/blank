@@ -120,7 +120,8 @@ describe('config highlights', () => {
         { id : 'cat1', type : 'category', key : 'cat1' },
         { id : 'tag2', type : 'tag' },
         { id : 'tag3', type : 'tag', key : 123 },
-        { id : 'tag4', type : 'tag', key : 'tag2', section : 456 },
+        { id : 'tag4', type : 'tag', key : 'tag2', title : 456 },
+        { id : 'tag5', type : 'tag', key : 'tag2', section : 456 },
       ],
     });
     expect(config).toEqual(expect.objectContaining({
