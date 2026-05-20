@@ -4,7 +4,10 @@
   import Card from '$lib/materials/card.svelte';
   import Abstract from '$lib/components/abstract.svelte';
 
-  const { tag } : { tag ?: string; } = $props();
+  const { tag, headingLevel } : {
+    tag ?: string;
+    headingLevel ?: 2 | 3;
+  } = $props();
 
   const { index } = useArticles();
 
@@ -22,6 +25,7 @@
         title={article.title}
         abstract={article.abstract}
         link={`/articles/${article.slug}`}
+        {headingLevel}
       />
     </Card>
   {/each}

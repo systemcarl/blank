@@ -3,14 +3,20 @@
   import Link from '$lib/materials/link.svelte';
   import Post from '$lib/components/post.svelte';
 
-  const { title = '', abstract = '', link = '#' } : {
+  const {
+    title = '',
+    abstract = '',
+    link = '#',
+    headingLevel = 3,
+  } : {
     title ?: string;
     abstract ?: string;
     link ?: string;
+    headingLevel ?: 2 | 3;
   } = $props();
 </script>
 
-<Heading level={3}>
+<Heading level={headingLevel}>
   <Link href={link}>{ title }</Link>
 </Heading>
 <Post content={abstract} />

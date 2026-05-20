@@ -12,6 +12,11 @@ export const defaultLocale = {
   highlights : {
     defaultHeading : 'Highlights',
   },
+  collections : {
+    allArticles : 'All Articles',
+    tagPrefix : '',
+    backPrefix : '',
+  },
   contact : {
     header : 'Contact',
     infoHeader : 'Contact Info:',

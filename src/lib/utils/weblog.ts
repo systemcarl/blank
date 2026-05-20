@@ -13,6 +13,7 @@ export interface Article {
 export interface Tag {
   slug : string;
   name : string;
+  description : string;
   articles : Article[];
 }
 
@@ -59,6 +60,7 @@ export function resolveWeblogIndex(data : unknown) : WeblogIndex {
     tags[slug] = {
       slug,
       name : String(tag.name || ''),
+      description : String(tag.description || ''),
       articles : tagArticles,
     };
   }

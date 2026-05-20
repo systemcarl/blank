@@ -22,6 +22,46 @@ describe('resolveWeblogIndex', () => {
     expect(index).toEqual({ articles : {}, tags : {} });
   });
 
+  it('resolves invalid article title', () => {
+    const index = resolveWeblogIndex({
+      articles : { 'article-1' : { title : 1 } },
+      tags : {},
+    });
+    expect(index.articles).toEqual(expect.objectContaining({
+      ['article-1'] : expect.objectContaining({ title : '1' }),
+    }));
+  });
+
+  it('resolves invalid article abstract', () => {
+    const index = resolveWeblogIndex({
+      articles : { 'article-1' : { abstract : 1 } },
+      tags : {},
+    });
+    expect(index.articles).toEqual(expect.objectContaining({
+      ['article-1'] : expect.objectContaining({ abstract : '1' }),
+    }));
+  });
+
+  it('resolves invalid tag name', () => {
+    const index = resolveWeblogIndex({
+      articles : {},
+      tags : { 'tag-1' : { name : 1 } },
+    });
+    expect(index.tags).toEqual(expect.objectContaining({
+      ['tag-1'] : expect.objectContaining({ name : '1' }),
+    }));
+  });
+
+  it('resolves invalid tag description', () => {
+    const index = resolveWeblogIndex({
+      articles : {},
+      tags : { 'tag-1' : { description : 1 } },
+    });
+    expect(index.tags).toEqual(expect.objectContaining({
+      ['tag-1'] : expect.objectContaining({ description : '1' }),
+    }));
+  });
+
   it('resolves tag articles', () => {
     const data = {
       articles : {
@@ -37,10 +77,12 @@ describe('resolveWeblogIndex', () => {
       tags : {
         'tag-1' : {
           name : 'Tag 1',
+          description : 'Tag 1 Description',
           articles : ['article-1', 'article-2'],
         },
         'tag-2' : {
           name : 'Tag 2',
+          description : 'Tag 2 Description',
           articles : ['article-1'],
         },
       },
@@ -62,6 +104,7 @@ describe('resolveWeblogIndex', () => {
         'tag-1' : {
           slug : 'tag-1',
           name : 'Tag 1',
+          description : 'Tag 1 Description',
           articles : [
             {
               slug : 'article-1',
@@ -78,6 +121,7 @@ describe('resolveWeblogIndex', () => {
         'tag-2' : {
           slug : 'tag-2',
           name : 'Tag 2',
+          description : 'Tag 2 Description',
           articles : [
             {
               slug : 'article-1',
@@ -103,6 +147,7 @@ describe('resolveWeblogIndex', () => {
       tags : {
         'tag-1' : {
           name : 'Tag 1',
+          description : 'Tag 1 Description',
           articles : ['article-1', 'article-2'],
         },
       },
@@ -119,6 +164,7 @@ describe('resolveWeblogIndex', () => {
         'tag-1' : {
           slug : 'tag-1',
           name : 'Tag 1',
+          description : 'Tag 1 Description',
           articles : [
             {
               slug : 'article-1',

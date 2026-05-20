@@ -58,6 +58,7 @@ describe('ArticleIndex', () => {
         test : {
           slug : 'test',
           name : 'Test',
+          description : 'Test description.',
           articles : [
             {
               slug : 'article-1',
@@ -93,6 +94,33 @@ describe('ArticleIndex', () => {
     expect(Abstract).toHaveBeenCalledTimes(2);
   });
 
+  it('renders article abstracts with specified heading level', async () => {
+    const index = {
+      articles : {},
+      tags : {
+        test : {
+          slug : 'test',
+          name : 'Test',
+          description : 'Test description.',
+          articles : [
+            {
+              slug : 'article-1',
+              title : 'Article 1',
+              abstract : 'This is article 1.',
+            },
+          ],
+        },
+      },
+    };
+    setIndex(index);
+
+    render(ArticleIndex, { tag : 'test', headingLevel : 2 });
+
+    expect(Abstract).toHaveBeenCalledWithProps(
+      expect.objectContaining({ headingLevel : 2 }),
+    );
+  });
+
   it('renders article in card', async () => {
     const index = {
       articles : {},
@@ -100,6 +128,7 @@ describe('ArticleIndex', () => {
         test : {
           slug : 'test',
           name : 'Test',
+          description : 'Test description.',
           articles : [
             {
               slug : 'article-1',
@@ -139,6 +168,7 @@ describe('ArticleIndex', () => {
         test : {
           slug : 'test',
           name : 'Test',
+          description : 'Test description.',
           articles : [
             {
               slug : 'article-1',

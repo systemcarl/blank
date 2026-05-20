@@ -97,4 +97,12 @@ describe('Abstract', () => {
     expect(heading.compareDocumentPosition(body))
       .toBe(Node.DOCUMENT_POSITION_FOLLOWING);
   });
+
+  it('renders abstract title with specified heading level', async () => {
+    render(Abstract, { headingLevel : 2 });
+
+    expect(Heading).toHaveBeenCalledWithProps(expect.objectContaining({
+      level : 2,
+    }));
+  });
 });
