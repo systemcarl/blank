@@ -286,7 +286,7 @@ describe('config weblog', () => {
       weblog : { url : 'https://example.com/weblog' },
     });
     expect(config).toEqual(expect.objectContaining({
-      weblog : { url : 'https://example.com/weblog' },
+      weblog : expect.objectContaining({ url : 'https://example.com/weblog' }),
     }));
   });
 
@@ -296,7 +296,67 @@ describe('config weblog', () => {
       weblog : { url : 123 },
     });
     expect(config).toEqual(expect.objectContaining({
-      weblog : {},
+      weblog : expect.objectContaining({ url : '' }),
+    }));
+  });
+
+  it('returns weblog with valid top credits', () => {
+    const config = buildConfig({
+      ...testConfig,
+      weblog : { topCredits : ['testA', 'testB'] },
+    });
+    expect(config).toEqual(expect.objectContaining({
+      weblog : expect.objectContaining({ topCredits : ['testA', 'testB'] }),
+    }));
+  });
+
+  it('drops invalid top credits', () => {
+    const config = buildConfig({
+      ...testConfig,
+      weblog : { topCredits : ['testA', 2, {}] },
+    });
+    expect(config).toEqual(expect.objectContaining({
+      weblog : expect.objectContaining({ topCredits : ['testA'] }),
+    }));
+  });
+
+  it('returns weblog with empty top credits if invalid', () => {
+    const config = buildConfig({
+      ...testConfig,
+      weblog : { topCredits : { test : 'A' } },
+    });
+    expect(config).toEqual(expect.objectContaining({
+      weblog : expect.objectContaining({ topCredits : [] }),
+    }));
+  });
+
+  it('returns weblog with valid bottom credits', () => {
+    const config = buildConfig({
+      ...testConfig,
+      weblog : { bottomCredits : ['testA', 'testB'] },
+    });
+    expect(config).toEqual(expect.objectContaining({
+      weblog : expect.objectContaining({ bottomCredits : ['testA', 'testB'] }),
+    }));
+  });
+
+  it('drops invalid top credits', () => {
+    const config = buildConfig({
+      ...testConfig,
+      weblog : { bottomCredits : ['testA', 2, {}] },
+    });
+    expect(config).toEqual(expect.objectContaining({
+      weblog : expect.objectContaining({ bottomCredits : ['testA'] }),
+    }));
+  });
+
+  it('returns weblog with empty top credits if invalid', () => {
+    const config = buildConfig({
+      ...testConfig,
+      weblog : { bottomCredits : { test : 'A' } },
+    });
+    expect(config).toEqual(expect.objectContaining({
+      weblog : expect.objectContaining({ bottomCredits : [] }),
     }));
   });
 

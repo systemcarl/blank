@@ -26,6 +26,7 @@
         abstract={article.abstract}
         link={`/articles/${article.slug}`}
         {headingLevel}
+        datePublished={article.datePublished}
       />
     </Card>
   {/each}

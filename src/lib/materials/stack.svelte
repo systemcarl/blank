@@ -2,6 +2,6 @@
   const { children } = $props();
 </script>
 
-<article class="text article typography-body">
+<div class='stack'>
   {@render children()}
-</article>
+</div>

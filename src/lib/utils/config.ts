@@ -18,8 +18,10 @@ export interface Config {
     href : string;
   }[] | null;
   weblog : {
-    url ?: string;
-  };
+    url : string;
+    topCredits : string[];
+    bottomCredits : string[];
+  } | null;
 }
 
 export const defaultConfig : Config = {
@@ -28,7 +30,7 @@ export const defaultConfig : Config = {
   highlights : null,
   contact : null,
   profileLinks : null,
-  weblog : {},
+  weblog : null,
 };
 
 export function buildConfig(config : unknown) : Config {
@@ -101,8 +103,26 @@ export function buildConfig(config : unknown) : Config {
 
   if (!conf.weblog || (typeof conf.weblog !== 'object')) {
     conf.weblog = defaultConfig.weblog;
-  } else if (!('url' in conf.weblog) || typeof conf.weblog.url !== 'string') {
-    delete conf.weblog.url;
+  } else {
+    if (!('url' in conf.weblog) || typeof conf.weblog.url !== 'string') {
+      conf.weblog.url = '';
+    }
+    if (
+      (!('topCredits' in conf.weblog)
+        || !Array.isArray(conf.weblog.topCredits))
+    ) {
+      conf.weblog.topCredits = [];
+    }
+    if (
+      (!('bottomCredits' in conf.weblog)
+        || !Array.isArray(conf.weblog.bottomCredits))
+    ) {
+      conf.weblog.bottomCredits = [];
+    }
+    conf.weblog.topCredits = conf.weblog.topCredits
+      .filter(c => typeof c === 'string');
+    conf.weblog.bottomCredits = conf.weblog.bottomCredits
+      .filter(c => typeof c === 'string');
   }
 
   return conf;

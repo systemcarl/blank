@@ -22,8 +22,9 @@ afterAll(() => { vi.restoreAllMocks(); });
 
 describe('Abstract', () => {
   it('renders abstract title', async () => {
+    const expectedTitle = 'Test Title';
     const { container } = render(Abstract, {
-      title : 'Test Title',
+      title : expectedTitle,
       abstract : 'This is the abstract body.',
       link : '/articles/test-article',
     });
@@ -31,7 +32,7 @@ describe('Abstract', () => {
     const heading = within(container)
       .queryByTestId('heading') as HTMLElement;
     expect(heading).toBeInTheDocument();
-    const headingText = within(heading).getByText('Test Title');
+    const headingText = within(heading).getByText(expectedTitle);
     expect(headingText).toBeInTheDocument();
 
     expect(Heading).toHaveBeenCalledTimes(1);
@@ -41,10 +42,12 @@ describe('Abstract', () => {
   });
 
   it('renders abstract title link', async () => {
+    const expectedTitle = 'Test Title';
+    const expectedLink = '/articles/test-article';
     const { container } = render(Abstract, {
-      title : 'Test Title',
+      title : expectedTitle,
       abstract : 'This is the abstract body.',
-      link : '/articles/test-article',
+      link : expectedLink,
     });
 
     const heading = within(container)
@@ -53,20 +56,24 @@ describe('Abstract', () => {
     const link = within(heading)
       .queryByTestId('link') as HTMLElement;
     expect(link).toBeInTheDocument();
-    const headingText = within(link).getByText('Test Title');
+    const headingText = within(link).getByText(expectedTitle);
     expect(headingText).toBeInTheDocument();
 
     expect(Link).toHaveBeenCalledTimes(1);
     expect(Link).toHaveBeenCalledWithProps(
-      expect.objectContaining({ href : '/articles/test-article' }),
+      expect.objectContaining({ href : expectedLink }),
     );
   });
 
   it('renders abstract body as article content', async () => {
+    const expectedTitle = 'Test Title';
+    const expectedContent = 'This is the abstract body.';
+    const expectedDate = new Date();
     const { container } = render(Abstract, {
-      title : 'Test Title',
-      abstract : 'This is the abstract body.',
+      title : expectedTitle,
+      abstract : expectedContent,
       link : '/articles/test-article',
+      datePublished : expectedDate,
     });
 
     const article = within(container)
@@ -76,33 +83,38 @@ describe('Abstract', () => {
     expect(Post).toHaveBeenCalledTimes(1);
     expect(Post).toHaveBeenCalledWithProps(
       expect.objectContaining({
-        content : 'This is the abstract body.',
+        content : expectedContent,
+        datePublished : expectedDate,
+        compact : true,
       }),
     );
   });
 
   it('renders abstract title before body', async () => {
+    const expectedTitle = 'Test Title';
+    const expectedContent = 'This is the abstract body.';
     const { container } = render(Abstract, {
-      title : 'Test Title',
-      abstract : 'This is the abstract body.',
+      title : expectedTitle,
+      abstract : expectedContent,
       link : '/articles/test-article',
     });
 
     const heading = within(container)
-      .queryByText('Test Title') as HTMLElement;
+      .queryByText(expectedTitle) as HTMLElement;
     expect(heading).toBeInTheDocument();
     const body = within(container)
-      .queryByText('This is the abstract body.') as HTMLElement;
+      .queryByText(expectedContent) as HTMLElement;
     expect(body).toBeInTheDocument();
     expect(heading.compareDocumentPosition(body))
       .toBe(Node.DOCUMENT_POSITION_FOLLOWING);
   });
 
   it('renders abstract title with specified heading level', async () => {
-    render(Abstract, { headingLevel : 2 });
+    const expectedLevel = 2;
+    render(Abstract, { headingLevel : expectedLevel });
 
     expect(Heading).toHaveBeenCalledWithProps(expect.objectContaining({
-      level : 2,
+      level : expectedLevel,
     }));
   });
 });

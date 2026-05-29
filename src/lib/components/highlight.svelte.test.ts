@@ -2,6 +2,7 @@ import { beforeEach, afterAll, describe, it, expect, vi } from 'vitest';
 import { render, within } from '@testing-library/svelte';
 
 import { wrapOriginal } from '$lib/tests/component';
+import type { Article } from '$lib/utils/weblog';
 import Heading from '$lib/materials/heading.svelte';
 import ArticleIndex from './articleIndex.svelte';
 import Post from './post.svelte';
@@ -9,6 +10,7 @@ import Highlight from './highlight.svelte';
 
 const defaultLocale = vi.hoisted(() => ({
   highlights : { defaultHeading : 'Test Default Heading' },
+  collections : { },
 }));
 
 vi.mock('$lib/hooks/useLocale', async (original) => {
@@ -148,9 +150,15 @@ describe('Highlight', () => {
       key : 'test',
       section : 'highlightTest',
     } as const;
+    const expectedMetadata = {
+      datePublished : new Date(),
+      contributions : [{ byline : 'Tested by ' }],
+    } as Article;
+
     const { container } = render(Highlight, {
       highlight,
       article : expectedContent,
+      metadata : expectedMetadata,
     });
 
     const post = within(container)
@@ -158,9 +166,11 @@ describe('Highlight', () => {
     expect(post).toBeInTheDocument();
 
     expect(Post).toHaveBeenCalledTimes(1);
-    expect(Post).toHaveBeenCalledWithProps(
-      expect.objectContaining({ content : expectedContent }),
-    );
+    expect(Post).toHaveBeenCalledWithProps(expect.objectContaining({
+      content : expectedContent,
+      datePublished : expectedMetadata.datePublished,
+      contributions : expectedMetadata.contributions,
+    }));
     expect(ArticleIndex).not.toHaveBeenCalled();
   });
 });

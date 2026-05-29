@@ -57,6 +57,10 @@ a {
   flex-shrink: 1;
 }
 
+.stack {
+  margin: calc(1.5 * var(--layout-spacing, 0)) 0;
+}
+
 .split-stack {
   --split-stack-direction: row;
 

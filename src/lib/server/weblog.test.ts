@@ -1,18 +1,29 @@
 import { beforeEach, afterAll, describe, it, expect, vi } from 'vitest';
 
+import {
+  type Article,
+  type WeblogIndex,
+  extractArticle,
+  resolveWeblogIndex,
+} from '$lib/utils/weblog';
+import { fetchJsonResource, fetchResource } from './http';
 import { loadIndex, loadAbstract, loadArticle, loadArticles } from './weblog';
 
-const fetchResourceMock = vi.hoisted(() => vi.fn());
-const FetchJsonResourceMock = vi.hoisted(() => vi.fn());
-
+vi.mock('$lib/utils/weblog', () => ({
+  extractArticle : vi.fn(() => ({})),
+  resolveWeblogIndex : vi.fn(() => ({})),
+}));
 vi.mock('./http', () => ({
-  fetchResource : fetchResourceMock,
-  fetchJsonResource : FetchJsonResourceMock,
+  fetchResource : vi.fn(() => ''),
+  fetchJsonResource : vi.fn(() => ({})),
 }));
 
 beforeEach(() => {
   vi.clearAllMocks();
-  fetchResourceMock.mockResolvedValue('');
+  vi.mocked(extractArticle).mockResolvedValue({ title : '', body : '' });
+  vi.mocked(resolveWeblogIndex).mockResolvedValue({} as WeblogIndex);
+  vi.mocked(fetchResource).mockResolvedValue('');
+  vi.mocked(fetchJsonResource).mockResolvedValue({});
 });
 
 afterAll(() => { vi.restoreAllMocks(); });
@@ -21,23 +32,10 @@ describe('loadIndex', () => {
   it('fetches index.json', async () => {
     const fetch = vi.fn();
     const basePath = '/base';
-    const expected = {
-      articles : {
-        'article-1' : {
-          slug : 'article-1',
-          title : 'Article 1',
-          abstract : 'This is article 1.',
-        },
-      },
-      tags : {},
-    };
-    FetchJsonResourceMock.mockResolvedValue(expected);
 
-    const actual = await loadIndex(basePath, { fetch });
+    await loadIndex(basePath, { fetch });
 
-    expect(actual).toEqual(expected);
-    expect(FetchJsonResourceMock).toHaveBeenCalledTimes(1);
-    expect(FetchJsonResourceMock).toHaveBeenCalledWith(
+    expect(fetchJsonResource).toHaveBeenCalledExactlyOnceWith(
       `${basePath}/index.json`,
       { fetch },
     );
@@ -48,26 +46,88 @@ describe('loadIndex', () => {
     const basePath = '/base';
 
     await loadIndex(basePath + '/', { fetch });
-    expect(FetchJsonResourceMock).toHaveBeenCalledWith(
+    expect(fetchJsonResource).toHaveBeenCalledWith(
       `${basePath}/index.json`,
       { fetch },
     );
   });
+
+  it('resolves fetched weblog index', async () => {
+    const fetch = vi.fn();
+    const basePath = '/base';
+    const fetched = {
+      articles : {
+        'article-1' : {
+          slug : 'article-1',
+          title : 'Article 1',
+          abstract : 'This is article 1.',
+        } as Article,
+      },
+    };
+    const expected = { ...fetched, tags : {} };
+    vi.mocked(fetchJsonResource).mockResolvedValue(fetched);
+    vi.mocked(resolveWeblogIndex).mockReturnValue(expected);
+
+    const actual = await loadIndex(basePath, { fetch });
+
+    expect(resolveWeblogIndex).toHaveBeenCalledExactlyOnceWith(fetched);
+    expect(actual).toEqual(expected);
+  });
+
+  it('resolves default weblog index if no path', async () => {
+    const fetch = vi.fn();
+    const basePath = '';
+    const expected = {
+      articles : {
+        'article-1' : {
+          slug : 'article-1',
+          title : 'Article 1',
+          abstract : 'This is article 1.',
+        } as Article,
+      },
+      tags : {},
+    };
+    vi.mocked(resolveWeblogIndex).mockReturnValue(expected);
+
+    const actual = await loadIndex(basePath, { fetch });
+
+    expect(fetchJsonResource).not.toHaveBeenCalled();
+    expect(resolveWeblogIndex).toHaveBeenCalledExactlyOnceWith({});
+    expect(actual).toEqual(expected);
+  });
+
+  it('resolves default weblog index if fetch fails', async () => {
+    const fetch = vi.fn();
+    const basePath = '/base';
+    const expected = {
+      articles : {
+        'article-1' : {
+          slug : 'article-1',
+          title : 'Article 1',
+          abstract : 'This is article 1.',
+        } as Article,
+      },
+      tags : {},
+    };
+    vi.mocked(fetchJsonResource).mockResolvedValue(null);
+    vi.mocked(resolveWeblogIndex).mockReturnValue(expected);
+
+    const actual = await loadIndex(basePath, { fetch });
+
+    expect(resolveWeblogIndex).toHaveBeenCalledExactlyOnceWith({});
+    expect(actual).toEqual(expected);
+  });
 });
 
 describe('loadAbstract', () => {
-  it('fetches article title and abstract', async () => {
+  it('fetches article abstract content', async () => {
     const fetch = vi.fn();
     const basePath = '/base';
     const path = 'test-article';
-    const markdown = '# Title\n\nThis is the abstract.';
-    const expected = { title : 'Title', body : 'This is the abstract.' };
-    fetchResourceMock.mockResolvedValue(markdown);
 
-    const actual = await loadAbstract(basePath, path, { fetch });
-    expect(actual).toEqual(expected);
-    expect(fetchResourceMock).toHaveBeenCalledTimes(1);
-    expect(fetchResourceMock).toHaveBeenCalledWith(
+    await loadAbstract(basePath, path, { fetch });
+
+    expect(fetchResource).toHaveBeenCalledExactlyOnceWith(
       `${basePath}/abstracts/${path}.md`,
       { fetch },
     );
@@ -79,14 +139,29 @@ describe('loadAbstract', () => {
     const path = 'test-article';
 
     await loadAbstract(basePath + '/', path, { fetch });
-    expect(fetchResourceMock).toHaveBeenCalledWith(
+    expect(fetchResource).toHaveBeenCalledExactlyOnceWith(
       `${basePath}/abstracts/${path}.md`,
       { fetch },
     );
   });
 
+  it('extracts article abstract title and body', async () => {
+    const fetch = vi.fn();
+    const basePath = '/base';
+    const path = 'test-article';
+    const markdown = '# Title\n\nThis is the abstract.';
+    const expected = { title : 'Title', body : 'This is the abstract.' };
+    vi.mocked(fetchResource).mockResolvedValue(markdown);
+    vi.mocked(extractArticle).mockResolvedValue(expected);
+
+    const actual = await loadAbstract(basePath, path, { fetch });
+
+    expect(actual).toEqual(expected);
+    expect(extractArticle).toHaveBeenCalledExactlyOnceWith(markdown);
+  });
+
   it('returns empty title and body if fetch fails', async () => {
-    fetchResourceMock.mockResolvedValue(null);
+    vi.mocked(fetchResource).mockResolvedValue(null);
     const result = await loadAbstract('/base', 'article', { fetch : vi.fn() });
     expect(result).toEqual({ title : '', body : '' });
   });
@@ -98,13 +173,13 @@ describe('loadArticle', () => {
     const basePath = '/base';
     const path = 'test-article';
     const expected = 'content';
-    fetchResourceMock.mockResolvedValue(expected);
+    vi.mocked(fetchResource).mockResolvedValue(expected);
 
     const actual = await loadArticle(basePath, path, { fetch });
 
     expect(actual).toEqual(expected);
-    expect(fetchResourceMock).toHaveBeenCalledTimes(1);
-    expect(fetchResourceMock).toHaveBeenCalledWith(
+    expect(fetchResource).toHaveBeenCalledTimes(1);
+    expect(fetchResource).toHaveBeenCalledWith(
       `${basePath}/articles/${path}.md`,
       { fetch },
     );
@@ -116,14 +191,14 @@ describe('loadArticle', () => {
     const path = 'test-article';
 
     await loadArticle(basePath + '/', path, { fetch });
-    expect(fetchResourceMock).toHaveBeenCalledWith(
+    expect(fetchResource).toHaveBeenCalledWith(
       `${basePath}/articles/${path}.md`,
       { fetch },
     );
   });
 
   it('returns empty string if fetch fails', async () => {
-    fetchResourceMock.mockResolvedValue(null);
+    vi.mocked(fetchResource).mockResolvedValue(null);
     const result = await loadArticle('/base', 'article', { fetch : vi.fn() });
     expect(result).toEqual('');
   });
@@ -131,7 +206,7 @@ describe('loadArticle', () => {
   it('removes .md extensions from inline links', async () => {
     const markdown = '[Link](./other-article.md)';
     const expected = '[Link](./other-article)';
-    fetchResourceMock.mockResolvedValue(markdown);
+    vi.mocked(fetchResource).mockResolvedValue(markdown);
 
     const actual = await loadArticle('/base', 'article', { fetch : vi.fn() });
 
@@ -141,7 +216,7 @@ describe('loadArticle', () => {
   it('removes .md extensions from inline links with anchors', async () => {
     const markdown = '[Link](./other-article.md#section)';
     const expected = '[Link](./other-article#section)';
-    fetchResourceMock.mockResolvedValue(markdown);
+    vi.mocked(fetchResource).mockResolvedValue(markdown);
 
     const actual = await loadArticle('/base', 'article', { fetch : vi.fn() });
 
@@ -151,7 +226,7 @@ describe('loadArticle', () => {
   it('removes .md extensions from inline links with query', async () => {
     const markdown = '[Link](./other-article.md?param=value)';
     const expected = '[Link](./other-article?param=value)';
-    fetchResourceMock.mockResolvedValue(markdown);
+    vi.mocked(fetchResource).mockResolvedValue(markdown);
 
     const actual = await loadArticle('/base', 'article', { fetch : vi.fn() });
     expect(actual).toEqual(expected);
@@ -160,7 +235,7 @@ describe('loadArticle', () => {
   it('does not alter absolute links', async () => {
     const markdown = '[Link](https://example.com/other-article.md)';
     const expected = '[Link](https://example.com/other-article.md)';
-    fetchResourceMock.mockResolvedValue(markdown);
+    vi.mocked(fetchResource).mockResolvedValue(markdown);
 
     const actual = await loadArticle('/base', 'article', { fetch : vi.fn() });
 
@@ -170,7 +245,7 @@ describe('loadArticle', () => {
   it('removes .md extensions from implied links', async () => {
     const markdown = '[Link]: ./other-article.md\n';
     const expected = '[Link]: ./other-article\n';
-    fetchResourceMock.mockResolvedValue(markdown);
+    vi.mocked(fetchResource).mockResolvedValue(markdown);
 
     const actual = await loadArticle('/base', 'article', { fetch : vi.fn() });
 
@@ -180,7 +255,7 @@ describe('loadArticle', () => {
   it('removes .md extensions from implied links with anchors', async () => {
     const markdown = '[Link]: ./other-article.md#section';
     const expected = '[Link]: ./other-article#section';
-    fetchResourceMock.mockResolvedValue(markdown);
+    vi.mocked(fetchResource).mockResolvedValue(markdown);
 
     const actual = await loadArticle('/base', 'article', { fetch : vi.fn() });
 
@@ -190,7 +265,7 @@ describe('loadArticle', () => {
   it('removes .md extensions from implied links with query', async () => {
     const markdown = '[Link]: ./other-article.md?param=value';
     const expected = '[Link]: ./other-article?param=value';
-    fetchResourceMock.mockResolvedValue(markdown);
+    vi.mocked(fetchResource).mockResolvedValue(markdown);
 
     const actual = await loadArticle('/base', 'article', { fetch : vi.fn() });
 
@@ -200,7 +275,7 @@ describe('loadArticle', () => {
   it('does not alter absolute implied links', async () => {
     const markdown = '[Link]: https://example.com/other-article.md';
     const expected = '[Link]: https://example.com/other-article.md';
-    fetchResourceMock.mockResolvedValue(markdown);
+    vi.mocked(fetchResource).mockResolvedValue(markdown);
 
     const actual = await loadArticle('/base', 'article', { fetch : vi.fn() });
 
@@ -216,7 +291,7 @@ describe('loadArticles', () => {
       'test-article-1',
       'test-article-2',
     ];
-    fetchResourceMock.mockImplementation((u, _) => `Article ${u}`);
+    vi.mocked(fetchResource).mockImplementation(async (u, _) => `Article ${u}`);
     const expected = Object.fromEntries(
       keys.map(k => [k, `Article ${basePath}/articles/${k}.md`]),
     );
@@ -224,9 +299,9 @@ describe('loadArticles', () => {
     const actual = await loadArticles(basePath, keys, { fetch });
 
     expect(actual).toEqual(expected);
-    expect(fetchResourceMock).toHaveBeenCalledTimes(keys.length);
+    expect(fetchResource).toHaveBeenCalledTimes(keys.length);
     for (const key of keys) {
-      expect(fetchResourceMock).toHaveBeenCalledWith(
+      expect(fetchResource).toHaveBeenCalledWith(
         `${basePath}/articles/${key}.md`,
         { fetch },
       );
@@ -239,7 +314,7 @@ describe('loadArticles', () => {
     const keys = ['test-article-1'];
 
     await loadArticles(basePath + '/', keys, { fetch });
-    expect(fetchResourceMock).toHaveBeenCalledWith(
+    expect(fetchResource).toHaveBeenCalledWith(
       `${basePath}/articles/${keys[0]}.md`,
       { fetch },
     );
@@ -247,7 +322,7 @@ describe('loadArticles', () => {
 
   it('returns empty string if fetch fails', async () => {
     const key = 'test-article-1';
-    fetchResourceMock.mockResolvedValue(null);
+    vi.mocked(fetchResource).mockResolvedValue(null);
     const result = await loadArticles(
       '/base',
       [key],
@@ -260,7 +335,7 @@ describe('loadArticles', () => {
     const markdown = '[Link](./other-article.md)';
     const expectedKey = 'article';
     const expected = { [expectedKey] : '[Link](./other-article)' };
-    fetchResourceMock.mockResolvedValue(markdown);
+    vi.mocked(fetchResource).mockResolvedValue(markdown);
 
     const actual = await loadArticles(
       '/base',
@@ -275,7 +350,7 @@ describe('loadArticles', () => {
     const markdown = '[Link](./other-article.md#section)';
     const expectedKey = 'article';
     const expected = { [expectedKey] : '[Link](./other-article#section)' };
-    fetchResourceMock.mockResolvedValue(markdown);
+    vi.mocked(fetchResource).mockResolvedValue(markdown);
 
     const actual = await loadArticles(
       '/base',
@@ -290,7 +365,7 @@ describe('loadArticles', () => {
     const markdown = '[Link](./other-article.md?param=value)';
     const expectedKey = 'article';
     const expected = { [expectedKey] : '[Link](./other-article?param=value)' };
-    fetchResourceMock.mockResolvedValue(markdown);
+    vi.mocked(fetchResource).mockResolvedValue(markdown);
 
     const actual = await loadArticles(
       '/base',
@@ -307,7 +382,7 @@ describe('loadArticles', () => {
     const expected = {
       [expectedKey] : '[Link](https://example.com/other-article.md)',
     };
-    fetchResourceMock.mockResolvedValue(markdown);
+    vi.mocked(fetchResource).mockResolvedValue(markdown);
 
     const actual = await loadArticles(
       '/base',
@@ -322,7 +397,7 @@ describe('loadArticles', () => {
     const markdown = '[Link]: ./other-article.md\n';
     const expectedKey = 'article';
     const expected = { [expectedKey] : '[Link]: ./other-article\n' };
-    fetchResourceMock.mockResolvedValue(markdown);
+    vi.mocked(fetchResource).mockResolvedValue(markdown);
 
     const actual = await loadArticles(
       '/base',
@@ -337,7 +412,7 @@ describe('loadArticles', () => {
     const markdown = '[Link]: ./other-article.md#section';
     const expectedKey = 'article';
     const expected = { [expectedKey] : '[Link]: ./other-article#section' };
-    fetchResourceMock.mockResolvedValue(markdown);
+    vi.mocked(fetchResource).mockResolvedValue(markdown);
 
     const actual = await loadArticles(
       '/base',
@@ -352,7 +427,7 @@ describe('loadArticles', () => {
     const markdown = '[Link]: ./other-article.md?param=value';
     const expectedKey = 'article';
     const expected = { [expectedKey] : '[Link]: ./other-article?param=value' };
-    fetchResourceMock.mockResolvedValue(markdown);
+    vi.mocked(fetchResource).mockResolvedValue(markdown);
 
     const actual = await loadArticles(
       '/base',
@@ -369,7 +444,7 @@ describe('loadArticles', () => {
     const expected = {
       [expectedKey] : '[Link]: https://example.com/other-article.md',
     };
-    fetchResourceMock.mockResolvedValue(markdown);
+    vi.mocked(fetchResource).mockResolvedValue(markdown);
 
     const actual = await loadArticles(
       '/base',

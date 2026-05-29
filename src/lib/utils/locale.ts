@@ -16,6 +16,7 @@ export const defaultLocale = {
     allArticles : 'All Articles',
     tagPrefix : '',
     backPrefix : '',
+    published : 'Published ',
   },
   contact : {
     header : 'Contact',

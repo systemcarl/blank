@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { Highlight } from '$lib/utils/config';
+  import type { Article } from '$lib/utils/weblog';
   import useLocale from '$lib/hooks/useLocale';
   import Heading from '$lib/materials/heading.svelte';
   import ArticleIndex from './articleIndex.svelte';
@@ -8,9 +9,11 @@
   const {
     highlight,
     article,
+    metadata,
   } : {
     highlight : Highlight;
     article ?: string;
+    metadata ?: Article;
   } = $props();
 
   const { locale } = useLocale();
@@ -23,5 +26,9 @@
   <ArticleIndex tag={highlight.key} />
 {/if}
 {#if highlight.type === 'article'}
-  <Post content={article} />
+  <Post
+    content={article}
+    datePublished={metadata?.datePublished ?? null}
+    contributions={metadata?.contributions ?? []}
+  />
 {/if}

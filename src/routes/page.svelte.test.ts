@@ -5,6 +5,7 @@ import { tryGet } from '$lib/utils/typing';
 import { wrapOriginal } from '$lib/tests/component';
 import type { Config } from '$lib/utils/config';
 import { defaultLocale } from '$lib/utils/locale';
+import type { Article } from '$lib/utils/weblog';
 import Content from '$lib/materials/content.svelte';
 import Nav from '$lib/components/nav.svelte';
 import Profile from '$lib/components/profile.svelte';
@@ -250,6 +251,7 @@ describe('+page.svelte', () => {
   it('renders highlights with pre-loaded articles', () => {
     const expectedKey = 'article1';
     const expectedContent = 'Test Article Content';
+    const expectedArticle = { title : 'Test Article' } as Article;
     const config = {
       highlights : [
         {
@@ -264,11 +266,16 @@ describe('+page.svelte', () => {
     render(HomePage, { data : {
       ...defaultData,
       articles : { [expectedKey] : expectedContent },
+      articleIndex : {
+        articles : { [expectedKey] : expectedArticle },
+        tags : {},
+      },
     } });
 
     expect(Highlight).toHaveBeenCalledOnce();
     expect(Highlight).toHaveBeenCalledWithProps(expect.objectContaining({
       article : expectedContent,
+      metadata : expectedArticle,
     }));
   });
 

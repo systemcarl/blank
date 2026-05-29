@@ -29,7 +29,11 @@
 </Content>
 {#each highlights as highlight (highlight.id)}
   <Content section={highlight.section ?? 'default'} showBackground={browser}>
-    <Highlight {highlight} article={data.articles?.[highlight.key]} />
+    <Highlight
+      {highlight}
+      article={data.articles?.[highlight.key]}
+      metadata={data.articleIndex?.articles?.[highlight.key]}
+    />
   </Content>
 {/each}
 <Content section="contact" showBackground={browser}>

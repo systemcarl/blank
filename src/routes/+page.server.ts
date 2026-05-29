@@ -7,7 +7,7 @@ export const load : PageServerLoad = async ({ parent, fetch }) => {
     config.highlights?.filter(h => h.type === 'article');
   const articles = articleHighlights?.length
     ? (await loadArticles(
-        config.weblog.url ?? '',
+        config.weblog?.url ?? '',
         articleHighlights.map(h => h.key),
         { fetch },
       ))

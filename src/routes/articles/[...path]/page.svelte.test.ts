@@ -5,6 +5,7 @@ import { tryGet } from '$lib/utils/typing';
 import { wrapOriginal } from '$lib/tests/component';
 import { defaultConfig } from '$lib/utils/config';
 import { defaultLocale } from '$lib/utils/locale';
+import type { Article } from '$lib/utils/weblog';
 import Content from '$lib/materials/content.svelte';
 import Nav from '$lib/components/nav.svelte';
 import Post from '$lib/components/post.svelte';
@@ -43,6 +44,10 @@ const data = {
   title : 'Test Title',
   abstract : 'Test Abstract',
   markdown : 'Test Content',
+  metadata : {
+    datePublished : new Date(),
+    contributions : [{ byline : 'Tested by', members : [{ name : 'Test' }] }],
+  } as Article,
 };
 
 beforeEach(() => {
@@ -90,6 +95,8 @@ describe('+page.svelte', () => {
     expect(Post).toHaveBeenCalledOnce();
     expect(Post).toHaveBeenCalledWithProps(expect.objectContaining({
       content : data.markdown,
+      datePublished : data.metadata.datePublished,
+      contributions : data.metadata.contributions,
     }));
   });
 

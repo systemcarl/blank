@@ -15,7 +15,11 @@
 
 <Content section="article" hasTopNav showBackground={browser}>
   <Nav home highlights contact />
-  <Post content={data.markdown} />
+  <Post
+    content={data.markdown}
+    datePublished={data.metadata?.datePublished ?? null}
+    contributions={data.metadata?.contributions ?? []}
+  />
 </Content>
 <Content section="footer" showBackground={browser}>
   <Footer />
