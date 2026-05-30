@@ -9,6 +9,7 @@ export interface Section {
     [key : string] : Typography;
   };
   graphics : Record<string, Graphic>;
+  scrim : boolean;
 }
 
 export type Palette = Record<string, string>;
@@ -66,6 +67,7 @@ export const defaultTheme = {
       background : 'default',
       typography : 'default',
       graphics : 'default',
+      scrim : false,
     },
   },
   palettes : {
@@ -140,6 +142,10 @@ function makeSection(section : unknown, { theme } : {
     && (('graphics' in section)
       ? section.graphics
       : defaultTheme.sections.default.graphics));
+  let scrim = ((section) && (typeof section === 'object')
+    && (('scrim' in section)
+      ? section.scrim
+      : defaultTheme.sections.default.scrim));
 
   if (typeof palette === 'string')
     palette = getPalette(theme, { key : palette });
@@ -179,7 +185,9 @@ function makeSection(section : unknown, { theme } : {
     });
   else graphics = getGraphics(theme, { palette : palette as Palette });
 
-  return { palette, scale, background, typography, graphics } as Section;
+  if (typeof scrim !== 'boolean') scrim = false;
+
+  return { palette, scale, background, typography, graphics, scrim } as Section;
 }
 
 function makePalette(palette : unknown) : Palette {

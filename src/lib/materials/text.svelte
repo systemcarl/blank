@@ -7,6 +7,7 @@
     centred,
     flex,
     inset,
+    scrim = false,
     typography = 'body',
     as = 'span',
     children,
@@ -15,6 +16,7 @@
     centred ?: boolean;
     flex ?: boolean;
     inset ?: boolean;
+    scrim ?: boolean;
     typography ?: 'body'
       | 'title'
       | 'subtitle'
@@ -43,6 +45,7 @@
     if (centred) cls.push('text-centred');
     if (flex) cls.push('text-flex');
     if (inset) cls.push('text-inset');
+    if (scrim) cls.push('scrim');
     return cls.join(' ');
   });
 </script>

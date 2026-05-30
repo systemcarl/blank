@@ -17,7 +17,7 @@
       {#each links as { text, href } (text)}
         <li>
           <Text as="span" typography="nav">
-            <Link href={href}>{ text }</Link>
+            <Link href={href} scrim>{ text }</Link>
           </Text>
         </li>
       {/each}

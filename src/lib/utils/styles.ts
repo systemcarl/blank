@@ -70,6 +70,10 @@ function compileSection(classes : string[], section : Section) {
               : 'top'))
       : 'initial',
     '--bg-opacity' : section.background.img?.opacity ?? 1,
+    '--scrim-colour' : (section.scrim && section.background.fill)
+      ? (`color-mix(in srgb, ${section.background.fill} 66%, `
+        + 'transparent 33%)')
+      : 'transparent',
   };
   return `${compileClasses(classes)} {\n  ${compileProps(props)}\n}`;
 }

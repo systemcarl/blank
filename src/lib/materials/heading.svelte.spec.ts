@@ -64,4 +64,17 @@ describe('Heading', () => {
       id : 'test-id',
     }));
   });
+
+  it('renders heading with scrim', async () => {
+    render(Heading, {
+      level : 1,
+      scrim : true,
+      children : makeHtml('<span>Heading Text</span>'),
+    });
+
+    expect(Text).toHaveBeenCalledOnce();
+    expect(Text).toHaveBeenCalledWithProps(expect.objectContaining({
+      scrim : true,
+    }));
+  });
 });

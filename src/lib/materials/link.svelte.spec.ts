@@ -38,6 +38,9 @@ describe('Link', () => {
       as : 'span',
       typography : 'link',
     }));
+    expect(Text).not.toHaveBeenCalledWithProps(expect.objectContaining({
+      scrim : true,
+    }));
 
     const content = page.elementLocator(container).getByText('Link Text');
     await expect.element(content).toBeInTheDocument();
@@ -54,5 +57,23 @@ describe('Link', () => {
     });
     await expect.element(link).toBeInTheDocument();
     await expect.element(link).toHaveAttribute('href', '/test');
+  });
+
+  it('renders link with scrim', async () => {
+    const { container } = render(Link, {
+      href : '/test',
+      scrim : true,
+      children : makeHtml('<span>Link Text</span>'),
+    });
+
+    expect(Text).toHaveBeenCalledOnce();
+    expect(Text).toHaveBeenCalledWithProps(expect.objectContaining({
+      as : 'span',
+      typography : 'link',
+      scrim : true,
+    }));
+
+    const content = page.elementLocator(container).getByText('Link Text');
+    await expect.element(content).toBeInTheDocument();
   });
 });

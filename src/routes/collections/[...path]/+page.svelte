@@ -33,7 +33,7 @@
 
 <Content section="collection" hasTopNav showBackground={browser}>
   <Nav home contact />
-  <Heading level={1} {id}>{name}</Heading>
+  <Heading level={1} {id} scrim>{name}</Heading>
   <NavLinks {links}/>
   <ArticleIndex tag={slug}/>
 </Content>

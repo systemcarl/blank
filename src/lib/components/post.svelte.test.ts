@@ -8,6 +8,8 @@ import {
   type Contribution,
 } from '$lib/utils/weblog';
 import Stack from '$lib/materials/stack.svelte';
+import Heading from '$lib/materials/heading.svelte';
+import Link from '$lib/materials/link.svelte';
 import Article from '$lib/materials/article.svelte';
 import Dateline from './dateline.svelte';
 import Byline from './byline.svelte';
@@ -43,6 +45,12 @@ vi.mock('$lib/hooks/useConfig', async (original) => {
 
 vi.mock('$lib/materials/stack.svelte', async (original) => {
   return { default : await wrapOriginal(original, { testId : 'stack' }) };
+});
+vi.mock('$lib/materials/heading.svelte', async (original) => {
+  return { default : await wrapOriginal(original, { testId : 'heading' }) };
+});
+vi.mock('$lib/materials/link.svelte', async (original) => {
+  return { default : await wrapOriginal(original, { testId : 'link' }) };
 });
 vi.mock('$lib/materials/article.svelte', async (original) => {
   return { default : await wrapOriginal(original, { testId : 'article' }) };
@@ -89,6 +97,107 @@ describe('Post', () => {
     expect(heading).toHaveTextContent(expectedTitle);
 
     expect(renderArticle).toHaveBeenCalledExactlyOnceWith(expectedMarkdown);
+    expect(Heading).not.toHaveBeenCalled();
+    expect(Link).not.toHaveBeenCalled();
+    expect(Article).toHaveBeenCalledOnce();
+  });
+
+  it('renders heading', async () => {
+    const expectedTitle = 'Test Title';
+    const expectedArticleTitle = 'Alt Test Title';
+    const expectedBody = 'Test Content';
+    const expectedMarkdown = [
+      `# ${expectedArticleTitle}\n\n`,
+      `${expectedBody}`,
+    ];
+    const expectedContent = expectedMarkdown.join('');
+    const expectedRender = [
+      `<h1 data-testid="article-title">${expectedArticleTitle}</h1>\n`,
+      `<p data-testid="article-content">${expectedBody}</p>`,
+    ].join('\n');
+    const expectedHeadingLevel = 2;
+    vi.mocked(extractArticle)
+      .mockReturnValue({ title : expectedTitle, body : expectedBody });
+    vi.mocked(renderArticle as ((_ : string) => string))
+      .mockReturnValue(expectedRender);
+
+    const { container } = render(Post, {
+      content : expectedContent,
+      heading : { text : expectedTitle, level : expectedHeadingLevel },
+    });
+
+    const article = within(container).queryByTestId('article') as HTMLElement;
+    expect(article).toBeInTheDocument();
+    expect(article).toHaveTextContent(expectedTitle);
+    expect(article).toHaveTextContent(expectedArticleTitle);
+    const articleHeading = within(article).queryByTestId('article-title');
+    expect(articleHeading).toBeInTheDocument();
+    expect(articleHeading).toHaveTextContent(expectedArticleTitle);
+    const heading = within(container).queryByTestId('heading');
+    expect(heading).toBeInTheDocument();
+    expect(heading).toHaveTextContent(expectedTitle);
+
+    expect(renderArticle).toHaveBeenCalledExactlyOnceWith(expectedContent);
+    expect(Heading).toHaveBeenCalledOnce();
+    expect(Heading).toHaveBeenCalledWithProps(expect.objectContaining({
+      level : expectedHeadingLevel,
+    }));
+    expect(Link).not.toHaveBeenCalled();
+    expect(Article).toHaveBeenCalledOnce();
+  });
+
+  it('renders heading with link', async () => {
+    const expectedTitle = 'Test Title';
+    const expectedArticleTitle = 'Alt Test Title';
+    const expectedLink = '#test';
+    const expectedBody = 'Test Content';
+    const expectedMarkdown = [
+      `# ${expectedArticleTitle}\n\n`,
+      `${expectedBody}`,
+    ];
+    const expectedContent = expectedMarkdown.join('');
+    const expectedRender = [
+      `<h1 data-testid="article-title">${expectedArticleTitle}</h1>\n`,
+      `<p data-testid="article-content">${expectedBody}</p>`,
+    ].join('\n');
+    const expectedHeadingLevel = 2;
+    vi.mocked(extractArticle)
+      .mockReturnValue({ title : expectedTitle, body : expectedBody });
+    vi.mocked(renderArticle as ((_ : string) => string))
+      .mockReturnValue(expectedRender);
+
+    const { container } = render(Post, {
+      content : expectedContent,
+      heading : {
+        text : expectedTitle,
+        href : expectedLink,
+        level : expectedHeadingLevel,
+      },
+    });
+
+    const article = within(container).queryByTestId('article') as HTMLElement;
+    expect(article).toBeInTheDocument();
+    expect(article).toHaveTextContent(expectedTitle);
+    expect(article).toHaveTextContent(expectedArticleTitle);
+    const articleHeading = within(article).queryByTestId('article-title');
+    expect(articleHeading).toBeInTheDocument();
+    expect(articleHeading).toHaveTextContent(expectedArticleTitle);
+    const heading = within(article).queryByTestId('heading') as HTMLElement;
+    expect(heading).toBeInTheDocument();
+    expect(heading).toHaveTextContent(expectedTitle);
+    const link = within(heading).queryByTestId('link');
+    expect(link).toBeInTheDocument();
+    expect(link).toHaveTextContent(expectedTitle);
+
+    expect(renderArticle).toHaveBeenCalledExactlyOnceWith(expectedContent);
+    expect(Heading).toHaveBeenCalledOnce();
+    expect(Heading).toHaveBeenCalledWithProps(expect.objectContaining({
+      level : expectedHeadingLevel,
+    }));
+    expect(Link).toHaveBeenCalledOnce();
+    expect(Link).toHaveBeenCalledWithProps(expect.objectContaining({
+      href : expectedLink,
+    }));
     expect(Article).toHaveBeenCalledOnce();
   });
 

@@ -2,17 +2,9 @@ import { beforeEach, afterAll, describe, it, expect, vi } from 'vitest';
 import { render, within } from '@testing-library/svelte';
 
 import { wrapOriginal } from '$lib/tests/component';
-import Heading from '$lib/materials/heading.svelte';
-import Link from '$lib/materials/link.svelte';
 import Post from './post.svelte';
 import Abstract from './abstract.svelte';
 
-vi.mock('$lib/materials/heading.svelte', async (original) => {
-  return { default : await wrapOriginal(original, { testId : 'heading' }) };
-});
-vi.mock('$lib/materials/link.svelte', async (original) => {
-  return { default : await wrapOriginal(original, { testId : 'link' }) };
-});
 vi.mock('$lib/components/post.svelte', async (original) => {
   return { default : await wrapOriginal(original, { testId : 'post' }) };
 });
@@ -21,59 +13,18 @@ beforeEach(() => { vi.clearAllMocks(); });
 afterAll(() => { vi.restoreAllMocks(); });
 
 describe('Abstract', () => {
-  it('renders abstract title', async () => {
-    const expectedTitle = 'Test Title';
-    const { container } = render(Abstract, {
-      title : expectedTitle,
-      abstract : 'This is the abstract body.',
-      link : '/articles/test-article',
-    });
-
-    const heading = within(container)
-      .queryByTestId('heading') as HTMLElement;
-    expect(heading).toBeInTheDocument();
-    const headingText = within(heading).getByText(expectedTitle);
-    expect(headingText).toBeInTheDocument();
-
-    expect(Heading).toHaveBeenCalledTimes(1);
-    expect(Heading).toHaveBeenCalledWithProps(
-      expect.objectContaining({ level : 3 }),
-    );
-  });
-
-  it('renders abstract title link', async () => {
-    const expectedTitle = 'Test Title';
-    const expectedLink = '/articles/test-article';
-    const { container } = render(Abstract, {
-      title : expectedTitle,
-      abstract : 'This is the abstract body.',
-      link : expectedLink,
-    });
-
-    const heading = within(container)
-      .queryByTestId('heading') as HTMLElement;
-    expect(heading).toBeInTheDocument();
-    const link = within(heading)
-      .queryByTestId('link') as HTMLElement;
-    expect(link).toBeInTheDocument();
-    const headingText = within(link).getByText(expectedTitle);
-    expect(headingText).toBeInTheDocument();
-
-    expect(Link).toHaveBeenCalledTimes(1);
-    expect(Link).toHaveBeenCalledWithProps(
-      expect.objectContaining({ href : expectedLink }),
-    );
-  });
-
   it('renders abstract body as article content', async () => {
     const expectedTitle = 'Test Title';
     const expectedContent = 'This is the abstract body.';
     const expectedDate = new Date();
+    const expectedLink = '/articles/test-article';
+    const expectedLevel = 2;
     const { container } = render(Abstract, {
       title : expectedTitle,
       abstract : expectedContent,
-      link : '/articles/test-article',
+      link : expectedLink,
       datePublished : expectedDate,
+      headingLevel : expectedLevel,
     });
 
     const article = within(container)
@@ -84,37 +35,14 @@ describe('Abstract', () => {
     expect(Post).toHaveBeenCalledWithProps(
       expect.objectContaining({
         content : expectedContent,
+        heading : expect.objectContaining({
+          text : expectedTitle,
+          href : expectedLink,
+          level : expectedLevel,
+        }),
         datePublished : expectedDate,
         compact : true,
       }),
     );
-  });
-
-  it('renders abstract title before body', async () => {
-    const expectedTitle = 'Test Title';
-    const expectedContent = 'This is the abstract body.';
-    const { container } = render(Abstract, {
-      title : expectedTitle,
-      abstract : expectedContent,
-      link : '/articles/test-article',
-    });
-
-    const heading = within(container)
-      .queryByText(expectedTitle) as HTMLElement;
-    expect(heading).toBeInTheDocument();
-    const body = within(container)
-      .queryByText(expectedContent) as HTMLElement;
-    expect(body).toBeInTheDocument();
-    expect(heading.compareDocumentPosition(body))
-      .toBe(Node.DOCUMENT_POSITION_FOLLOWING);
-  });
-
-  it('renders abstract title with specified heading level', async () => {
-    const expectedLevel = 2;
-    render(Abstract, { headingLevel : expectedLevel });
-
-    expect(Heading).toHaveBeenCalledWithProps(expect.objectContaining({
-      level : expectedLevel,
-    }));
   });
 });

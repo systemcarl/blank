@@ -28,7 +28,10 @@ describe('Article', () => {
     container.style.setProperty('padding', '32px');
     container.style.setProperty('background-color', '#000');
     container.style.setProperty('--font-size', `${expectedScrim * 2}px`);
-    container.style.setProperty('--bg-colour', 'rgba(255, 255, 255, 0.9)');
+    container.style.setProperty(
+      '--scrim-colour',
+      'color-mix(in srgb, rgba(255, 255, 255, 0.9) 66%, transparent 33%)',
+    );
 
     const article = page
       .elementLocator(container.firstElementChild as HTMLElement);

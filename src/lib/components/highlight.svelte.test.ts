@@ -61,6 +61,7 @@ describe('Highlight', () => {
       expect.objectContaining({
         id : highlight.id,
         level : 2,
+        scrim : true,
       }),
     );
     expect(heading).toHaveTextContent(highlight.title);

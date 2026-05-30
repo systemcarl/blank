@@ -1,6 +1,4 @@
 <script lang="ts">
-  import Heading from '$lib/materials/heading.svelte';
-  import Link from '$lib/materials/link.svelte';
   import Post from './post.svelte';
 
   const {
@@ -18,7 +16,9 @@
   } = $props();
 </script>
 
-<Heading level={headingLevel}>
-  <Link href={link}>{ title }</Link>
-</Heading>
-<Post content={abstract} datePublished={datePublished} compact/>
+<Post
+  content={abstract}
+  heading={{ text : title, href : link, level : headingLevel }}
+  datePublished={datePublished}
+  compact
+/>

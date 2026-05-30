@@ -134,6 +134,7 @@ describe('+page.svelte', () => {
     expect(Heading).toHaveBeenCalledOnce();
     expect(Heading).toHaveBeenCalledWithProps(expect.objectContaining({
       level : 1,
+      scrim : true,
     }));
   });
 

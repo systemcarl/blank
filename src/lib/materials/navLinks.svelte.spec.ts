@@ -78,11 +78,16 @@ describe('NavLinks', () => {
 
       expect(Link).toHaveBeenCalledWithProps(expect.objectContaining({
         href : link?.href,
+        scrim : true,
       }));
     }
 
     expect(Link).toHaveBeenCalledTimes(links.length);
     expect(Text).toHaveBeenCalledTimes(2 * links.length);
+    for (const [, args] of vi.mocked(Text).mock.calls) {
+      if (args.typography !== 'nav') continue;
+      expect(args).toEqual(expect.objectContaining({ as : 'span' }));
+    }
   });
 
   it('justifies links to left', async () => {

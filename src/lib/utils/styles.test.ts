@@ -48,6 +48,7 @@ const testSection = vi.hoisted(() => ({
       colourMap : { first : '#123456', second : '#234567' },
     },
   },
+  scrim : false,
 }));
 
 function matchBlock(style : string, {
@@ -530,6 +531,43 @@ describe('compileStyles', () => {
 
     const block = matchBlock(styles, { section : 'test' });
     expect(block?.[0]).contains(`--bg-opacity: 0.5;`);
+  });
+
+  it('returns compiled scrim colour', () => {
+    const section = {
+      ...testSection,
+      scrim : true,
+      background : { ...testSection.background, fill : '#042' },
+    };
+    getAllSectionsMock.mockReturnValue({ test : section });
+
+    const styles = compileStyles(testThemes);
+
+    const block = matchBlock(styles, { section : 'test' });
+    expect(block?.[0]).contains(
+      'color-mix(in srgb, #042 66%, transparent 33%)',
+    );
+  });
+
+  it('returns transparent scrim', () => {
+    const section = { ...testSection, scrim : false };
+    getAllSectionsMock.mockReturnValue({ test : section });
+
+    const styles = compileStyles(testThemes);
+
+    const block = matchBlock(styles, { section : 'test' });
+    expect(block?.[0]).contains(`--scrim-colour: transparent;`);
+  });
+
+  it('returns transparent scrim if no background colour', () => {
+    const { fill : _, ...background } = testSection.background;
+    const section = { ...testSection, scrim : true, background };
+    getAllSectionsMock.mockReturnValue({ test : section });
+
+    const styles = compileStyles(testThemes);
+
+    const block = matchBlock(styles, { section : 'test' });
+    expect(block?.[0]).contains(`--scrim-colour: transparent;`);
   });
 
   it('returns default background image opacity', () => {

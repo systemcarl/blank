@@ -6,17 +6,21 @@
   } from '$lib/utils/weblog';
   import useConfig from '$lib/hooks/useConfig';
   import Stack from '$lib/materials/stack.svelte';
+  import Heading from '$lib/materials/heading.svelte';
+  import Link from '$lib/materials/link.svelte';
   import Article from '$lib/materials/article.svelte';
   import Dateline from './dateline.svelte';
   import Byline from './byline.svelte';
 
   const {
     content,
+    heading,
     datePublished,
     contributions,
     compact = false,
   } : {
     content ?: string;
+    heading ?: { text : string; href ?: string; level ?: 1 | 2 | 3; };
     datePublished ?: Date | null;
     contributions ?: Contribution[];
     compact ?: boolean;
@@ -26,7 +30,7 @@
 
   const { title = '', body } = $derived.by(() => {
     const { title, body } = extractArticle(content || '');
-    if (!title) return { body : renderArticle(body) };
+    if (heading || !title) return { body : renderArticle(content || '') };
     const sections = renderArticle([`# ${title}\n\n`, body]);
     return {
       title : sections[0] ?? '',
@@ -43,7 +47,17 @@
 </script>
 
 <Article>
-  {@html title}
+  {#if heading}
+    <Heading level={heading.level ?? 1}>
+      {#if heading.href}
+        <Link href={heading.href}>{ heading.text }</Link>
+      {:else}
+        { heading.text }
+      {/if}
+    </Heading>
+  {:else}
+    {@html title}
+  {/if}
   <Dateline date={datePublished} />
   {#if topCredits?.length}
     <Byline contributions={topCredits} />
