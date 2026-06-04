@@ -120,7 +120,13 @@ describe('config highlights', () => {
       ...testConfig,
       highlights : [
         { id : 'art1', type : 'article', key : 'art1', section : 'Section 1' },
-        { id : 'tag1', type : 'tag', key : 'tag1', section : 'Section 1' },
+        {
+          id : 'tag1',
+          type : 'tag',
+          key : 'tag1',
+          count : 42,
+          section : 'Section 1',
+        },
         { id : 'tag2', key : 'tag2', section : 'Section 1' },
         { type : 'tag', key : 'tag1', section : 'Section 1' },
         { id : 'cat1', type : 'category', key : 'cat1' },
@@ -129,13 +135,20 @@ describe('config highlights', () => {
       ],
     });
     expect(config).toEqual(expect.objectContaining({ highlights : [
-      expect.objectContaining(
-        { id : 'art1', type : 'article', key : 'art1', section : 'Section 1' },
-      ),
-      expect.objectContaining(
-        { id : 'tag1', type : 'tag', key : 'tag1', section : 'Section 1' },
-      ),
-    ]}));
+      expect.objectContaining({
+        id : 'art1',
+        type : 'article',
+        key : 'art1',
+        section : 'Section 1',
+      }),
+      expect.objectContaining({
+        id : 'tag1',
+        type : 'tag',
+        key : 'tag1',
+        count : 42,
+        section : 'Section 1',
+      }),
+    ] }));
   });
 
   it('filters out duplicate highlight IDs', () => {
@@ -152,6 +165,18 @@ describe('config highlights', () => {
       highlights : [
         expect.objectContaining({ id : 'tag1', key : 'tag1' }),
         expect.objectContaining({ id : 'tag2', key : 'tag2' }),
+      ],
+    }));
+  });
+
+  it('drops invalid highlight count', () => {
+    const config = buildConfig({
+      ...testConfig,
+      highlights : [{ id : 'tag1', type : 'tag', key : 'tag1', count : '42' }],
+    });
+    expect(config).toEqual(expect.objectContaining({
+      highlights : [
+        expect.objectContaining({ id : 'tag1', key : 'tag1', count : null }),
       ],
     }));
   });
