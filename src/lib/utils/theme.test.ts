@@ -18,6 +18,7 @@ const testTheme = {
       background : 'test',
       typography : 'test',
       graphics : 'test',
+      scrim : false,
     },
   },
   palettes : {
@@ -77,6 +78,7 @@ function makeSection({
   background,
   typography,
   graphics,
+  scrim = false,
 } : {
   palette ?: Record<string, unknown>;
   scale ?: Record<string, unknown>;
@@ -84,6 +86,7 @@ function makeSection({
   background ?: object;
   typography ?: Record<string, unknown>;
   graphics ?: Record<string, unknown>;
+  scrim ?: boolean;
 }) {
   palette = palette ?? {
     ...defaultThemes.default.palettes.default,
@@ -144,6 +147,7 @@ function makeSection({
       };
     }, {} as unknown),
     graphics : { ...graphics },
+    scrim,
   } as Section;
 }
 
@@ -893,6 +897,43 @@ describe('getSection', () => {
     }));
   });
 
+  it.each([true, false])('returns section scrim', (scrim) => {
+    const theme = {
+      ...testTheme,
+      sections : {
+        ...testTheme.sections,
+        default : { ...testTheme.sections.default, scrim },
+      },
+    };
+    const section = getSection(theme);
+    expect(section).toEqual(expect.objectContaining({ scrim }));
+  });
+
+  it('returns default scrim', () => {
+    const { scrim : _, ...testSection } = { ...testTheme.sections.default };
+    const theme = {
+      ...testTheme,
+      sections : {
+        ...testTheme.sections,
+        default : { ...testSection },
+      },
+    };
+    const section = getSection(theme);
+    expect(section).toEqual(expect.objectContaining({ scrim : false }));
+  });
+
+  it('returns default scrim if scrim invalid', () => {
+    const theme = {
+      ...testTheme,
+      sections : {
+        ...testTheme.sections,
+        default : { ...testTheme.sections.default, scrim : 42 },
+      },
+    };
+    const section = getSection(theme);
+    expect(section).toEqual(expect.objectContaining({ scrim : false }));
+  });
+
   it('does not mutate theme', () => {
     const expectedTheme = {
       ...testTheme,
@@ -1329,6 +1370,7 @@ describe('getSection background', () => {
   it.each([
     { mode : 'cover' },
     { mode : 'tile' },
+    { mode : 'fixed' },
   ])('returns %s background image mode', ({ mode }) => {
     const theme = {
       ...testTheme,
@@ -1344,6 +1386,54 @@ describe('getSection background', () => {
     const section = getSection(theme);
     expect(section.background)
       .toEqual(expect.objectContaining(expectedBackground));
+  });
+
+  it('drops anchor to if invalid', () => {
+    const theme = {
+      ...testTheme,
+      backgrounds : {
+        ...testTheme.backgrounds,
+        [testTheme.sections.default.background] : {
+          ...testTheme.backgrounds.custom,
+          img : { src : 'image.jpg', anchor : 0 },
+        },
+      },
+    };
+    const expectedBackground = { img : expect.objectContaining({
+      src : 'image.jpg',
+    }) };
+    const unexpectedBackground = { img : expect.objectContaining({
+      anchor : expect.anything(),
+    }) };
+    const section = getSection(theme);
+    expect(section.background)
+      .toEqual(expect.objectContaining(expectedBackground));
+    expect(section.background)
+      .toEqual(expect.not.objectContaining(unexpectedBackground));
+  });
+
+  it('drops anchor not valid option', () => {
+    const theme = {
+      ...testTheme,
+      backgrounds : {
+        ...testTheme.backgrounds,
+        [testTheme.sections.default.background] : {
+          ...testTheme.backgrounds.custom,
+          img : { src : 'image.jpg', anchor : 'bad' },
+        },
+      },
+    };
+    const expectedBackground = { img : expect.objectContaining({
+      src : 'image.jpg',
+    }) };
+    const unexpectedBackground = { img : expect.objectContaining({
+      anchor : expect.anything(),
+    }) };
+    const section = getSection(theme);
+    expect(section.background)
+      .toEqual(expect.objectContaining(expectedBackground));
+    expect(section.background)
+      .toEqual(expect.not.objectContaining(unexpectedBackground));
   });
 
   it('drops invalid image opacity', () => {

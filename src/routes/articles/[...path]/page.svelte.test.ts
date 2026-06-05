@@ -5,12 +5,38 @@ import { tryGet } from '$lib/utils/typing';
 import { wrapOriginal } from '$lib/tests/component';
 import { defaultConfig } from '$lib/utils/config';
 import { defaultLocale } from '$lib/utils/locale';
+import type { Article } from '$lib/utils/weblog';
 import Content from '$lib/materials/content.svelte';
 import Nav from '$lib/components/nav.svelte';
 import Post from '$lib/components/post.svelte';
 import Footer from '$lib/components/footer.svelte';
 
 import ArticlePage from './+page.svelte';
+
+let isBrowser = vi.hoisted(() => true);
+
+const locale = vi.hoisted(() => ({
+  nav : {
+    home : 'Home',
+    allArticles : 'All Articles',
+    contact : 'Contact',
+  },
+  collections : { tagPrefix : 'Tag:' },
+}));
+
+vi.mock('$app/environment', () => ({ get browser() { return isBrowser; } }));
+
+vi.mock('$lib/hooks/useLocale', async (original) => {
+  const originalDefault =
+    ((await original()) as { default : () => object; }).default;
+  const writable = (await import('svelte/store')).writable;
+  return {
+    default : () => ({
+      ...originalDefault(),
+      locale : writable<unknown>(locale),
+    }),
+  };
+});
 
 vi.mock('$lib/materials/content.svelte', async (original) => {
   return {
@@ -39,9 +65,16 @@ const data = {
   title : 'Test Title',
   abstract : 'Test Abstract',
   markdown : 'Test Content',
+  metadata : {
+    datePublished : new Date(),
+    contributions : [{ byline : 'Tested by', members : [{ name : 'Test' }] }],
+  } as Article,
 };
 
-beforeEach(() => { vi.clearAllMocks(); });
+beforeEach(() => {
+  vi.clearAllMocks();
+  isBrowser = true;
+});
 afterAll(() => { vi.restoreAllMocks(); });
 
 describe('+page.svelte', () => {
@@ -65,8 +98,11 @@ describe('+page.svelte', () => {
     expect(Nav).toHaveBeenCalledOnce();
     expect(Nav).toHaveBeenCalledWithProps(expect.objectContaining({
       home : true,
-      highlights : true,
+      allArticles : true,
       contact : true,
+    }));
+    expect(Nav).not.toHaveBeenCalledWithProps(expect.objectContaining({
+      highlights : true,
     }));
   });
 
@@ -83,6 +119,25 @@ describe('+page.svelte', () => {
     expect(Post).toHaveBeenCalledOnce();
     expect(Post).toHaveBeenCalledWithProps(expect.objectContaining({
       content : data.markdown,
+      datePublished : data.metadata.datePublished,
+      contributions : data.metadata.contributions,
+    }));
+  });
+
+  it('renders article content with tag links', () => {
+    const tags = [
+      { name : 'Tag 1', slug : 'tag-1' },
+      { name : 'Tag 2', slug : 'tag-2' },
+    ];
+    const expectedLinks = tags.map(t => ({
+      text : locale.collections.tagPrefix + t.name,
+      href : `/collections/${t.slug}`,
+    }));
+
+    render(ArticlePage, { data : { ...data, metadata : { tags } as Article } });
+    expect(Post).toHaveBeenCalledOnce();
+    expect(Post).toHaveBeenCalledWithProps(expect.objectContaining({
+      topLinks : expectedLinks,
     }));
   });
 
@@ -106,6 +161,17 @@ describe('+page.svelte', () => {
     expect(Footer).toHaveBeenCalledOnce();
     expect(articleContent.compareDocumentPosition(footerContent))
       .toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+  });
+
+  it('hides content background server-side', () => {
+    isBrowser = false;
+
+    render(ArticlePage, { data });
+
+    vi.mocked(Content).mock.calls.forEach((args) => {
+      expect(args[1])
+        .toEqual(expect.objectContaining({ showBackground : false }));
+    });
   });
 
   it('adds article title to head', () => {

@@ -20,6 +20,7 @@ const locale = vi.hoisted(() => ({
       highlight1 : 'Highlight One',
       highlight2 : 'Highlight Two',
     },
+    allArticles : 'Test All Articles',
     contact : 'Test Contact',
   } as Record<string, unknown>,
 }));
@@ -80,6 +81,18 @@ describe('Nav', () => {
         { text : 'Highlight One', href : '/#highlight1' },
         { text : 'Highlight Two', href : '/#highlight2' },
       ],
+    }));
+  });
+
+  it('populates nav links with all articles locale', () => {
+    const { container } = render(Nav, { allArticles : true });
+
+    const navLinks = within(container).queryByTestId('navLinks') as HTMLElement;
+    expect(navLinks).toBeInTheDocument();
+
+    expect(NavLinks).toHaveBeenCalledOnce();
+    expect(NavLinks).toHaveBeenCalledWithProps(expect.objectContaining({
+      links : [{ text : 'Test All Articles', href : '/collections' }],
     }));
   });
 
