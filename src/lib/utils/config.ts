@@ -5,6 +5,8 @@ export interface Highlight {
   count : number | null;
   links : { href : string; text : string; }[];
   title : string;
+  intro : string;
+  outro : string;
   section : string;
 }
 

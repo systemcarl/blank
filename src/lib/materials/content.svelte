@@ -86,10 +86,12 @@
     display: flex;
     flex-grow: 1;
     width: 100%;
+    max-width: calc(1024px + (var(--layout-spacing, 0) * 4));
     flex-direction: column;
     justify-content: var(--content-justify);
     align-items: var(--content-align);
     gap: var(--layout-spacing);
+    margin: auto;
     padding:
       calc(2 * var(--layout-spacing, 0))
       calc(2 *var(--layout-spacing, 0) * var(--layout-scale, 1));

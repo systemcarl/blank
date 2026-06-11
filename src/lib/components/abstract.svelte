@@ -5,7 +5,7 @@
   const {
     title = '',
     abstract = '',
-    link = '#',
+    // link = '#',
     datePublished = null,
     tags = [],
     headingLevel = 3,
@@ -28,7 +28,7 @@
 
 <Post
   content={abstract}
-  heading={{ text : title, href : link, level : headingLevel }}
+  heading={{ text : title, level : headingLevel }}
   bottomLinks={tagLinks}
   datePublished={datePublished}
   compact
